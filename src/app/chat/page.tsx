@@ -15,7 +15,7 @@ import {
   signOut,
   updateProfile 
 } from "firebase/auth"
-import { collection, addDoc, serverTimestamp, query, orderBy, limit } from "firebase/firestore"
+import { collection, addDoc, setDoc, doc, serverTimestamp, query, orderBy, limit } from "firebase/firestore"
 import { askChatBot } from "@/app/actions/portfolio-actions"
 
 export default function ChatPage() {
@@ -30,10 +30,11 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
+  // Only create the query if the user is authenticated to prevent permission errors
   const messagesQuery = useMemoFirebase(() => {
-    if (!db) return null
+    if (!db || !user) return null
     return query(collection(db, "chat_messages"), orderBy("timestamp", "desc"), limit(50))
-  }, [db])
+  }, [db, user])
 
   const { data: messages } = useCollection(messagesQuery)
 
@@ -57,7 +58,8 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      await addDoc(collection(db, "chat_users"), {
+      // Use setDoc with UID as the document ID to match security rules expectations
+      await setDoc(doc(db, "chat_users", userCredential.user.uid), {
         id: userCredential.user.uid,
         username: username,
         email: email,
@@ -92,6 +94,7 @@ export default function ChatPage() {
       const aiResponse = await askChatBot(userMsgContent)
 
       // 3. Add AI message to Firestore
+      // Security rules updated to allow users to "create" these system responses
       await addDoc(collection(db, "chat_messages"), {
         chatUserId: "system-ai",
         senderName: "ChatBRJ AI",

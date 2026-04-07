@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { 
   collection, 
@@ -28,7 +28,6 @@ import {
   MessageCircle, 
   MessageSquare,
   Trash2,
-  CheckCircle,
   Plus,
   Loader2,
   ShieldAlert
@@ -40,12 +39,13 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [password, setPassword] = useState("")
 
-  // Queries
-  const imagesQuery = useMemoFirebase(() => db ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db])
-  const collabQuery = useMemoFirebase(() => db ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db])
-  const hireQuery = useMemoFirebase(() => db ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db])
-  const chatUsersQuery = useMemoFirebase(() => db ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db])
-  const commentsQuery = useMemoFirebase(() => db ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db])
+  // Protect queries so they don't run until the admin UI is unlocked
+  // Note: True security is enforced by firestore.rules
+  const imagesQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, isAdmin])
+  const collabQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
+  const hireQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
+  const chatUsersQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, isAdmin])
+  const commentsQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
@@ -291,7 +291,7 @@ export default function AdminPage() {
                   <div key={u.id} className="flex items-center justify-between p-4 bg-secondary/30 rounded-2xl">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-primary/10 text-primary rounded-full flex items-center justify-center font-black">
-                        {u.username.charAt(0)}
+                        {u.username?.charAt(0) || "U"}
                       </div>
                       <div>
                         <p className="font-bold">{u.username}</p>

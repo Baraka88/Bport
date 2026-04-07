@@ -9,77 +9,40 @@ service cloud.firestore {
      * This ruleset implements a robust "Admin-Managed Portfolio" model combined with an "Authenticated Chat" system. 
      * Security is enforced through Database-Backed Access Control (DBAC) for administrators and 
      * strict ownership/authentication checks for chat participants.
-     *
-     * DATA STRUCTURE:
-     * - Admin Roles: Defined in `/roles_admin/` using Firebase Auth UIDs as document IDs.
-     * - Public Content: Projects, Technologies, Certificates, Services, and Images are publicly readable but admin-writable.
-     * - Protected Inquiries: 'Hire Me' and 'Collaboration' submissions are write-only for visitors and admin-only for reading.
-     * - Interaction: Comments are publicly readable only if approved; chat messages require authentication.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Admin Escalation: Admin privileges are determined by the existence of a document in the `/roles_admin/` collection.
-     * 2. Chat Privacy: Only logged-in users can participate in ChatBRJ. Users can manage their own profiles, but only admins see all users.
-     * 3. Relational Integrity: On chat message creation, the rules strictly enforce that the 'chatUserId' field matches the sender's UID.
-     * 4. Relational Denormalization: For high performance, comment approval status and image categories are stored directly on the documents.
      */
 
     // --- Helper Functions ---
 
-    /** @description Checks if the user is authenticated with Firebase Auth. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the user's UID exists in the admin roles collection. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** @description Checks if the provided ID matches the authenticated user's UID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Verifies document existence and ownership for destructive operations. */
     function isExistingOwner(userId) {
       return resource != null && isOwner(userId);
     }
 
     // --- Collection Rules ---
 
-    /**
-     * @description Authorization table for administrators.
-     * @path /roles_admin/{adminId}
-     * @allow (get) Any signed-in user to check admin status.
-     * @deny (write) Anyone except via administrative console.
-     * @principle Database-backed access control using UID-as-key.
-     */
     match /roles_admin/{adminId} {
       allow get: if isSignedIn();
       allow list: if isAdmin();
       allow create, update, delete: if false; 
     }
 
-    /**
-     * @description The portfolio owner's public profile details.
-     * @path /user_profile/portfolioOwner
-     * @allow (read) Anyone to view the profile. (update) Only the admin.
-     * @deny (create/delete) Structural document should be permanent.
-     * @principle Admin-only writes for public-facing profiles.
-     */
     match /user_profile/portfolioOwner {
       allow get, list: if true;
       allow update: if isAdmin() && resource != null;
       allow create, delete: if isAdmin();
     }
 
-    /**
-     * @description Public collections: Projects, Technologies, Certificates, and Services.
-     * @path /{collectionName}/{docId}
-     * @allow (read) Public access for portfolio visitors. (write) Admin-only management.
-     * @deny (write) Non-admin users.
-     * @principle Structural segregation of public assets.
-     */
     match /projects/{projectId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
@@ -100,26 +63,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Gallery and asset management.
-     * @path /images/{imageId}
-     * @allow (read) Anyone. (write) Admin only.
-     * @deny (write) Public users.
-     * @principle Admin control over visual portfolio content.
-     */
     match /images/{imageId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Client and collaborator inquiries.
-     * @path /inquiries_hire_me/{inquiryId}
-     * @path /inquiries_collaboration/{inquiryId}
-     * @allow (create) Anyone to submit a form. (read/update/delete) Admin only.
-     * @deny (read) Public users or other submitters.
-     * @principle Write-only for public, restricted read for sensitive lead data.
-     */
     match /inquiries_hire_me/{inquiryId} {
       allow create: if true;
       allow get, list, update, delete: if isAdmin();
@@ -130,26 +78,12 @@ service cloud.firestore {
       allow get, list, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Visitor comments and project feedback.
-     * @path /comments/{commentId}
-     * @allow (create) Anyone. (list/get) Anyone if approved. (write) Admin.
-     * @deny (read) Unapproved comments for public.
-     * @principle Content-based filtering for public list operations.
-     */
     match /comments/{commentId} {
       allow create: if true;
       allow get, list: if isAdmin() || resource.data.isApproved == true;
       allow update, delete: if isAdmin();
     }
 
-    /**
-     * @description ChatBRJ User Profiles.
-     * @path /chat_users/{chatUserId}
-     * @allow (create/update) User to manage own profile. (get) Own profile. (list) Admin.
-     * @deny (write) Mismatched user IDs.
-     * @principle User-ownership model for chat identity.
-     */
     match /chat_users/{chatUserId} {
       allow get: if isOwner(chatUserId) || isAdmin();
       allow list: if isAdmin();
@@ -158,16 +92,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description ChatBRJ Messages.
-     * @path /chat_messages/{messageId}
-     * @allow (create) Signed-in users. (read) Signed-in users. (delete) Admin.
-     * @deny (create) Mismatched chatUserId in data. (read) Anonymous visitors.
-     * @principle Relational integrity via chatUserId validation.
-     */
     match /chat_messages/{messageId} {
       allow get, list: if isSignedIn();
-      allow create: if isSignedIn() && request.resource.data.chatUserId == request.auth.uid;
+      // Allow users to create their own messages or trigger "system-ai" messages for history tracking
+      allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid || request.resource.data.chatUserId == "system-ai");
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
