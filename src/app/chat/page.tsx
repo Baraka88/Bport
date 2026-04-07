@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ShieldCheck, Mail, Lock, User, Loader2, Send, Sparkles, Trash2, RotateCcw } from "lucide-react"
+import { ShieldCheck, Mail, Lock, User, Loader2, Send, Sparkles, Trash2, RotateCcw, MessageCircle } from "lucide-react"
 import React from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
@@ -15,7 +15,7 @@ import {
   signOut,
   updateProfile 
 } from "firebase/auth"
-import { collection, addDoc, setDoc, doc, serverTimestamp, query, orderBy, limit, where, getDocs, deleteDoc, writeBatch } from "firebase/firestore"
+import { collection, addDoc, doc, serverTimestamp, query, orderBy, limit, where, getDocs, writeBatch } from "firebase/firestore"
 import { askChatBot } from "@/app/actions/portfolio-actions"
 
 export default function ChatPage() {
@@ -63,12 +63,16 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      await setDoc(doc(db, "chat_users", userCredential.user.uid), {
+      // Initialize chat user record
+      const userDocRef = doc(db, "chat_users", userCredential.user.uid)
+      const batch = writeBatch(db)
+      batch.set(userDocRef, {
         id: userCredential.user.uid,
         username: username,
         email: email,
         joinDate: serverTimestamp()
       })
+      await batch.commit()
 
       toast({ title: "Registration Successful", description: "You can now participate in the chat." })
     } catch (error: any) {
@@ -86,7 +90,7 @@ export default function ChatPage() {
     setMessage("")
 
     try {
-      // 1. Add user message to Firestore (Tagged with user UID)
+      // 1. Add user message to Firestore
       await addDoc(collection(db, "chat_messages"), {
         chatUserId: user.uid,
         senderName: user.displayName || "You",
@@ -98,7 +102,7 @@ export default function ChatPage() {
       // 2. Trigger AI Bot Response
       const aiResponse = await askChatBot(userMsgContent)
 
-      // 3. Add AI message to Firestore (ALSO tagged with user UID so it belongs to their history)
+      // 3. Add AI message to Firestore
       await addDoc(collection(db, "chat_messages"), {
         chatUserId: user.uid,
         senderName: "ChatBRJ AI",
@@ -127,7 +131,7 @@ export default function ChatPage() {
       })
       
       await batch.commit()
-      toast({ title: "History Deleted", description: "Your conversation has been cleared from our records." })
+      toast({ title: "History Deleted", description: "Your conversation has been cleared." })
     } catch (error) {
       toast({ variant: "destructive", title: "Delete Failed", description: "Failed to clear history." })
     } finally {
@@ -136,8 +140,6 @@ export default function ChatPage() {
   }
 
   function handleNewChat() {
-    // In this firestore implementation, "New Chat" logic often implies clearing the current view 
-    // or starting fresh. Here we'll just focus on resetting any local input state.
     setMessage("")
     toast({ title: "Ready", description: "Start a fresh topic below!" })
   }
@@ -166,8 +168,8 @@ export default function ChatPage() {
           <CardContent className="p-8 pt-0">
             <Tabs defaultValue="login" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2 rounded-xl h-12 bg-secondary">
-                <TabsTrigger value="login" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
-                <TabsTrigger value="register" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Register</TabsTrigger>
+                <TabsTrigger value="login" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold">Login</TabsTrigger>
+                <TabsTrigger value="register" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm font-bold">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -298,7 +300,6 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 flex flex-col-reverse">
           {messages && messages.map((msg) => {
             const isMe = !msg.isAI;
-            const isAI = msg.isAI;
             
             return (
               <div 

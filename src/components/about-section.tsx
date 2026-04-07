@@ -1,11 +1,9 @@
 import { EXPERIENCE } from "@/app/data/portfolio"
-import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 import Image from "next/image"
 import { Briefcase, Calendar, GraduationCap, ShieldCheck, Users } from "lucide-react"
 
 export function AboutSection() {
-  const profileImg = PlaceHolderImages.find(img => img.id === "profile-pic") || PlaceHolderImages[4];
-  const collabImg = PlaceHolderImages.find(img => img.id === "collab-1") || PlaceHolderImages[5];
+  const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";
 
   return (
     <section id="about" className="container mx-auto px-4 py-20">
@@ -13,35 +11,15 @@ export function AboutSection() {
         <div className="relative group">
           <div className="absolute -inset-6 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-700" />
           
-          <div className="grid grid-cols-2 gap-4 relative">
-            <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-background transform group-hover:-rotate-2 transition-transform duration-500">
-              <Image
-                src={profileImg.imageUrl}
-                alt="Baraka Junior"
-                fill
-                className="object-cover"
-                data-ai-hint="professional portrait"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-            </div>
-            
-            <div className="space-y-4 pt-12">
-              <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-xl border-4 border-background transform group-hover:rotate-2 transition-transform duration-500">
-                <Image
-                  src={collabImg.imageUrl}
-                  alt="Collaboration"
-                  fill
-                  className="object-cover"
-                  data-ai-hint="team collaboration"
-                />
-              </div>
-              <div className="bg-accent p-6 rounded-[2rem] shadow-xl text-accent-foreground">
-                <div className="flex items-center gap-3">
-                  <Users className="h-6 w-6" />
-                  <p className="font-bold text-sm uppercase tracking-tighter">Team Player</p>
-                </div>
-              </div>
-            </div>
+          <div className="relative aspect-square max-w-lg mx-auto rounded-[3rem] overflow-hidden shadow-2xl border-4 border-background transform group-hover:-rotate-2 transition-transform duration-500">
+            <Image
+              src={profileImg}
+              alt="Baraka Junior"
+              fill
+              className="object-cover"
+              data-ai-hint="professional portrait"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
           </div>
           
           <div className="absolute -bottom-10 -right-6 bg-card p-6 rounded-[2rem] shadow-2xl border border-primary/10 hidden sm:block animate-bounce-slow">
@@ -56,13 +34,13 @@ export function AboutSection() {
             </div>
           </div>
 
-          <div className="absolute -top-10 -left-6 bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-2xl border border-primary/10 hidden sm:block">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-accent text-accent-foreground rounded-2xl">
+          <div className="absolute -top-10 -left-6 bg-accent p-6 rounded-[2rem] shadow-2xl border border-white/10 hidden sm:block">
+            <div className="flex items-center gap-4 text-accent-foreground">
+              <div className="p-3 bg-white/20 rounded-2xl">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-tighter text-muted-foreground">Status</p>
+                <p className="text-sm font-bold uppercase tracking-tighter opacity-80">Verified</p>
                 <p className="text-xl font-black font-headline">Expert Analyst</p>
               </div>
             </div>
@@ -80,7 +58,7 @@ export function AboutSection() {
               I am Baraka Junior, a passionate Software Engineer based in Rwanda. My journey in tech is driven by a desire to solve real-world problems through elegant code and robust system analysis.
             </p>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              With a background in both development and systems design, I bridge the gap between business requirements and technical implementation. I specialize in high-performance stacks and have a proven track record of delivering scalable applications.
+              With a background in both development and systems design, I bridge the gap between business requirements and technical implementation. I specialize in the LAMP/MERN stacks and have a proven track record of delivering high-performance applications.
             </p>
           </div>
 

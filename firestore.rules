@@ -4,11 +4,9 @@ service cloud.firestore {
 
     /**
      * BRJDEV SECURITY RULES
-     *
-     * CORE PHILOSOPHY:
-     * This ruleset implements a robust "Admin-Managed Portfolio" model combined with an "Authenticated Chat" system. 
-     * Security is enforced through Database-Backed Access Control (DBAC) for administrators and 
-     * strict ownership/authentication checks for chat participants.
+     * 
+     * Fixed: Simplified permissions to resolve "Missing or insufficient permissions" errors.
+     * Admin status is granted to the owner email and designated admin roles.
      */
 
     // --- Helper Functions ---
@@ -19,8 +17,8 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
-        request.auth.token.email == "barakaruzibiza680@gmail.com"
+        request.auth.token.email == "barakaruzibiza680@gmail.com" ||
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
 
@@ -28,80 +26,74 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
     // --- Collection Rules ---
 
     match /roles_admin/{adminId} {
-      allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create, update, delete: if false; 
+      allow read: if isSignedIn();
+      allow write: if false; 
     }
 
     match /user_profile/portfolioOwner {
-      allow get, list: if true;
-      allow update: if isAdmin() && resource != null;
-      allow create, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /projects/{projectId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /technologies/{technologyId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /certificates/{certificateId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /services/{serviceId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /images/{imageId} {
-      allow get, list: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /inquiries_hire_me/{inquiryId} {
       allow create: if true;
-      allow get, list, update, delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /inquiries_collaboration/{inquiryId} {
       allow create: if true;
-      allow get, list, update, delete: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
     match /comments/{commentId} {
       allow create: if true;
-      allow get, list: if isAdmin() || resource.data.isApproved == true;
+      allow read: if isAdmin() || (resource != null && resource.data.isApproved == true);
       allow update, delete: if isAdmin();
     }
 
     match /chat_users/{chatUserId} {
-      allow get: if isOwner(chatUserId) || isAdmin();
-      allow list: if isAdmin();
+      allow read: if isOwner(chatUserId) || isAdmin();
       allow create: if isOwner(chatUserId);
-      allow update: if isExistingOwner(chatUserId);
+      allow update: if isOwner(chatUserId) || isAdmin();
       allow delete: if isAdmin();
     }
 
     match /chat_messages/{messageId} {
-      allow get, list: if isSignedIn();
-      // Allow users to create messages for themselves or trigger system-ai (stored under their UID)
+      // Allow authenticated users to read their own messages and admins to read all
+      allow read: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid) || (resource == null));
+      // Allow users to create messages for themselves or trigger AI response storage
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
       allow update: if isAdmin();
-      // Allow users to delete their own conversation history
-      allow delete: if isSignedIn() && (resource.data.chatUserId == request.auth.uid || isAdmin());
+      // Allow users to delete their own messages
+      allow delete: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
     }
   }
 }
