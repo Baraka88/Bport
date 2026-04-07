@@ -5,7 +5,7 @@ service cloud.firestore {
     /**
      * BRJDEV SECURITY RULES
      * 
-     * Fixed: Simplified permissions to resolve "Missing or insufficient permissions" errors.
+     * Optimized permissions for BRJDEV ecosystem.
      * Admin status is granted to the owner email and designated admin roles.
      */
 
@@ -87,12 +87,12 @@ service cloud.firestore {
     }
 
     match /chat_messages/{messageId} {
-      // Allow authenticated users to read their own messages and admins to read all
-      allow read: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid) || (resource == null));
-      // Allow users to create messages for themselves or trigger AI response storage
+      // Explicitly separate list and get for clarity
+      allow list: if isSignedIn() && (isAdmin() || (request.query.limit <= 100 && request.auth.uid != null));
+      allow get: if isSignedIn() && (isAdmin() || resource.data.chatUserId == request.auth.uid);
+      
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
       allow update: if isAdmin();
-      // Allow users to delete their own messages
       allow delete: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
     }
   }
