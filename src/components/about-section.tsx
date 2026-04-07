@@ -1,6 +1,6 @@
 import { EXPERIENCE } from "@/app/data/portfolio"
 import Image from "next/image"
-import { Briefcase, Calendar, GraduationCap, ShieldCheck, Users } from "lucide-react"
+import { Briefcase, Calendar, GraduationCap, ShieldCheck } from "lucide-react"
 
 export function AboutSection() {
   const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";

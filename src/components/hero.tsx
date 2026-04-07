@@ -2,10 +2,8 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 import Image from "next/image"
 import { ChevronRight, Sparkles } from "lucide-react"
-import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 const mainMessages = [
@@ -48,15 +46,7 @@ function TypewriterText({ messages, speed = 150, delay = 2000 }: { messages: str
 }
 
 export function Hero() {
-  const [currentImage, setCurrentImage] = React.useState(0)
-  const heroImages = [PlaceHolderImages[0], PlaceHolderImages[1], PlaceHolderImages[5]]
-
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % heroImages.length)
-    }, 6000)
-    return () => clearInterval(timer)
-  }, [heroImages.length])
+  const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";
 
   return (
     <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
@@ -91,37 +81,28 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Right Side Slideshow */}
+        {/* Hero Visual */}
         <div className="relative group perspective-1000">
           <div className="absolute -inset-4 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-1000" />
           <div className="relative aspect-[4/5] md:aspect-square w-full max-w-2xl mx-auto rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border-8 border-background/50 backdrop-blur-sm group-hover:rotate-1 transition-transform duration-1000">
-            {heroImages.map((img, idx) => (
-              <div
-                key={img.id}
-                className={cn(
-                  "absolute inset-0 transition-opacity duration-1000 ease-in-out",
-                  currentImage === idx ? "opacity-100 scale-100" : "opacity-0 scale-110"
-                )}
-              >
-                <Image
-                  src={img.imageUrl}
-                  alt={img.description}
-                  fill
-                  className="object-cover"
-                  priority={idx === 0}
-                  data-ai-hint={img.imageHint}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
-              </div>
-            ))}
+            <Image
+              src={profileImg}
+              alt="Baraka Junior Lion Profile"
+              fill
+              className="object-cover"
+              priority
+              data-ai-hint="professional portrait"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
+            
             <div className="absolute bottom-10 left-10 right-10 bg-background/20 backdrop-blur-md p-6 rounded-3xl border border-white/20 text-white">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-1 bg-accent rounded-full animate-pulse" />
-                <span className="text-sm font-bold uppercase tracking-widest opacity-80">Featured Visual</span>
+                <span className="text-sm font-bold uppercase tracking-widest opacity-80">Principal Engineer</span>
               </div>
               <p className="mt-2 text-lg font-headline font-bold drop-shadow-lg">
                 <TypewriterText 
-                  messages={heroImages.map(img => img.description)} 
+                  messages={["Baraka Junior", "BRJDEV Founder", "Systems Specialist"]} 
                   speed={100} 
                   delay={3000}
                 />
