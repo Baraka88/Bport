@@ -86,12 +86,10 @@ service cloud.firestore {
     }
 
     match /chat_messages/{messageId} {
-      // Allow reading only if the user is an admin or the owner of the message
-      // Queries MUST be filtered by chatUserId
-      allow read: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
+      // Prioritize owner check to resolve permission errors for standard users
+      allow read, delete: if isSignedIn() && (resource.data.chatUserId == request.auth.uid || isAdmin());
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
       allow update: if isAdmin();
-      allow delete: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
     }
   }
 }
