@@ -14,7 +14,7 @@ export function Footer() {
             <div className="flex gap-4">
               <a href="https://github.com/baraka88" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Github className="h-5 w-5" /></a>
               <a href="https://linkedin.com/in/baraka-junior" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Linkedin className="h-5 w-5" /></a>
-              <a href="https://instagram.com/barakajunior72" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Instagram className="h-5 w-5" /></a>
+              <a href="https://instagram.com/barakaruzibiza680" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Instagram className="h-5 w-5" /></a>
             </div>
           </div>
           
@@ -32,7 +32,7 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-bold">Contact</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> barakaruzibiza680@gmail.com</li>
+              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> Via Contact Form</li>
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> 0732786495</li>
               <li>Kigali, Rwanda</li>
               <li className="pt-2">

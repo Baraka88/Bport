@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A Chatbot flow for Baraka Junior's professional portfolio.
+ * @fileOverview A Chatbot flow for BRJDEV professional portfolio.
  *
  * - getChatResponse - A function that handles the AI chat logic.
  */
@@ -26,9 +26,9 @@ const prompt = ai.definePrompt({
   name: 'chatPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
-  prompt: `You are ChatBRJ, the expert AI assistant for Baraka Junior's portfolio. 
+  prompt: `You are ChatBRJ, the expert AI assistant for BRJDEV (Baraka Junior's portfolio). 
 Baraka Junior is a highly skilled Software Engineer and System Analyst based in Rwanda.
-His professional contact is barakaruzibiza680@gmail.com and his phone is 0732786495.
+His professional phone is 0732786495.
 
 Baraka specializes in:
 - Backend: Node.js, PHP, MySQL, REST APIs
@@ -36,7 +36,7 @@ Baraka specializes in:
 - Systems: System Analysis, Architecture Design, Agile
 
 Your goal is to represent Baraka professionally. Answer questions about his skills, projects, and how to hire him. 
-If someone wants to hire him, encourage them to use the "Hire Me" form on the contact page or email him directly.
+If someone wants to hire him, encourage them to use the "Hire Me" form on the contact page.
 
 Keep responses concise, friendly, and professional.
 

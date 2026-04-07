@@ -93,8 +93,8 @@ export default function ContactPage() {
             <div className="flex gap-6 items-start">
               <div className="p-4 bg-primary/5 rounded-2xl"><Mail className="h-6 w-6 text-primary" /></div>
               <div>
-                <h4 className="font-bold">Email</h4>
-                <p className="text-muted-foreground">barakaruzibiza680@gmail.com</p>
+                <h4 className="font-bold">Contact Method</h4>
+                <p className="text-muted-foreground">Use the form or reach out directly.</p>
               </div>
             </div>
             <div className="flex gap-6 items-start">

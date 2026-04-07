@@ -42,15 +42,12 @@ export default function AdminPage() {
   const [unlocked, setUnlocked] = useState(false)
   const [password, setPassword] = useState("")
 
-  // Check if current user is the owner by email
-  const isOwnerEmail = user?.email === "barakaruzibiza680@gmail.com"
-
   // Protect queries so they don't run until the admin UI is unlocked and user is authenticated
-  const imagesQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked, isOwnerEmail])
-  const collabQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
-  const hireQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
-  const chatUsersQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked, isOwnerEmail])
-  const commentsQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
+  const imagesQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked, user])
+  const collabQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
+  const hireQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
+  const chatUsersQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked, user])
+  const commentsQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
@@ -68,15 +65,11 @@ export default function AdminPage() {
     e.preventDefault()
     if (password === "adminBRJ") {
       if (!user) {
-        toast({ variant: "destructive", title: "Authentication Required", description: "Please sign in to the ChatBRJ page first to verify your identity." })
-        return
-      }
-      if (!isOwnerEmail) {
-        toast({ variant: "destructive", title: "Unauthorized", description: "Only the portfolio owner can access this panel." })
+        toast({ variant: "destructive", title: "Authentication Required", description: "Please sign in to the ChatBRJ page first to verify your session." })
         return
       }
       setUnlocked(true)
-      toast({ title: "Access Granted", description: "Welcome to your control center, Baraka." })
+      toast({ title: "Access Granted", description: "Welcome to your BRJDEV control center." })
     } else {
       toast({ variant: "destructive", title: "Access Denied", description: "Incorrect master password." })
     }
@@ -97,7 +90,7 @@ export default function AdminPage() {
       setNewImageDesc("")
       toast({ title: "Asset Added", description: "Image has been successfully published to gallery." })
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to upload asset." })
+      toast({ variant: "destructive", title: "Error", description: "Failed to upload asset. Ensure you have admin permissions." })
     } finally {
       setIsPending(false)
     }
@@ -180,7 +173,7 @@ export default function AdminPage() {
           <h1 className="text-4xl font-black font-headline flex items-center gap-3">
             <LayoutDashboard className="h-10 w-10 text-primary" /> Admin Control
           </h1>
-          <p className="text-muted-foreground font-medium">Managing ProFolio Studio ecosystem | Welcome {user?.displayName}</p>
+          <p className="text-muted-foreground font-medium">Managing BRJDEV ecosystem | Welcome {user?.displayName}</p>
         </div>
         <div className="flex gap-4">
           <Badge className="px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 font-bold border-none">SYSTEM ACTIVE</Badge>

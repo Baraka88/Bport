@@ -5,7 +5,7 @@ service cloud.firestore {
     /**
      * BRJDEV SECURITY RULES
      * 
-     * Admin status is granted to the owner email and designated admin roles.
+     * Access is granted based on Authentication status and Admin roles.
      */
 
     // --- Helper Functions ---
@@ -16,7 +16,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == "barakaruzibiza680@gmail.com" ||
+        // Check for specific UID or existence in roles_admin collection
         request.auth.uid == "5FqKVhvQZcOJbgvJSLHcThpbGzg1" ||
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
@@ -87,10 +87,9 @@ service cloud.firestore {
     }
 
     match /chat_messages/{messageId} {
-      // Allow listing only if the query filters by the user's own ID, OR if the user is an admin
-      allow list: if isSignedIn() && (isAdmin() || request.query.limit <= 100);
-      allow get: if isSignedIn() && (isAdmin() || resource.data.chatUserId == request.auth.uid);
-      
+      // Allow reading if the user is an admin or the owner of the message
+      // For listing, the query must be filtered by chatUserId
+      allow read: if isSignedIn() && (isAdmin() || resource == null || resource.data.chatUserId == request.auth.uid);
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
