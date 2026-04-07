@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { 
   collection, 
   addDoc, 
@@ -30,22 +30,27 @@ import {
   Trash2,
   Plus,
   Loader2,
-  ShieldAlert
+  ShieldAlert,
+  Lock,
+  Unlock
 } from "lucide-react"
 
 export default function AdminPage() {
+  const { user, isUserLoading } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [unlocked, setUnlocked] = useState(false)
   const [password, setPassword] = useState("")
 
-  // Protect queries so they don't run until the admin UI is unlocked
-  // Note: True security is enforced by firestore.rules
-  const imagesQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, isAdmin])
-  const collabQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
-  const hireQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
-  const chatUsersQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, isAdmin])
-  const commentsQuery = useMemoFirebase(() => (db && isAdmin) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, isAdmin])
+  // Check if current user is the owner by email
+  const isOwnerEmail = user?.email === "barakaruzibiza680@gmail.com"
+
+  // Protect queries so they don't run until the admin UI is unlocked and user is authenticated
+  const imagesQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked, isOwnerEmail])
+  const collabQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
+  const hireQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
+  const chatUsersQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked, isOwnerEmail])
+  const commentsQuery = useMemoFirebase(() => (db && unlocked && isOwnerEmail) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked, isOwnerEmail])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
@@ -62,8 +67,16 @@ export default function AdminPage() {
   function verifyAdmin(e: React.FormEvent) {
     e.preventDefault()
     if (password === "adminBRJ") {
-      setIsAdmin(true)
-      toast({ title: "Access Granted", description: "Welcome to your control center." })
+      if (!user) {
+        toast({ variant: "destructive", title: "Authentication Required", description: "Please sign in to the ChatBRJ page first to verify your identity." })
+        return
+      }
+      if (!isOwnerEmail) {
+        toast({ variant: "destructive", title: "Unauthorized", description: "Only the portfolio owner can access this panel." })
+        return
+      }
+      setUnlocked(true)
+      toast({ title: "Access Granted", description: "Welcome to your control center, Baraka." })
     } else {
       toast({ variant: "destructive", title: "Access Denied", description: "Incorrect master password." })
     }
@@ -108,7 +121,15 @@ export default function AdminPage() {
     }
   }
 
-  if (!isAdmin) {
+  if (isUserLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!unlocked) {
     return (
       <div className="container mx-auto px-4 py-32 flex items-center justify-center">
         <Card className="max-w-md w-full rounded-[2.5rem] shadow-2xl border-none">
@@ -125,18 +146,26 @@ export default function AdminPage() {
             <form onSubmit={verifyAdmin} className="space-y-6">
               <div className="space-y-2">
                 <Label className="uppercase tracking-widest text-xs font-bold opacity-60">Security Key</Label>
-                <Input 
-                  type="password" 
-                  className="h-14 rounded-2xl text-center text-2xl tracking-[1em]" 
-                  placeholder="••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoFocus
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="password" 
+                    className="h-14 rounded-2xl pl-10 text-center text-xl tracking-[0.5em]" 
+                    placeholder="••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoFocus
+                  />
+                </div>
               </div>
-              <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl">
-                Unlock Control Center
+              <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-bold shadow-xl flex gap-2">
+                <Unlock className="h-5 w-5" /> Unlock Control Center
               </Button>
+              {!user && (
+                <p className="text-xs text-center text-red-500 font-bold">
+                  Note: You must be logged in via the Chat page first.
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>
@@ -151,11 +180,11 @@ export default function AdminPage() {
           <h1 className="text-4xl font-black font-headline flex items-center gap-3">
             <LayoutDashboard className="h-10 w-10 text-primary" /> Admin Control
           </h1>
-          <p className="text-muted-foreground font-medium">Managing ProFolio Studio ecosystem</p>
+          <p className="text-muted-foreground font-medium">Managing ProFolio Studio ecosystem | Welcome {user?.displayName}</p>
         </div>
         <div className="flex gap-4">
           <Badge className="px-4 py-2 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 font-bold border-none">SYSTEM ACTIVE</Badge>
-          <Button variant="outline" className="rounded-full font-bold" onClick={() => setIsAdmin(false)}>Lock System</Button>
+          <Button variant="outline" className="rounded-full font-bold" onClick={() => setUnlocked(false)}>Lock System</Button>
         </div>
       </header>
 
