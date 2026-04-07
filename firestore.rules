@@ -16,8 +16,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        // Check for specific UID or existence in roles_admin collection
-        request.auth.uid == "5FqKVhvQZcOJbgvJSLHcThpbGzg1" ||
+        // Check for existence in roles_admin collection (UID-based)
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
@@ -87,9 +86,9 @@ service cloud.firestore {
     }
 
     match /chat_messages/{messageId} {
-      // Allow reading if the user is an admin or the owner of the message
-      // For listing, the query must be filtered by chatUserId
-      allow read: if isSignedIn() && (isAdmin() || resource == null || resource.data.chatUserId == request.auth.uid);
+      // Allow reading only if the user is an admin or the owner of the message
+      // Queries MUST be filtered by chatUserId
+      allow read: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if isSignedIn() && (isAdmin() || (resource != null && resource.data.chatUserId == request.auth.uid));

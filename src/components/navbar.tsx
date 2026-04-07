@@ -80,8 +80,8 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetTitle className="sr-only">Menu Navigation</SheetTitle>
-              <SheetDescription className="sr-only">Access site links and settings</SheetDescription>
+              <SheetTitle>Menu Navigation</SheetTitle>
+              <SheetDescription>Access site links and settings</SheetDescription>
               <nav className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
                   <Link

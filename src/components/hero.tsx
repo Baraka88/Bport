@@ -91,6 +91,7 @@ export function Hero() {
               fill
               className="object-cover"
               priority
+              unoptimized
               data-ai-hint="professional portrait"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
@@ -101,11 +102,7 @@ export function Hero() {
                 <span className="text-sm font-bold uppercase tracking-widest opacity-80">Principal Engineer</span>
               </div>
               <p className="mt-2 text-lg font-headline font-bold drop-shadow-lg">
-                <TypewriterText 
-                  messages={["Baraka Junior", "BRJDEV Founder", "Systems Specialist"]} 
-                  speed={100} 
-                  delay={3000}
-                />
+                Baraka Junior
               </p>
             </div>
           </div>

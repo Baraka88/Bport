@@ -17,6 +17,7 @@ export function AboutSection() {
               alt="Baraka Junior"
               fill
               className="object-cover"
+              unoptimized
               data-ai-hint="professional portrait"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
