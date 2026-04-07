@@ -1,0 +1,40 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "Developer coding on a laptop",
+      "imageUrl": "https://picsum.photos/seed/code1/1200/600",
+      "imageHint": "coding workspace"
+    },
+    {
+      "id": "hero-2",
+      "description": "System architecture diagram",
+      "imageUrl": "https://picsum.photos/seed/arch/1200/600",
+      "imageHint": "system architecture"
+    },
+    {
+      "id": "project-node",
+      "description": "Node.js application visualization",
+      "imageUrl": "https://picsum.photos/seed/node/800/600",
+      "imageHint": "backend technology"
+    },
+    {
+      "id": "project-vue",
+      "description": "Vue.js dashboard",
+      "imageUrl": "https://picsum.photos/seed/vue/800/600",
+      "imageHint": "frontend dashboard"
+    },
+    {
+      "id": "profile-pic",
+      "description": "Professional profile picture",
+      "imageUrl": "https://picsum.photos/seed/baraka/400/400",
+      "imageHint": "professional portrait"
+    },
+    {
+      "id": "collab-1",
+      "description": "Developers collaborating",
+      "imageUrl": "https://picsum.photos/seed/team1/1200/400",
+      "imageHint": "team collaboration"
+    }
+  ]
+}
