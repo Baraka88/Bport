@@ -1,71 +1,272 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ShieldCheck, Lock, ArrowRight } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ShieldCheck, Mail, Lock, User, ArrowRight, Loader2, Send } from "lucide-react"
 import React from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut,
+  updateProfile 
+} from "firebase/auth"
+import { collection, addDoc, serverTimestamp, query, orderBy, limit } from "firebase/firestore"
 
-export default function ChatAccessPage() {
-  const [accessCode, setAccessCode] = React.useState("")
+export default function ChatPage() {
+  const { user, isUserLoading } = useUser()
+  const auth = useAuth()
+  const db = useFirestore()
   const { toast } = useToast()
+  
+  const [email, setEmail] = React.useState("")
+  const [password, setPassword] = React.useState("")
+  const [username, setUsername] = React.useState("")
+  const [isPending, setIsPending] = React.useState(false)
+  const [message, setMessage] = React.useState("")
 
-  function handleVerify(e: React.FormEvent) {
+  const messagesQuery = useMemoFirebase(() => {
+    if (!db) return null
+    return query(collection(db, "chat_messages"), orderBy("timestamp", "desc"), limit(50))
+  }, [db])
+
+  const { data: messages } = useCollection(messagesQuery)
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
-    if (accessCode === "chatBRJ") {
-      toast({
-        title: "Access Granted",
-        description: "Connecting to secure chat session...",
-      })
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid Access Code",
-        description: "Please check your code and try again.",
-      })
+    setIsPending(true)
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      toast({ title: "Welcome back!", description: "Connected to ChatBRJ session." })
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Login Failed", description: error.message })
+    } finally {
+      setIsPending(false)
     }
   }
 
-  return (
-    <div className="container mx-auto px-4 py-32 flex items-center justify-center">
-      <Card className="max-w-md w-full rounded-3xl shadow-2xl border-none">
-        <CardHeader className="text-center space-y-4 pt-12 pb-8">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
-            <ShieldCheck className="h-10 w-10" />
-          </div>
-          <div className="space-y-1">
-            <CardTitle className="text-3xl font-headline font-bold">Secure Access</CardTitle>
-            <p className="text-muted-foreground">Authorized users only</p>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8 pt-0 space-y-8">
-          <form onSubmit={handleVerify} className="space-y-6">
-            <div className="space-y-2 text-center">
-              <Label htmlFor="code" className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Access Code</Label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="code"
-                  type="password"
-                  placeholder="••••••••"
-                  className="rounded-xl h-14 pl-12 text-xl tracking-widest text-center"
-                  value={accessCode}
-                  onChange={(e) => setAccessCode(e.target.value)}
-                  required
-                />
-              </div>
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault()
+    setIsPending(true)
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(userCredential.user, { displayName: username })
+      
+      // Create user profile in Firestore
+      await addDoc(collection(db, "chat_users"), {
+        id: userCredential.user.uid,
+        username: username,
+        email: email,
+        joinDate: serverTimestamp()
+      })
+
+      toast({ title: "Registration Successful", description: "You can now participate in the chat." })
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Registration Failed", description: error.message })
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  async function handleSendMessage(e: React.FormEvent) {
+    e.preventDefault()
+    if (!message.trim() || !user) return
+
+    try {
+      await addDoc(collection(db, "chat_messages"), {
+        chatUserId: user.uid,
+        senderName: user.displayName || "Anonymous",
+        messageContent: message,
+        timestamp: serverTimestamp()
+      })
+      setMessage("")
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to send message." })
+    }
+  }
+
+  if (isUserLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-20 flex items-center justify-center">
+        <Card className="max-w-md w-full rounded-3xl shadow-2xl border-none">
+          <CardHeader className="text-center space-y-4 pt-12 pb-8">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
+              <ShieldCheck className="h-10 w-10" />
             </div>
-            <Button type="submit" className="w-full rounded-xl py-7 text-lg font-bold shadow-lg flex items-center justify-center gap-2 group">
-              Verify and Enter Chat
-              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <div className="space-y-1">
+              <CardTitle className="text-3xl font-headline font-bold">ChatBRJ Access</CardTitle>
+              <CardDescription>Join our professional developer community</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="p-8 pt-0">
+            <Tabs defaultValue="login" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2 rounded-xl h-12 bg-secondary">
+                <TabsTrigger value="login" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Login</TabsTrigger>
+                <TabsTrigger value="register" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Register</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        className="pl-10 rounded-xl h-12" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="password" 
+                        type="password" 
+                        placeholder="••••••••" 
+                        className="pl-10 rounded-xl h-12" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full rounded-xl py-6 font-bold" disabled={isPending}>
+                    {isPending ? <Loader2 className="animate-spin" /> : "Sign In"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-name">Username</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="reg-name" 
+                        placeholder="DeveloperName" 
+                        className="pl-10 rounded-xl h-12" 
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="reg-email" 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        className="pl-10 rounded-xl h-12" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="reg-password" 
+                        type="password" 
+                        placeholder="Min 6 characters" 
+                        className="pl-10 rounded-xl h-12" 
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <Button type="submit" className="w-full rounded-xl py-6 font-bold" disabled={isPending}>
+                    {isPending ? <Loader2 className="animate-spin" /> : "Create Account"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12 flex flex-col h-[85vh]">
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl">
+            {user.displayName?.charAt(0) || "U"}
+          </div>
+          <div>
+            <h2 className="font-bold text-xl">{user.displayName}</h2>
+            <p className="text-sm text-green-500 flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Online
+            </p>
+          </div>
+        </div>
+        <Button variant="outline" className="rounded-full" onClick={() => signOut(auth)}>Sign Out</Button>
+      </div>
+
+      <Card className="flex-1 rounded-3xl border-none shadow-2xl flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages && messages.slice().reverse().map((msg) => (
+            <div 
+              key={msg.id} 
+              className={`flex flex-col ${msg.chatUserId === user.uid ? "items-end" : "items-start"}`}
+            >
+              <div className={`max-w-[80%] p-4 rounded-2xl ${
+                msg.chatUserId === user.uid 
+                  ? "bg-primary text-primary-foreground rounded-tr-none" 
+                  : "bg-secondary text-secondary-foreground rounded-tl-none"
+              }`}>
+                {msg.chatUserId !== user.uid && (
+                  <p className="text-xs font-bold mb-1 opacity-70">{msg.senderName}</p>
+                )}
+                <p className="leading-relaxed">{msg.messageContent}</p>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1 px-2">
+                {msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-6 border-t bg-card">
+          <form onSubmit={handleSendMessage} className="flex gap-4">
+            <Input 
+              placeholder="Type your message..." 
+              className="flex-1 rounded-2xl h-14 px-6 border-none bg-secondary focus-visible:ring-primary"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <Button type="submit" size="icon" className="h-14 w-14 rounded-2xl bg-primary shadow-lg hover:scale-105 transition-transform">
+              <Send className="h-6 w-6" />
             </Button>
           </form>
-          <div className="pt-4 text-center">
-            <p className="text-sm text-muted-foreground">Don't have a code? <a href="/contact" className="text-primary font-bold hover:underline">Request Access</a></p>
-          </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

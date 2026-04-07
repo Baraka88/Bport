@@ -5,34 +5,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 import Image from "next/image"
 import React from "react"
 import { Github, Linkedin, Instagram, Users, Rocket, CheckCircle2 } from "lucide-react"
-import { submitCollaborationRequest } from "@/app/actions/portfolio-actions"
 import { useToast } from "@/hooks/use-toast"
+import { useFirestore } from "@/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export default function CollabPage() {
   const { toast } = useToast()
+  const db = useFirestore()
   const [isPending, setIsPending] = React.useState(false)
   const [submitted, setSubmitted] = React.useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsPending(true)
+    
     const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData.entries())
+
     try {
-      await submitCollaborationRequest(formData)
-      toast({
-        title: "Inquiry Sent!",
-        description: "Your collaboration request has been sent to Baraka Junior.",
+      // Save to Firebase for Admin Panel
+      await addDoc(collection(db, "inquiries_collaboration"), {
+        ...data,
+        status: "new",
+        submissionDate: serverTimestamp(),
       })
-      setSubmitted(true)
+
+      // Send to Formspree
+      const response = await fetch("https://formspree.io/f/mlgoveej", {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Inquiry Sent!",
+          description: "Your collaboration request has been sent to Baraka Junior.",
+        })
+        setSubmitted(true)
+      } else {
+        throw new Error("Formspree submission failed")
+      }
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to send request. Please try again later.",
+        description: "Failed to send request. Please try again.",
       })
     } finally {
       setIsPending(false)
@@ -76,7 +99,7 @@ export default function CollabPage() {
                 <a href="https://linkedin.com/in/baraka-junior"><Linkedin className="h-4 w-4" /> LinkedIn</a>
               </Button>
               <Button variant="outline" className="rounded-full gap-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white" asChild>
-                <a href="https://instagram.com/barakajunior72"><Instagram className="h-4 w-4" /> Instagram</a>
+                <a href="https://instagram.com/barakaruzibiza680"><Instagram className="h-4 w-4" /> Instagram</a>
               </Button>
             </div>
           </div>
@@ -85,7 +108,7 @@ export default function CollabPage() {
         <div className="relative">
           <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative group">
             <Image
-              src={PlaceHolderImages[5].imageUrl}
+              src="https://picsum.photos/seed/collab/800/1000"
               alt="Collaboration"
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -114,19 +137,25 @@ export default function CollabPage() {
                   <Input name="name" placeholder="Your Name" required className="rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
+                  <Label>Phone Number</Label>
+                  <Input name="phone" type="tel" placeholder="0732786495" required className="rounded-xl h-12" />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label>Role/Expertise</Label>
                   <Input name="role" placeholder="e.g. Frontend Dev, UI Designer" required className="rounded-xl h-12" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input name="email" type="email" placeholder="your@email.com" required className="rounded-xl h-12" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>Your Project Idea / Collaboration Scope</Label>
                 <Textarea name="idea" placeholder="Describe the project or how we could work together..." required className="rounded-xl min-h-[150px]" />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Email Address</Label>
-                <Input name="email" type="email" placeholder="your@email.com" required className="rounded-xl h-12" />
               </div>
 
               <Button type="submit" size="lg" disabled={isPending} className="w-full rounded-xl py-8 text-xl font-bold">

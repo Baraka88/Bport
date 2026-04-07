@@ -9,19 +9,58 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react"
 import React from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useFirestore } from "@/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = React.useState(false)
+  const [isPending, setIsPending] = React.useState(false)
   const { toast } = useToast()
+  const db = useFirestore()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    // Simulated submission logic
-    toast({
-      title: "Inquiry Sent!",
-      description: "Thank you for reaching out. I'll get back to you within 24 hours.",
-    })
-    setSubmitted(true)
+    setIsPending(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData.entries())
+
+    try {
+      // Save to Firebase for Admin Panel
+      await addDoc(collection(db, "inquiries_hire_me"), {
+        ...data,
+        status: "new",
+        isSpam: false,
+        submissionDate: serverTimestamp(),
+      })
+
+      // Send to Formspree
+      const response = await fetch("https://formspree.io/f/mlgoveej", {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Inquiry Sent!",
+          description: "Thank you for reaching out. I'll get back to you within 24 hours.",
+        })
+        setSubmitted(true)
+      } else {
+        throw new Error("Formspree submission failed")
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send inquiry. Please try again.",
+      })
+    } finally {
+      setIsPending(false)
+    }
   }
 
   if (submitted) {
@@ -32,7 +71,7 @@ export default function ContactPage() {
         </div>
         <h1 className="text-4xl font-bold font-headline">Thank You for <span className="text-primary">Getting in Touch!</span></h1>
         <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-          Your inquiry has been received. A confirmation email has been sent to your inbox.
+          Your inquiry has been received. I will review it and contact you shortly.
         </p>
         <Button onClick={() => setSubmitted(false)} size="lg" className="rounded-full">Send Another Message</Button>
       </div>
@@ -85,18 +124,22 @@ export default function ContactPage() {
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" placeholder="John Doe" required className="rounded-xl h-12" />
+                    <Input id="name" name="name" placeholder="John Doe" required className="rounded-xl h-12" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="john@example.com" required className="rounded-xl h-12" />
+                    <Input id="email" name="email" type="email" placeholder="john@example.com" required className="rounded-xl h-12" />
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" name="phone" type="tel" placeholder="0732786495" required className="rounded-xl h-12" />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="service">Desired Service</Label>
-                    <Select>
+                    <Select name="service">
                       <SelectTrigger className="rounded-xl h-12">
                         <SelectValue placeholder="Select a service" />
                       </SelectTrigger>
@@ -108,9 +151,12 @@ export default function ContactPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="urgency">Urgency</Label>
-                    <Select>
+                    <Select name="urgency">
                       <SelectTrigger className="rounded-xl h-12">
                         <SelectValue placeholder="How urgent?" />
                       </SelectTrigger>
@@ -121,20 +167,19 @@ export default function ContactPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="budget">Budget Range (Optional)</Label>
-                  <Input id="budget" placeholder="e.g. $2000 - $5000" className="rounded-xl h-12" />
+                  <div className="space-y-2">
+                    <Label htmlFor="budget">Budget Range (Optional)</Label>
+                    <Input id="budget" name="budget" placeholder="e.g. $2000 - $5000" className="rounded-xl h-12" />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="message">Message & Details</Label>
-                  <Textarea id="message" placeholder="Tell me more about your project goals..." required className="rounded-xl min-h-[150px] p-4" />
+                  <Textarea id="message" name="message" placeholder="Tell me more about your project goals..." required className="rounded-xl min-h-[150px] p-4" />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full rounded-xl py-6 text-lg font-bold shadow-xl">
-                  Send Inquiry <Send className="ml-2 h-5 w-5" />
+                <Button type="submit" size="lg" disabled={isPending} className="w-full rounded-xl py-6 text-lg font-bold shadow-xl">
+                  {isPending ? "Sending..." : "Send Inquiry"} <Send className="ml-2 h-5 w-5" />
                 </Button>
               </form>
             </CardContent>

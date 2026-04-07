@@ -1,4 +1,4 @@
-import { Github, Linkedin, Instagram, Mail, Phone } from "lucide-react"
+import { Github, Linkedin, Instagram, Mail, Phone, Lock } from "lucide-react"
 import Link from "next/link"
 
 export function Footer() {
@@ -41,8 +41,11 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t mt-12 pt-8 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} ProFolio Studio. All rights reserved. Created by Baraka Junior.
+        <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} ProFolio Studio. All rights reserved. Created by Baraka Junior.</p>
+          <Link href="/admin" className="p-2 hover:text-primary transition-colors" title="Admin Locker">
+            <Lock className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </footer>
