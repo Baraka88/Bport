@@ -1,64 +1,106 @@
 import { EXPERIENCE } from "@/app/data/portfolio"
 import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 import Image from "next/image"
-import { Briefcase, Calendar, GraduationCap } from "lucide-react"
+import { Briefcase, Calendar, GraduationCap, ShieldCheck, Users } from "lucide-react"
 
 export function AboutSection() {
+  const profileImg = PlaceHolderImages.find(img => img.id === "profile-pic") || PlaceHolderImages[4];
+  const collabImg = PlaceHolderImages.find(img => img.id === "collab-1") || PlaceHolderImages[5];
+
   return (
-    <section id="about" className="container mx-auto px-4">
-      <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section id="about" className="container mx-auto px-4 py-20">
+      <div className="grid lg:grid-cols-2 gap-20 items-center">
         <div className="relative group">
-          <div className="absolute -inset-4 bg-accent/20 rounded-2xl blur-2xl group-hover:bg-accent/30 transition-all" />
-          <div className="relative aspect-square max-w-md mx-auto rounded-2xl overflow-hidden shadow-2xl">
-            <Image
-              src={PlaceHolderImages[4].imageUrl}
-              alt="Baraka Junior"
-              fill
-              className="object-cover"
-            />
+          <div className="absolute -inset-6 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-700" />
+          
+          <div className="grid grid-cols-2 gap-4 relative">
+            <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-background transform group-hover:-rotate-2 transition-transform duration-500">
+              <Image
+                src={profileImg.imageUrl}
+                alt="Baraka Junior"
+                fill
+                className="object-cover"
+                data-ai-hint="professional portrait"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
+            
+            <div className="space-y-4 pt-12">
+              <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-xl border-4 border-background transform group-hover:rotate-2 transition-transform duration-500">
+                <Image
+                  src={collabImg.imageUrl}
+                  alt="Collaboration"
+                  fill
+                  className="object-cover"
+                  data-ai-hint="team collaboration"
+                />
+              </div>
+              <div className="bg-accent p-6 rounded-[2rem] shadow-xl text-accent-foreground">
+                <div className="flex items-center gap-3">
+                  <Users className="h-6 w-6" />
+                  <p className="font-bold text-sm uppercase tracking-tighter">Team Player</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="absolute -bottom-6 -right-6 bg-card p-6 rounded-2xl shadow-xl hidden sm:block">
+          
+          <div className="absolute -bottom-10 -right-6 bg-card p-6 rounded-[2rem] shadow-2xl border border-primary/10 hidden sm:block animate-bounce-slow">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <Briefcase className="h-6 w-6 text-primary" />
+              <div className="p-4 bg-primary text-primary-foreground rounded-2xl">
+                <Briefcase className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Experience</p>
-                <p className="font-bold">4+ Years</p>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-tighter">Experience</p>
+                <p className="text-2xl font-black font-headline">4+ Years</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute -top-10 -left-6 bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-2xl border border-primary/10 hidden sm:block">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-accent text-accent-foreground rounded-2xl">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-tighter text-muted-foreground">Status</p>
+                <p className="text-xl font-black font-headline">Expert Analyst</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline">About <span className="text-primary">Me</span></h2>
-            <div className="w-16 h-1 bg-accent" />
-            <p className="text-lg text-muted-foreground leading-relaxed">
+        <div className="space-y-10">
+          <div className="space-y-6">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-widest">
+              Who is Baraka?
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black font-headline leading-none">The Visionary Behind the <span className="text-primary">Code</span></h2>
+            <div className="w-24 h-2 bg-accent rounded-full" />
+            <p className="text-xl text-muted-foreground leading-relaxed font-medium">
               I am Baraka Junior, a passionate Software Engineer based in Rwanda. My journey in tech is driven by a desire to solve real-world problems through elegant code and robust system analysis.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              With a background in both development and systems design, I bridge the gap between business requirements and technical implementation. I specialize in the LAMP/MERN stacks and have a proven track record of delivering high-performance applications.
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              With a background in both development and systems design, I bridge the gap between business requirements and technical implementation. I specialize in high-performance stacks and have a proven track record of delivering scalable applications.
             </p>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              Education & Experience
+          <div className="space-y-8">
+            <h3 className="text-2xl font-black font-headline flex items-center gap-3">
+              <GraduationCap className="h-8 w-8 text-primary" />
+              Career Journey
             </h3>
-            <div className="space-y-6 border-l-2 border-primary/20 ml-2.5 pl-8">
+            <div className="space-y-10 border-l-4 border-primary/20 ml-4 pl-10">
               {EXPERIENCE.map((exp, idx) => (
-                <div key={idx} className="relative">
-                  <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-primary border-4 border-background" />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wider">
+                <div key={idx} className="relative group/exp">
+                  <div className="absolute -left-[54px] top-1 w-8 h-8 rounded-full bg-background border-4 border-primary group-hover/exp:scale-125 transition-transform" />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 text-sm font-black text-primary uppercase tracking-widest">
                       <Calendar className="h-4 w-4" />
                       {exp.period}
                     </div>
-                    <h4 className="text-lg font-bold">{exp.role}</h4>
-                    <p className="text-sm font-medium text-accent">{exp.company}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{exp.description}</p>
+                    <h4 className="text-2xl font-black font-headline">{exp.role}</h4>
+                    <p className="text-lg font-bold text-accent">{exp.company}</p>
+                    <p className="text-muted-foreground text-lg leading-relaxed">{exp.description}</p>
                   </div>
                 </div>
               ))}

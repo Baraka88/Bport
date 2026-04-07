@@ -8,9 +8,52 @@ import { Textarea } from "@/components/ui/textarea"
 import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 import Image from "next/image"
 import React from "react"
-import { Github, Linkedin, Instagram, Users, Rocket } from "lucide-react"
+import { Github, Linkedin, Instagram, Users, Rocket, CheckCircle2 } from "lucide-react"
+import { submitCollaborationRequest } from "@/app/actions/portfolio-actions"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CollabPage() {
+  const { toast } = useToast()
+  const [isPending, setIsPending] = React.useState(false)
+  const [submitted, setSubmitted] = React.useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setIsPending(true)
+    const formData = new FormData(e.currentTarget)
+    try {
+      await submitCollaborationRequest(formData)
+      toast({
+        title: "Inquiry Sent!",
+        description: "Your collaboration request has been sent to Baraka Junior.",
+      })
+      setSubmitted(true)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send request. Please try again later.",
+      })
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="container mx-auto px-4 py-32 text-center space-y-8">
+        <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle2 className="h-12 w-12 text-primary" />
+        </div>
+        <h1 className="text-4xl font-bold font-headline">Inquiry Received!</h1>
+        <p className="text-xl text-muted-foreground max-w-lg mx-auto">
+          Thank you for reaching out. Baraka will review your proposal and get back to you soon.
+        </p>
+        <Button onClick={() => setSubmitted(false)} size="lg" className="rounded-full">Send Another Inquiry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-20 space-y-24">
       <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -64,29 +107,31 @@ export default function CollabPage() {
             </h2>
           </div>
           <CardContent className="p-8 sm:p-12 space-y-8">
-            <form className="grid gap-8">
+            <form onSubmit={handleSubmit} className="grid gap-8">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Name</Label>
-                  <Input placeholder="Your Name" className="rounded-xl h-12" />
+                  <Input name="name" placeholder="Your Name" required className="rounded-xl h-12" />
                 </div>
                 <div className="space-y-2">
                   <Label>Role/Expertise</Label>
-                  <Input placeholder="e.g. Frontend Dev, UI Designer" className="rounded-xl h-12" />
+                  <Input name="role" placeholder="e.g. Frontend Dev, UI Designer" required className="rounded-xl h-12" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>Your Project Idea / Collaboration Scope</Label>
-                <Textarea placeholder="Describe the project or how we could work together..." className="rounded-xl min-h-[150px]" />
+                <Textarea name="idea" placeholder="Describe the project or how we could work together..." required className="rounded-xl min-h-[150px]" />
               </div>
 
               <div className="space-y-2">
-                <Label>Attach Project Docs (Optional)</Label>
-                <Input type="file" className="rounded-xl h-auto py-2" />
+                <Label>Email Address</Label>
+                <Input name="email" type="email" placeholder="your@email.com" required className="rounded-xl h-12" />
               </div>
 
-              <Button size="lg" className="w-full rounded-xl py-8 text-xl font-bold">Submit Collaboration Inquiry</Button>
+              <Button type="submit" size="lg" disabled={isPending} className="w-full rounded-xl py-8 text-xl font-bold">
+                {isPending ? "Sending..." : "Submit Collaboration Inquiry"}
+              </Button>
             </form>
           </CardContent>
         </Card>

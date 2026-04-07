@@ -62,7 +62,7 @@ export default function ContactPage() {
               <div className="p-4 bg-primary/5 rounded-2xl"><Phone className="h-6 w-6 text-primary" /></div>
               <div>
                 <h4 className="font-bold">Phone</h4>
-                <p className="text-muted-foreground">+250 788 000 000</p>
+                <p className="text-muted-foreground">0732786495</p>
               </div>
             </div>
             <div className="flex gap-6 items-start">

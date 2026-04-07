@@ -1,6 +1,35 @@
 import { PlaceHolderImages } from "@/app/lib/placeholder-images";
 
-export const PROJECTS = [
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  tech: string[];
+  imageUrl: string;
+  liveUrl: string;
+  repoUrl: string;
+}
+
+export interface Skill {
+  category: string;
+  items: string[];
+}
+
+export interface Certificate {
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+export interface Experience {
+  role: string;
+  company: string;
+  period: string;
+  description: string;
+}
+
+export const PROJECTS: Project[] = [
   {
     id: "inventory-sys",
     title: "Smart Inventory Manager",
@@ -23,19 +52,19 @@ export const PROJECTS = [
   }
 ];
 
-export const SKILLS = [
+export const SKILLS: Skill[] = [
   { category: "Backend", items: ["Node.js", "PHP", "MySQL", "REST APIs"] },
   { category: "Frontend", items: ["Vue.js", "React", "Tailwind CSS", "TypeScript"] },
   { category: "Tools & Others", items: ["System Analysis", "Git", "Docker", "Agile"] }
 ];
 
-export const CERTIFICATES = [
+export const CERTIFICATES: Certificate[] = [
   { name: "Full Stack Web Development", issuer: "Meta", date: "2023" },
   { name: "MySQL Database Administrator", issuer: "Oracle", date: "2022" },
   { name: "System Analysis Professional", issuer: "BCS", date: "2023" }
 ];
 
-export const EXPERIENCE = [
+export const EXPERIENCE: Experience[] = [
   {
     role: "Senior Software Engineer",
     company: "TechFlow Solutions",

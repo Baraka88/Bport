@@ -2,6 +2,8 @@
 
 import { generateProjectDescription } from "@/ai/flows/generate-project-description-flow";
 
+const CONTACT_EMAIL = "barakaruzibiza680@gmail.com";
+
 export async function getAIDescription(technicalDetails: string, projectGoals: string) {
   try {
     const result = await generateProjectDescription({ technicalDetails, projectGoals });
@@ -13,14 +15,19 @@ export async function getAIDescription(technicalDetails: string, projectGoals: s
 }
 
 export async function submitHireMeRequest(formData: FormData) {
-  // Logic to save to MySQL (simulated)
-  // Logic to send email to barakaruzibiza680@gmail.com
-  console.log("Saving hire request to DB...");
+  const data = Object.fromEntries(formData.entries());
+  console.log(`Sending Hire Me request to ${CONTACT_EMAIL}:`, data);
+  // Simulated success
   return { success: true };
 }
 
 export async function submitComment(projectId: string, content: string) {
-  // Logic to save to MySQL (simulated)
-  console.log(`Saving comment for ${projectId}: ${content}`);
+  console.log(`Sending comment for ${projectId} to ${CONTACT_EMAIL}: ${content}`);
+  return { success: true };
+}
+
+export async function submitCollaborationRequest(formData: FormData) {
+  const data = Object.fromEntries(formData.entries());
+  console.log(`Sending Collaboration Inquiry to ${CONTACT_EMAIL}:`, data);
   return { success: true };
 }

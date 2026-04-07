@@ -1,4 +1,4 @@
-import { Github, Linkedin, Instagram, Mail } from "lucide-react"
+import { Github, Linkedin, Instagram, Mail, Phone } from "lucide-react"
 import Link from "next/link"
 
 export function Footer() {
@@ -25,6 +25,7 @@ export function Footer() {
               <li><Link href="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
               <li><Link href="/collab" className="hover:text-primary transition-colors">Collaborate</Link></li>
               <li><Link href="/#projects" className="hover:text-primary transition-colors">Projects</Link></li>
+              <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
             </ul>
           </div>
 
@@ -32,6 +33,7 @@ export function Footer() {
             <h4 className="font-bold">Contact</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> barakaruzibiza680@gmail.com</li>
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> 0732786495</li>
               <li>Kigali, Rwanda</li>
               <li className="pt-2">
                 <Link href="/contact" className="text-accent font-bold hover:underline">Hire Me Now</Link>
