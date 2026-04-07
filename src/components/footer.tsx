@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-12">
           <div className="col-span-2 space-y-4">
-            <Link href="/" className="font-headline text-2xl font-bold text-primary">ProFolio<span className="text-accent">Studio</span></Link>
+            <Link href="/" className="font-headline text-2xl font-bold text-primary">BRJ<span className="text-accent">DEV</span></Link>
             <p className="text-muted-foreground max-w-sm">
               Helping businesses build reliable systems and engaging digital experiences with modern web technologies.
             </p>
@@ -42,7 +42,7 @@ export function Footer() {
           </div>
         </div>
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} ProFolio Studio. All rights reserved. Created by Baraka Junior.</p>
+          <p>© {new Date().getFullYear()} BRJDEV. All rights reserved. Created by Baraka Junior.</p>
           <Link href="/admin" className="p-2 hover:text-primary transition-colors" title="Admin Locker">
             <Lock className="h-4 w-4" />
           </Link>

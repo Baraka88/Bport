@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ShieldCheck, Mail, Lock, User, Loader2, Send, Sparkles } from "lucide-react"
+import { ShieldCheck, Mail, Lock, User, Loader2, Send, Sparkles, Trash2, RotateCcw } from "lucide-react"
 import React from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth, useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
@@ -15,7 +15,7 @@ import {
   signOut,
   updateProfile 
 } from "firebase/auth"
-import { collection, addDoc, setDoc, doc, serverTimestamp, query, orderBy, limit } from "firebase/firestore"
+import { collection, addDoc, setDoc, doc, serverTimestamp, query, orderBy, limit, where, getDocs, deleteDoc, writeBatch } from "firebase/firestore"
 import { askChatBot } from "@/app/actions/portfolio-actions"
 
 export default function ChatPage() {
@@ -30,10 +30,15 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
-  // Only create the query if the user is authenticated to prevent permission errors
+  // Filter messages specifically for the logged-in user
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !user) return null
-    return query(collection(db, "chat_messages"), orderBy("timestamp", "desc"), limit(50))
+    return query(
+      collection(db, "chat_messages"), 
+      where("chatUserId", "==", user.uid),
+      orderBy("timestamp", "desc"), 
+      limit(100)
+    )
   }, [db, user])
 
   const { data: messages } = useCollection(messagesQuery)
@@ -58,7 +63,6 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      // Use setDoc with UID as the document ID to match security rules expectations
       await setDoc(doc(db, "chat_users", userCredential.user.uid), {
         id: userCredential.user.uid,
         username: username,
@@ -82,29 +86,60 @@ export default function ChatPage() {
     setMessage("")
 
     try {
-      // 1. Add user message to Firestore
+      // 1. Add user message to Firestore (Tagged with user UID)
       await addDoc(collection(db, "chat_messages"), {
         chatUserId: user.uid,
-        senderName: user.displayName || "Anonymous",
+        senderName: user.displayName || "You",
         messageContent: userMsgContent,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        isAI: false
       })
 
       // 2. Trigger AI Bot Response
       const aiResponse = await askChatBot(userMsgContent)
 
-      // 3. Add AI message to Firestore
-      // Security rules updated to allow users to "create" these system responses
+      // 3. Add AI message to Firestore (ALSO tagged with user UID so it belongs to their history)
       await addDoc(collection(db, "chat_messages"), {
-        chatUserId: "system-ai",
+        chatUserId: user.uid,
         senderName: "ChatBRJ AI",
         messageContent: aiResponse,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        isAI: true
       })
 
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "Failed to process message." })
     }
+  }
+
+  async function handleDeleteConversation() {
+    if (!user || !db) return
+    if (!confirm("Are you sure you want to delete your entire chat history? This cannot be undone.")) return
+
+    setIsPending(true)
+    try {
+      const q = query(collection(db, "chat_messages"), where("chatUserId", "==", user.uid))
+      const snapshot = await getDocs(q)
+      
+      const batch = writeBatch(db)
+      snapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref)
+      })
+      
+      await batch.commit()
+      toast({ title: "History Deleted", description: "Your conversation has been cleared from our records." })
+    } catch (error) {
+      toast({ variant: "destructive", title: "Delete Failed", description: "Failed to clear history." })
+    } finally {
+      setIsPending(false)
+    }
+  }
+
+  function handleNewChat() {
+    // In this firestore implementation, "New Chat" logic often implies clearing the current view 
+    // or starting fresh. Here we'll just focus on resetting any local input state.
+    setMessage("")
+    toast({ title: "Ready", description: "Start a fresh topic below!" })
   }
 
   if (isUserLoading) {
@@ -232,68 +267,88 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 flex flex-col h-[85vh]">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto px-4 py-6 md:py-12 flex flex-col h-[calc(100vh-140px)]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl relative">
+          <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl relative shadow-lg">
             {user.displayName?.charAt(0) || "U"}
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
           </div>
           <div>
             <h2 className="font-bold text-xl">{user.displayName}</h2>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Connected to ChatBRJ AI</span>
+              <span className="text-xs text-muted-foreground">BRJ AI Context Active</span>
               <Sparkles className="h-3 w-3 text-accent animate-pulse" />
             </div>
           </div>
         </div>
-        <Button variant="outline" className="rounded-full" onClick={() => signOut(auth)}>Sign Out</Button>
+        
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <Button variant="secondary" className="rounded-full gap-2 flex-1 md:flex-none" onClick={handleNewChat}>
+            <RotateCcw className="h-4 w-4" /> New Chat
+          </Button>
+          <Button variant="outline" className="rounded-full gap-2 flex-1 md:flex-none text-red-500 border-red-500/20 hover:bg-red-50 dark:hover:bg-red-900/10" onClick={handleDeleteConversation}>
+            <Trash2 className="h-4 w-4" /> Clear History
+          </Button>
+          <Button variant="ghost" className="rounded-full flex-1 md:flex-none" onClick={() => signOut(auth)}>Sign Out</Button>
+        </div>
       </div>
 
-      <Card className="flex-1 rounded-3xl border-none shadow-2xl flex flex-col overflow-hidden bg-card/50 backdrop-blur-xl">
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col-reverse">
+      <Card className="flex-1 rounded-[2rem] border-none shadow-2xl flex flex-col overflow-hidden bg-card/50 backdrop-blur-xl border border-white/10">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 flex flex-col-reverse">
           {messages && messages.map((msg) => {
-            const isMe = msg.chatUserId === user.uid;
-            const isAI = msg.chatUserId === "system-ai";
+            const isMe = !msg.isAI;
+            const isAI = msg.isAI;
             
             return (
               <div 
                 key={msg.id} 
                 className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
               >
-                <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${
+                <div className={`max-w-[90%] md:max-w-[75%] p-4 md:p-5 rounded-2xl shadow-sm ${
                   isMe 
                     ? "bg-primary text-primary-foreground rounded-tr-none" 
-                    : isAI
-                      ? "bg-accent/10 border border-accent/20 text-foreground rounded-tl-none"
-                      : "bg-secondary text-secondary-foreground rounded-tl-none"
+                    : "bg-secondary text-secondary-foreground rounded-tl-none border border-border/50"
                 }`}>
                   {!isMe && (
-                    <div className="flex items-center gap-1.5 mb-1 opacity-70">
-                      {isAI && <Sparkles className="h-3 w-3 text-accent" />}
-                      <p className="text-[10px] font-black uppercase tracking-widest">{msg.senderName}</p>
+                    <div className="flex items-center gap-1.5 mb-1.5 opacity-70">
+                      <Sparkles className="h-3 w-3 text-accent" />
+                      <p className="text-[10px] font-black uppercase tracking-widest">ChatBRJ AI</p>
                     </div>
                   )}
-                  <p className="leading-relaxed text-sm">{msg.messageContent}</p>
+                  <p className="leading-relaxed text-sm md:text-base whitespace-pre-wrap">{msg.messageContent}</p>
                 </div>
-                <p className="text-[9px] text-muted-foreground mt-1.5 px-2 font-medium">
+                <p className="text-[10px] text-muted-foreground mt-2 px-2 font-medium opacity-60">
                   {msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
             )
           })}
+          
+          {messages?.length === 0 && (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-40">
+              <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center">
+                <MessageCircle className="h-10 w-10" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-bold text-lg">No messages yet</p>
+                <p className="text-sm max-w-xs">Ask ChatBRJ about projects, skills, or how to get in touch!</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="p-6 border-t bg-card/80">
-          <form onSubmit={handleSendMessage} className="flex gap-4">
+        <div className="p-4 md:p-8 border-t bg-background/50 backdrop-blur-md">
+          <form onSubmit={handleSendMessage} className="flex gap-4 max-w-5xl mx-auto">
             <Input 
               placeholder="Ask ChatBRJ AI anything..." 
-              className="flex-1 rounded-2xl h-14 px-6 border-none bg-secondary/50 focus-visible:ring-primary shadow-inner"
+              className="flex-1 rounded-2xl h-14 px-6 border-none bg-secondary/80 focus-visible:ring-primary shadow-inner text-base"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              disabled={isPending}
             />
-            <Button type="submit" size="icon" className="h-14 w-14 rounded-2xl bg-primary shadow-lg hover:scale-105 transition-transform active:scale-95">
-              <Send className="h-6 w-6" />
+            <Button type="submit" size="icon" className="h-14 w-14 rounded-2xl bg-primary shadow-xl hover:scale-105 transition-transform active:scale-95" disabled={isPending}>
+              {isPending ? <Loader2 className="animate-spin" /> : <Send className="h-6 w-6" />}
             </Button>
           </form>
         </div>

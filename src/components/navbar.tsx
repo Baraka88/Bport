@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Moon, Sun, Menu, Layout, Code, Briefcase, Mail, Image as ImageIcon, MessageCircle, Zap } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -27,7 +27,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="font-headline text-2xl font-bold text-primary">ProFolio<span className="text-accent">Studio</span></span>
+          <span className="font-headline text-2xl font-bold text-primary">BRJ<span className="text-accent">DEV</span></span>
         </Link>
 
         {/* Desktop Nav */}
@@ -80,6 +80,8 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetTitle className="sr-only">Menu Navigation</SheetTitle>
+              <SheetDescription className="sr-only">Access site links and settings</SheetDescription>
               <nav className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
                   <Link

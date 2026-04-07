@@ -7,7 +7,7 @@ import {Toaster} from '@/components/ui/toaster';
 import {FirebaseClientProvider} from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'ProFolio Studio | Baraka Junior',
+  title: 'BRJDEV | Baraka Junior',
   description: 'Professional Portfolio of Baraka Junior - Software Engineer and Systems Analyst',
 };
 
