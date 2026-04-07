@@ -31,22 +31,32 @@ export interface Experience {
 
 export const PROJECTS: Project[] = [
   {
-    id: "inventory-sys",
-    title: "Smart Inventory Manager",
-    description: "A comprehensive system analysis and implementation for a retail chain using Node.js and MySQL.",
-    longDescription: "This project involved a deep dive into business processes followed by the development of a real-time inventory tracking solution. It features automated stock alerts, detailed reporting, and a responsive Vue.js frontend.",
-    tech: ["Node.js", "Vue.js", "MySQL", "System Analysis"],
-    imageUrl: PlaceHolderImages[2].imageUrl,
+    id: "inventory-mgmt",
+    title: "Inventory Management System",
+    description: "A robust real-time tracking solution for retail and warehouses with automated stock alerts.",
+    longDescription: "This system provides end-to-end visibility into supply chains. Built with Node.js and MySQL, it features a sophisticated dashboard for monitoring stock levels, generating reports, and predicting reorder points using historical data.",
+    tech: ["Node.js", "MySQL", "Vue.js", "System Analysis"],
+    imageUrl: "https://picsum.photos/seed/inv/800/600",
     liveUrl: "#",
     repoUrl: "#"
   },
   {
-    id: "health-portal",
-    title: "MediLink Patient Portal",
-    description: "Secure healthcare management system built with PHP and MySQL with a focus on data privacy.",
-    longDescription: "MediLink allows patients to schedule appointments, view medical history, and communicate securely with doctors. Built with PHP 8 and follows strict security standards for medical data.",
-    tech: ["PHP", "MySQL", "System Analysis", "Bootstrap"],
-    imageUrl: PlaceHolderImages[3].imageUrl,
+    id: "chatbrj-ai",
+    title: "ChatBRJ AI Assistant",
+    description: "An intelligent chatbot powered by Genkit and Gemini to handle portfolio inquiries and user interaction.",
+    longDescription: "ChatBRJ AI is an agentic chat system integrated directly into this portfolio. It uses RAG-like context to answer questions about skills and projects, providing a seamless bridge between me and potential clients.",
+    tech: ["Genkit", "Gemini AI", "TypeScript", "Firebase"],
+    imageUrl: "https://picsum.photos/seed/ai/800/600",
+    liveUrl: "/chat",
+    repoUrl: "#"
+  },
+  {
+    id: "bookstore-mgmt",
+    title: "Book Store Management System",
+    description: "A comprehensive digital storefront and backend management system for independent booksellers.",
+    longDescription: "This project focuses on the unique needs of bookstore owners, including ISBN integration, customer loyalty tracking, and secure payment processing. Developed using the LAMP stack with a focus on ease of use.",
+    tech: ["PHP", "MySQL", "Tailwind CSS", "REST APIs"],
+    imageUrl: "https://picsum.photos/seed/book/800/600",
     liveUrl: "#",
     repoUrl: "#"
   }
@@ -55,7 +65,7 @@ export const PROJECTS: Project[] = [
 export const SKILLS: Skill[] = [
   { category: "Backend", items: ["Node.js", "PHP", "MySQL", "REST APIs"] },
   { category: "Frontend", items: ["Vue.js", "React", "Tailwind CSS", "TypeScript"] },
-  { category: "Tools & Others", items: ["System Analysis", "Git", "Docker", "Agile"] }
+  { category: "Systems", items: ["System Analysis", "Architecture Design", "Agile", "Docker"] }
 ];
 
 export const CERTIFICATES: Certificate[] = [
