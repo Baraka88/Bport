@@ -10,11 +10,30 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Progress } from "@/components/ui/progress"
-import { Mail, MessageSquare, MapPin, Loader2, Send, ShieldCheck, AlertCircle } from "lucide-react"
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel"
+import { 
+  Mail, 
+  MessageSquare, 
+  Loader2, 
+  Send, 
+  ShieldCheck, 
+  CheckCircle2, 
+  Clock, 
+  Wallet,
+  Zap
+} from "lucide-react"
 import { useFirestore } from "@/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 
 const SERVICES = [
   "Web Development",
@@ -24,8 +43,6 @@ const SERVICES = [
   "Mobile Apps",
   "Consulting"
 ]
-
-const SPAM_KEYWORDS = ["casino", "viagra", "poker", "lottery", "crypto"]
 
 export default function ContactPage() {
   const db = useFirestore()
@@ -43,8 +60,7 @@ export default function ContactPage() {
     services: [] as string[],
     budget: "",
     timeline: "",
-    urgency: "medium",
-    cvUrl: ""
+    urgency: "medium"
   })
 
   // Math CAPTCHA Generation
@@ -65,7 +81,14 @@ export default function ContactPage() {
   }, [formData])
 
   const calculateProgress = () => {
-    const fields = [formData.name, formData.email, formData.message, formData.budget]
+    const fields = [
+      formData.name, 
+      formData.email, 
+      formData.message, 
+      formData.budget, 
+      formData.timeline,
+      formData.services.length > 0 ? "services" : ""
+    ]
     const filled = fields.filter(f => f.length > 0).length
     return (filled / fields.length) * 100
   }
@@ -74,20 +97,18 @@ export default function ContactPage() {
     e.preventDefault()
     if (!db) return
 
-    // Validation
+    // Rate limiting check (client side best effort)
+    const lastSubmit = localStorage.getItem("last_hire_submit")
+    if (lastSubmit) {
+      const timeDiff = Date.now() - parseInt(lastSubmit)
+      if (timeDiff < 3600000 / 3) { // Simple throttle
+         toast({ variant: "destructive", title: "Wait a moment", description: "You are submitting too fast. Please wait a while." })
+         return
+      }
+    }
+
     if (parseInt(userAnswer) !== captcha.a) {
-      toast({ variant: "destructive", title: "Spam Check Failed", description: "Incorrect math answer." })
-      return
-    }
-
-    if (formData.message.length < 20) {
-      toast({ variant: "destructive", title: "Validation Error", description: "Message is too short (min 20 chars)." })
-      return
-    }
-
-    const hasSpam = SPAM_KEYWORDS.some(k => formData.message.toLowerCase().includes(k))
-    if (hasSpam) {
-      toast({ variant: "destructive", title: "Blocked", description: "Your message contains prohibited keywords." })
+      toast({ variant: "destructive", title: "Verification Failed", description: "Incorrect answer to the security question." })
       return
     }
 
@@ -103,27 +124,30 @@ export default function ContactPage() {
         budget: formData.budget,
         timeline: formData.timeline,
         urgency: formData.urgency,
-        cvPortfolioUrl: formData.cvUrl,
         status: "new",
         submissionDate: new Date().toISOString(),
-        isSpam: false,
         createdAt: serverTimestamp()
       }
 
       // 1. Store in Firebase
       await addDoc(collection(db, "inquiries_hire_me"), inquiryData)
 
-      // 2. Send to Formspree (Email Notification)
+      // 2. Send to Formspree
       await fetch("https://formspree.io/f/mlgoveej", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...inquiryData, subject: "New Hire Inquiry - BRJDEV" })
+        body: JSON.stringify({ 
+          ...inquiryData, 
+          _subject: `New Hire Inquiry from ${formData.name}`,
+          _replyto: formData.email
+        })
       })
       
+      localStorage.setItem("last_hire_submit", Date.now().toString())
       localStorage.removeItem("hire_me_draft")
       router.push("/thank-you")
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Could not send inquiry. Please try again." })
+      toast({ variant: "destructive", title: "Error", description: "Something went wrong. Please try again." })
     } finally {
       setIsPending(false)
     }
@@ -131,13 +155,40 @@ export default function ContactPage() {
 
   return (
     <div className="container mx-auto px-4 py-20">
-      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
-        <div className="space-y-12">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-start">
+        <div className="space-y-12 lg:sticky lg:top-32">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-6xl font-bold font-headline">Let's <span className="text-primary">Connect</span></h1>
+            <h1 className="text-4xl md:text-6xl font-bold font-headline">Let's <span className="text-primary">Collaborate</span></h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Ready to build something amazing? Fill out the form or reach out directly.
+              Transform your ideas into high-performance digital reality. Check out my work while you fill out the details.
             </p>
+          </div>
+
+          <div className="rounded-[2rem] overflow-hidden shadow-2xl border bg-card">
+            <Carousel className="w-full" opts={{ loop: true }}>
+              <CarouselContent>
+                {PlaceHolderImages.slice(0, 4).map((img, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative aspect-video">
+                      <Image 
+                        src={img.imageUrl} 
+                        alt={img.description} 
+                        fill 
+                        className="object-cover"
+                        data-ai-hint={img.imageHint}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                        <p className="text-white font-medium">{img.description}</p>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="hidden sm:block">
+                <CarouselPrevious className="left-4" />
+                <CarouselNext className="right-4" />
+              </div>
+            </Carousel>
           </div>
 
           <div className="grid gap-6">
@@ -146,7 +197,7 @@ export default function ContactPage() {
                 <Mail className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-bold text-muted-foreground uppercase">Email</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase">Direct Email</p>
                 <p className="text-lg font-bold">barakaruzibiza680@gmail.com</p>
               </div>
             </div>
@@ -155,19 +206,21 @@ export default function ContactPage() {
                 <MessageSquare className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-bold text-muted-foreground uppercase">WhatsApp</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase">WhatsApp</p>
                 <p className="text-lg font-bold">0732786495</p>
               </div>
             </div>
           </div>
         </div>
 
-        <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden">
+        <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-sm">
           <CardHeader className="p-10 pb-0">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-3xl font-bold font-headline">Hire Me</CardTitle>
-                <span className="text-xs font-bold text-muted-foreground">{Math.round(calculateProgress())}% Complete</span>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                  <CheckCircle2 className="h-3 w-3" /> {Math.round(calculateProgress())}% Ready
+                </div>
               </div>
               <Progress value={calculateProgress()} className="h-2" />
             </div>
@@ -176,20 +229,22 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Full Name*</Label>
+                  <Label className="text-sm font-bold">Full Name*</Label>
                   <Input 
                     required 
-                    className="rounded-xl h-12" 
+                    placeholder="Jane Doe"
+                    className="rounded-xl h-12 bg-background/50" 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email Address*</Label>
+                  <Label className="text-sm font-bold">Email Address*</Label>
                   <Input 
                     type="email" 
                     required 
-                    className="rounded-xl h-12" 
+                    placeholder="jane@example.com"
+                    className="rounded-xl h-12 bg-background/50" 
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
@@ -197,10 +252,12 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-4">
-                <Label>Required Services</Label>
+                <Label className="text-sm font-bold flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" /> Required Services
+                </Label>
                 <div className="grid grid-cols-2 gap-4">
                   {SERVICES.map((service) => (
-                    <div key={service} className="flex items-center space-x-2">
+                    <div key={service} className="flex items-center space-x-2 bg-background/30 p-3 rounded-xl border border-transparent hover:border-primary/20 transition-all">
                       <Checkbox 
                         id={service} 
                         checked={formData.services.includes(service)}
@@ -211,7 +268,7 @@ export default function ContactPage() {
                           setFormData({...formData, services: newServices})
                         }}
                       />
-                      <label htmlFor={service} className="text-sm font-medium leading-none cursor-pointer">{service}</label>
+                      <label htmlFor={service} className="text-sm font-medium leading-none cursor-pointer select-none">{service}</label>
                     </div>
                   ))}
                 </div>
@@ -219,73 +276,79 @@ export default function ContactPage() {
 
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Estimated Budget</Label>
+                  <Label className="text-sm font-bold flex items-center gap-2">
+                    <Wallet className="h-4 w-4 text-primary" /> Budget Range
+                  </Label>
                   <Input 
                     placeholder="e.g., $1000 - $5000"
-                    className="rounded-xl h-12" 
+                    className="rounded-xl h-12 bg-background/50" 
                     value={formData.budget}
                     onChange={(e) => setFormData({...formData, budget: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Expected Timeline</Label>
+                  <Label className="text-sm font-bold flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" /> Expected Timeline
+                  </Label>
                   <Input 
-                    placeholder="e.g., 1 month"
-                    className="rounded-xl h-12" 
+                    placeholder="e.g., 4 weeks"
+                    className="rounded-xl h-12 bg-background/50" 
                     value={formData.timeline}
                     onChange={(e) => setFormData({...formData, timeline: e.target.value})}
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Urgency Level</Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-bold">Project Urgency</Label>
                 <RadioGroup 
                   value={formData.urgency} 
                   onValueChange={(v) => setFormData({...formData, urgency: v})}
-                  className="flex gap-4"
+                  className="flex gap-6"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="low" id="low" />
-                    <Label htmlFor="low">Low</Label>
+                    <Label htmlFor="low" className="cursor-pointer">Low</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="medium" id="medium" />
-                    <Label htmlFor="medium">Medium</Label>
+                    <Label htmlFor="medium" className="cursor-pointer">Medium</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="high" id="high" />
-                    <Label htmlFor="high">High</Label>
+                    <Label htmlFor="high" className="cursor-pointer">High</Label>
                   </div>
                 </RadioGroup>
               </div>
 
               <div className="space-y-2">
-                <Label>Project Details* (Min 20 chars)</Label>
+                <Label className="text-sm font-bold">Project Details*</Label>
                 <Textarea 
                   required 
-                  className="rounded-xl min-h-[120px]" 
-                  placeholder="Describe your goals..."
+                  className="rounded-xl min-h-[140px] bg-background/50" 
+                  placeholder="Tell me about your vision, goals, and specific requirements..."
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
                 />
               </div>
 
-              <div className="space-y-2 p-6 bg-secondary/20 rounded-2xl border border-primary/10">
-                <Label className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Anti-Spam Challenge</Label>
-                <div className="flex items-center gap-4">
-                  <p className="font-bold text-lg">{captcha.q}</p>
+              <div className="space-y-4 p-6 bg-primary/5 rounded-3xl border border-primary/10">
+                <Label className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-primary" /> Security Verification</Label>
+                <div className="flex items-center gap-6">
+                  <p className="font-bold text-xl font-headline">{captcha.q}</p>
                   <Input 
                     type="number"
-                    className="w-24 h-12 rounded-xl"
+                    required
+                    placeholder="?"
+                    className="w-28 h-12 rounded-xl text-center text-lg font-bold"
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full h-14 rounded-xl text-lg font-bold" disabled={isPending}>
-                {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Submit Inquiry</>}
+              <Button type="submit" className="w-full h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20" disabled={isPending}>
+                {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Send Project Proposal</>}
               </Button>
             </form>
           </CardContent>

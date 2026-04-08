@@ -3,9 +3,10 @@
 
 import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
 import Link from "next/link"
+import React from "react"
 
 export function Footer() {
-  // Simple email obfuscation
+  const [showEmail, setShowEmail] = React.useState(false)
   const emailUser = "barakaruzibiza680"
   const emailDomain = "gmail.com"
 
@@ -40,17 +41,23 @@ export function Footer() {
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-center gap-2 font-bold text-primary">
                 <Mail className="h-4 w-4" /> 
-                <span className="cursor-pointer hover:underline" onClick={() => window.location.href = `mailto:${emailUser}@${emailDomain}`}>
-                  {emailUser} [at] {emailDomain}
-                </span>
+                {showEmail ? (
+                  <a href={`mailto:${emailUser}@${emailDomain}`} className="hover:underline">
+                    {emailUser}@{emailDomain}
+                  </a>
+                ) : (
+                  <span 
+                    className="cursor-pointer hover:underline text-xs" 
+                    onClick={() => setShowEmail(true)}
+                  >
+                    Click to reveal email
+                  </span>
+                )}
               </li>
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> 0732786495</li>
               <li>Kigali, Rwanda</li>
               <li className="pt-2">
                 <a href="https://wa.me/250732786495" target="_blank" className="text-accent font-bold hover:underline">WhatsApp Me Now</a>
-              </li>
-              <li>
-                 <Link href="/admin" className="text-xs opacity-50 hover:opacity-100 mt-4 block">Admin Panel</Link>
               </li>
             </ul>
           </div>

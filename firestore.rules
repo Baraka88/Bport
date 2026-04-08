@@ -3,14 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.email == "barakaruzibiza680@gmail.com" ||
-        get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin "
-      );
-    }
-
-    // Public content access
+    // Helper for public read only collections
     match /projects/{id} { allow read: if true; }
     match /images/{id} { allow read: if true; }
     match /technologies/{id} { allow read: if true; }
@@ -18,31 +11,25 @@ service cloud.firestore {
     match /services/{id} { allow read: if true; }
     match /user_profile/{id} { allow read: if true; }
 
-    // Inquiries - Anyone can create, only admin can read/manage
+    // Inquiries - Anyone can create, no one can read (admin panel removed)
     match /inquiries_hire_me/{id} {
       allow create: if true;
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
     
     match /inquiries_collaboration/{id} {
       allow create: if true;
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
     
-    // Comments - Anyone can create, public reads only approved, admin reads all
+    // Comments - Anyone can create, anyone can read approved ones
     match /comments/{id} {
-      allow read: if isAdmin() || resource.data.isApproved == true;
+      allow read: if resource.data.isApproved == true;
       allow create: if true;
-      allow delete, update: if isAdmin();
+      allow delete, update: if false;
     }
 
-    // Admin Users
-    match /chat_users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if isAdmin();
-    }
-
-    // Block everything else
+    // Default block
     match /{document=**} {
       allow read, write: if false;
     }
