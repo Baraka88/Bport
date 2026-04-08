@@ -1,48 +1,89 @@
+
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Rocket, Users, Loader2, Send } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Rocket, Users, Loader2, Send, ShieldCheck } from "lucide-react"
 import { useFirestore } from "@/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 export default function CollabPage() {
   const db = useFirestore()
   const { toast } = useToast()
+  const router = useRouter()
   const [isPending, setIsPending] = useState(false)
+  const [captcha, setCaptcha] = useState({ q: "", a: 0 })
+  const [userAnswer, setUserAnswer] = useState("")
   
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     idea: "",
-    scope: ""
+    scope: "",
+    timeline: ""
   })
+
+  useEffect(() => {
+    const num1 = Math.floor(Math.random() * 10)
+    const num2 = Math.floor(Math.random() * 10)
+    setCaptcha({ q: `What is ${num1} + ${num2}?`, a: num1 + num2 })
+
+    const draft = localStorage.getItem("collab_draft")
+    if (draft) setFormData(JSON.parse(draft))
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("collab_draft", JSON.stringify(formData))
+  }, [formData])
+
+  const calculateProgress = () => {
+    const fields = [formData.name, formData.email, formData.idea]
+    const filled = fields.filter(f => f.length > 0).length
+    return (filled / fields.length) * 100
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!db) return
+
+    if (parseInt(userAnswer) !== captcha.a) {
+      toast({ variant: "destructive", title: "Spam Check", description: "Incorrect math answer." })
+      return
+    }
+
     setIsPending(true)
 
     try {
-      await addDoc(collection(db, "inquiries_collaboration"), {
+      const collabData = {
         collaboratorName: formData.name,
         collaboratorEmail: formData.email,
         collaboratorPhone: formData.phone,
         projectIdea: formData.idea,
         projectScope: formData.scope,
+        estimatedTimeline: formData.timeline,
         status: "new",
         submissionDate: new Date().toISOString(),
         createdAt: serverTimestamp()
+      }
+
+      await addDoc(collection(db, "inquiries_collaboration"), collabData)
+
+      await fetch("https://formspree.io/f/mlgoveej", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...collabData, subject: "New Collab Proposal - BRJDEV" })
       })
       
-      toast({ title: "Collaboration Sent", description: "Let's innovate together!" })
-      setFormData({ name: "", email: "", phone: "", idea: "", scope: "" })
+      localStorage.removeItem("collab_draft")
+      router.push("/thank-you")
     } catch (error) {
       toast({ variant: "destructive", title: "Error", description: "Submission failed." })
     } finally {
@@ -54,26 +95,25 @@ export default function CollabPage() {
     <div className="container mx-auto px-4 py-20">
       <div className="max-w-4xl mx-auto space-y-16">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full font-bold text-sm">
-            <Users className="h-4 w-4" /> Open for Partnerships
-          </div>
           <h1 className="text-4xl md:text-6xl font-bold font-headline">Build the Future <span className="text-primary">Together</span></h1>
-          <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            I'm looking for talented developers and designers to collaborate on innovative ventures and scalable systems.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Innovate with purpose. Let's combine our skills for something extraordinary.
           </p>
         </div>
 
         <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden">
           <CardHeader className="p-10 bg-primary text-primary-foreground text-center">
             <Rocket className="h-12 w-12 mx-auto mb-4" />
-            <CardTitle className="text-3xl">Collaboration Proposal</CardTitle>
-            <CardDescription className="text-primary-foreground/80">Share your vision and let's see how we can align</CardDescription>
+            <div className="space-y-4">
+              <CardTitle className="text-3xl">Collaboration Proposal</CardTitle>
+              <Progress value={calculateProgress()} className="h-2 bg-white/20" />
+            </div>
           </CardHeader>
           <CardContent className="p-10">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Collaborator Name</Label>
+                  <Label>Collaborator Name*</Label>
                   <Input 
                     required 
                     className="rounded-xl h-12" 
@@ -82,7 +122,7 @@ export default function CollabPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email Address</Label>
+                  <Label>Email Address*</Label>
                   <Input 
                     type="email" 
                     required 
@@ -93,24 +133,38 @@ export default function CollabPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Project Idea</Label>
+                <Label>Project Idea*</Label>
                 <Textarea 
                   required 
                   className="rounded-xl min-h-[120px]" 
-                  placeholder="Describe your project idea..."
+                  placeholder="Describe your vision..."
                   value={formData.idea}
                   onChange={(e) => setFormData({...formData, idea: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Proposed Scope & Your Role</Label>
-                <Textarea 
-                  className="rounded-xl h-24" 
-                  placeholder="What is your area of expertise?"
-                  value={formData.scope}
-                  onChange={(e) => setFormData({...formData, scope: e.target.value})}
+                <Label>Proposed Scope & Timeline</Label>
+                <Input 
+                  className="rounded-xl h-12" 
+                  placeholder="e.g., MVP in 3 months"
+                  value={formData.timeline}
+                  onChange={(e) => setFormData({...formData, timeline: e.target.value})}
                 />
               </div>
+
+              <div className="space-y-2 p-6 bg-secondary/20 rounded-2xl border border-primary/10">
+                <Label className="flex items-center gap-2 font-bold"><ShieldCheck className="h-4 w-4 text-primary" /> Anti-Spam</Label>
+                <div className="flex items-center gap-4">
+                  <p className="font-bold text-lg">{captcha.q}</p>
+                  <Input 
+                    type="number"
+                    className="w-24 h-12 rounded-xl"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <Button type="submit" className="w-full h-14 rounded-xl text-lg font-bold" disabled={isPending}>
                 {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Propose Collaboration</>}
               </Button>

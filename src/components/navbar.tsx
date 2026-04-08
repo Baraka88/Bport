@@ -1,13 +1,15 @@
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users, MessageSquare } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users, Shield } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { useUser } from "@/firebase"
 
 const navItems = [
   { name: "Home", href: "/", icon: Layout },
@@ -20,6 +22,9 @@ export function Navbar() {
   const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
+  const { user } = useUser()
+
+  const isAdmin = user?.email === "barakaruzibiza680@gmail.com"
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -41,6 +46,11 @@ export function Navbar() {
               {item.name}
             </Link>
           ))}
+          {isAdmin && (
+             <Link href="/admin" className="text-sm font-bold text-accent flex items-center gap-1">
+               <Shield className="h-4 w-4" /> Admin
+             </Link>
+          )}
           <Button variant="default" size="sm" className="rounded-full ml-4" asChild>
             <Link href="/contact">Hire Me</Link>
           </Button>
@@ -88,6 +98,16 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center space-x-2 text-lg font-bold text-accent py-2 border-b"
+                  >
+                    <Shield className="h-5 w-5" />
+                    <span>Admin Panel</span>
+                  </Link>
+                )}
                 <Link
                   href="/contact"
                   onClick={() => setIsOpen(false)}
