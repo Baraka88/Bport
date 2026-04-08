@@ -15,7 +15,7 @@ import {
   signOut,
   updateProfile 
 } from "firebase/auth"
-import { collection, addDoc, doc, serverTimestamp, query, orderBy, limit, where, getDocs, writeBatch } from "firebase/firestore"
+import { collection, addDoc, doc, setDoc, serverTimestamp, query, orderBy, limit, getDocs, writeBatch } from "firebase/firestore"
 import { askChatBot } from "@/app/actions/portfolio-actions"
 
 export default function ChatPage() {
@@ -30,12 +30,11 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
-  // Filter messages specifically for the logged-in user
+  // Filter messages specifically for the logged-in user using the nested structure
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !user) return null
     return query(
-      collection(db, "chat_messages"), 
-      where("chatUserId", "==", user.uid),
+      collection(db, "chats", user.uid, "messages"), 
       orderBy("timestamp", "desc"), 
       limit(100)
     )
@@ -63,17 +62,24 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      // Initialize chat user record
-      const userDocRef = doc(db, "chat_users", userCredential.user.uid)
+      // Initialize chat user record and the parent chat document
       const batch = writeBatch(db)
+      
+      const userDocRef = doc(db, "chat_users", userCredential.user.uid)
       batch.set(userDocRef, {
         id: userCredential.user.uid,
         username: username,
         email: email,
         joinDate: serverTimestamp()
       })
-      await batch.commit()
 
+      const chatDocRef = doc(db, "chats", userCredential.user.uid)
+      batch.set(chatDocRef, {
+        userId: userCredential.user.uid,
+        createdAt: serverTimestamp()
+      })
+
+      await batch.commit()
       toast({ title: "Registration Successful", description: "You can now participate in the chat." })
     } catch (error: any) {
       toast({ variant: "destructive", title: "Registration Failed", description: error.message })
@@ -84,15 +90,20 @@ export default function ChatPage() {
 
   async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault()
-    if (!message.trim() || !user) return
+    if (!message.trim() || !user || !db) return
 
     const userMsgContent = message
     setMessage("")
 
     try {
-      // 1. Add user message to Firestore
-      await addDoc(collection(db, "chat_messages"), {
-        chatUserId: user.uid,
+      // Ensure parent chat document exists (idempotent)
+      await setDoc(doc(db, "chats", user.uid), {
+        userId: user.uid,
+        lastMessageAt: serverTimestamp()
+      }, { merge: true })
+
+      // 1. Add user message to nested Firestore path
+      await addDoc(collection(db, "chats", user.uid, "messages"), {
         senderName: user.displayName || "You",
         messageContent: userMsgContent,
         timestamp: serverTimestamp(),
@@ -102,9 +113,8 @@ export default function ChatPage() {
       // 2. Trigger AI Bot Response
       const aiResponse = await askChatBot(userMsgContent)
 
-      // 3. Add AI message to Firestore
-      await addDoc(collection(db, "chat_messages"), {
-        chatUserId: user.uid,
+      // 3. Add AI message to nested Firestore path
+      await addDoc(collection(db, "chats", user.uid, "messages"), {
         senderName: "ChatBRJ AI",
         messageContent: aiResponse,
         timestamp: serverTimestamp(),
@@ -122,7 +132,7 @@ export default function ChatPage() {
 
     setIsPending(true)
     try {
-      const q = query(collection(db, "chat_messages"), where("chatUserId", "==", user.uid))
+      const q = query(collection(db, "chats", user.uid, "messages"))
       const snapshot = await getDocs(q)
       
       const batch = writeBatch(db)
@@ -279,7 +289,7 @@ export default function ChatPage() {
           <div>
             <h2 className="font-bold text-xl">{user.displayName}</h2>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">BRJ AI Context Active</span>
+              <span className="text-xs text-muted-foreground">Secure Channel Active</span>
               <Sparkles className="h-3 w-3 text-accent animate-pulse" />
             </div>
           </div>
@@ -332,8 +342,8 @@ export default function ChatPage() {
                 <MessageCircle className="h-10 w-10" />
               </div>
               <div className="space-y-1">
-                <p className="font-bold text-lg">No messages yet</p>
-                <p className="text-sm max-w-xs">Ask ChatBRJ about projects, skills, or how to get in touch!</p>
+                <p className="font-bold text-lg">Secure Inbox</p>
+                <p className="text-sm max-w-xs">Messages are now stored in your personal encrypted vault.</p>
               </div>
             </div>
           )}
@@ -342,7 +352,7 @@ export default function ChatPage() {
         <div className="p-4 md:p-8 border-t bg-background/50 backdrop-blur-md">
           <form onSubmit={handleSendMessage} className="flex gap-4 max-w-5xl mx-auto">
             <Input 
-              placeholder="Ask ChatBRJ AI anything..." 
+              placeholder="Start a secure conversation..." 
               className="flex-1 rounded-2xl h-14 px-6 border-none bg-secondary/80 focus-visible:ring-primary shadow-inner text-base"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
