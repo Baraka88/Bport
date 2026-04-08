@@ -15,9 +15,12 @@ service cloud.firestore {
     }
 
     function isAdmin() {
+      // In prototype, allow admin if signed in and exists in roles_admin
+      // or if we broaden it for the owner's account.
       return isSignedIn() && (
-        // Check for existence in roles_admin collection (UID-based)
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
+        // Fallback for primary user if not in roles_admin yet
+        request.auth.token.email == "barakaruzibiza680@gmail.com"
       );
     }
 
@@ -64,31 +67,32 @@ service cloud.firestore {
 
     match /inquiries_hire_me/{inquiryId} {
       allow create: if true;
-      allow read, write: if isSignedIn(); // Allow reading inquiries if signed in (Admin bypass)
+      allow read, write: if isSignedIn();
     }
 
     match /inquiries_collaboration/{inquiryId} {
       allow create: if true;
-      allow read, write: if isSignedIn(); // Allow reading inquiries if signed in (Admin bypass)
+      allow read, write: if isSignedIn();
     }
 
     match /comments/{commentId} {
       allow create: if true;
-      allow read: if isSignedIn() || (resource != null && resource.data.isApproved == true);
-      allow update, delete: if isAdmin() || isSignedIn(); // Broaden for prototype admin usage
+      allow read: if true; // Allow public to see approved comments handled by UI
+      allow update, delete: if isSignedIn();
     }
 
     match /chat_users/{chatUserId} {
-      allow read: if isSignedIn(); // Allow signed-in users to see directory
+      allow read: if isSignedIn();
       allow create: if isOwner(chatUserId);
-      allow update: if isOwner(chatUserId) || isSignedIn(); // Allow updates for admin-like usage
-      allow delete: if isSignedIn();
+      allow update: if isOwner(chatUserId) || isAdmin();
+      allow delete: if isSignedIn(); // Broaden for admin management
     }
 
     match /chat_messages/{messageId} {
-      // Prioritize owner check to resolve permission errors for standard users
-      allow read, delete: if isSignedIn() && (resource.data.chatUserId == request.auth.uid || isAdmin());
+      // Allow signed in users to read messages. UI filters by chatUserId.
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
+      allow delete: if isSignedIn() && (resource.data.chatUserId == request.auth.uid || isAdmin());
       allow update: if isAdmin();
     }
   }

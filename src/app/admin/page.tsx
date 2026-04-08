@@ -31,7 +31,6 @@ import {
   Plus,
   Loader2,
   ShieldAlert,
-  Lock,
   Unlock,
   Edit2,
   Check
@@ -98,17 +97,19 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDeleteDoc(col: string, id: string) {
+  async function handleDeleteDoc(colName: string, id: string) {
     if (!confirm("Are you sure? This action is permanent.")) return
     try {
-      await deleteDoc(doc(db, col, id))
+      await deleteDoc(doc(db, colName, id))
       toast({ title: "Deleted", description: "Document removed successfully." })
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Delete failed." })
+      console.error("Delete Error:", error)
+      toast({ variant: "destructive", title: "Error", description: "Delete failed. Check permissions." })
     }
   }
 
   async function handleUpdateUsername(userId: string) {
+    if (!editUsername.trim()) return
     try {
       await updateDoc(doc(db, "chat_users", userId), { username: editUsername })
       setEditingUserId(null)
@@ -118,7 +119,7 @@ export default function AdminPage() {
     }
   }
 
-  if (isUserLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10" /></div>
+  if (isUserLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-primary" /></div>
 
   if (!unlocked) {
     return (
@@ -129,6 +130,7 @@ export default function AdminPage() {
               <ShieldAlert className="h-10 w-10" />
             </div>
             <CardTitle className="text-3xl font-black">Admin Access</CardTitle>
+            <CardDescription>Enter your master password to manage BRJDEV</CardDescription>
           </CardHeader>
           <CardContent className="p-8 pt-0">
             <form onSubmit={verifyAdmin} className="space-y-6">
@@ -185,7 +187,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {chatUsersLoading ? <Loader2 className="animate-spin mx-auto" /> : chatUsers?.map((u) => (
+                {chatUsersLoading ? <Loader2 className="animate-spin mx-auto text-primary" /> : chatUsers?.map((u) => (
                   <div key={u.id} className="flex items-center justify-between p-5 bg-secondary/30 rounded-2xl">
                     <div className="flex items-center gap-4 flex-1">
                       <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center font-black">
@@ -219,7 +221,12 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-4">
                       <p className="hidden sm:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>
-                      <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteDoc("chat_users", u.id)}>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="text-red-500 hover:bg-red-50" 
+                        onClick={() => handleDeleteDoc("chat_users", u.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -252,7 +259,7 @@ export default function AdminPage() {
             </Card>
 
             <div className="lg:col-span-2 grid sm:grid-cols-2 gap-6">
-              {imagesLoading ? <Loader2 className="animate-spin mx-auto" /> : images?.map((img) => (
+              {imagesLoading ? <Loader2 className="animate-spin mx-auto text-primary" /> : images?.map((img) => (
                 <Card key={img.id} className="rounded-3xl overflow-hidden group border-none shadow-lg">
                   <div className="relative aspect-video">
                     <img src={img.url} className="w-full h-full object-cover" />
@@ -271,7 +278,7 @@ export default function AdminPage() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <h3 className="text-xl font-bold font-headline flex items-center gap-2"><Briefcase className="h-5 w-5" /> Hire Me</h3>
-              {hireLoading ? <Loader2 className="animate-spin" /> : hireRequests?.map((hire) => (
+              {hireLoading ? <Loader2 className="animate-spin text-primary" /> : hireRequests?.map((hire) => (
                 <Card key={hire.id} className="rounded-2xl p-4 border-none shadow-md">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-bold">{hire.name}</h4>
@@ -284,7 +291,7 @@ export default function AdminPage() {
             </div>
             <div className="space-y-4">
               <h3 className="text-xl font-bold font-headline flex items-center gap-2"><Users className="h-5 w-5" /> Collabs</h3>
-              {collabsLoading ? <Loader2 className="animate-spin" /> : collabs?.map((collab) => (
+              {collabsLoading ? <Loader2 className="animate-spin text-primary" /> : collabs?.map((collab) => (
                 <Card key={collab.id} className="rounded-2xl p-4 border-none shadow-md">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-bold">{collab.name}</h4>
@@ -299,7 +306,7 @@ export default function AdminPage() {
         </TabsContent>
 
         <TabsContent value="comments" className="space-y-4">
-          {commentsLoading ? <Loader2 className="animate-spin" /> : comments?.map((comment) => (
+          {commentsLoading ? <Loader2 className="animate-spin text-primary" /> : comments?.map((comment) => (
             <Card key={comment.id} className="rounded-2xl p-4 border-none shadow-md flex justify-between items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
