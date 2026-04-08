@@ -3,35 +3,25 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper for public read only collections
-    match /projects/{id} { allow read: if true; }
-    match /images/{id} { allow read: if true; }
-    match /technologies/{id} { allow read: if true; }
-    match /certificates/{id} { allow read: if true; }
-    match /services/{id} { allow read: if true; }
-    match /user_profile/{id} { allow read: if true; }
-
-    // Inquiries - Anyone can create, no one can read (admin panel removed)
-    match /inquiries_hire_me/{id} {
-      allow create: if true;
-      allow read, write: if false;
-    }
-    
-    match /inquiries_collaboration/{id} {
-      allow create: if true;
-      allow read, write: if false;
-    }
-    
-    // Comments - Anyone can create, anyone can read approved ones
-    match /comments/{id} {
-      allow read: if resource.data.isApproved == true;
-      allow create: if true;
-      allow delete, update: if false;
+    function isAdmin() {
+      return get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin ";
     }
 
-    // Default block
+    match /chat_users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null; // For liking
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+    }
+
     match /{document=**} {
-      allow read, write: if false;
+      allow read: if true;
+      allow write: if false;
     }
   }
 }
