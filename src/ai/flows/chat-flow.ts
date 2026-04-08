@@ -1,24 +1,27 @@
+
 'use server';
 /**
- * @fileOverview A Chatbot flow for BRJDEV professional portfolio.
- *
- * - getChatResponse - A function that handles the AI chat logic.
+ * @fileOverview ChatBRJ AI Flow - Handles context-aware professional responses for Baraka Ruzibiza Junior.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const ChatInputSchema = z.object({
-  message: z.string().describe('The user message to respond to.'),
+const MessageSchema = z.object({
+  role: z.enum(['user', 'ai']),
+  text: z.string(),
 });
-export type ChatInput = z.infer<typeof ChatInputSchema>;
+
+const ChatInputSchema = z.object({
+  message: z.string(),
+  history: z.array(MessageSchema).optional().describe('Previous messages in the conversation for context.'),
+});
 
 const ChatOutputSchema = z.object({
-  response: z.string().describe('The professional AI response.'),
+  text: z.string(),
 });
-export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function getChatResponse(input: ChatInput): Promise<ChatOutput> {
+export async function getChatResponse(input: z.infer<typeof ChatInputSchema>) {
   return chatFlow(input);
 }
 
@@ -26,8 +29,8 @@ const prompt = ai.definePrompt({
   name: 'chatPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
-  prompt: `You are ChatBRJ, the expert AI assistant for BRJDEV (Baraka Junior's portfolio). 
-Baraka Junior is a highly skilled Software Engineer and System Analyst based in Rwanda.
+  prompt: `You are ChatBRJ, the expert AI assistant for Baraka Ruzibiza Junior.
+Baraka is a highly skilled Full Stack Developer based in Rwanda.
 His professional WhatsApp contact number is 0732786495.
 
 Baraka specializes in:
@@ -35,12 +38,20 @@ Baraka specializes in:
 - Frontend: Vue.js, React, Tailwind CSS, TypeScript
 - Systems: System Analysis, Architecture Design, Agile
 
-Your goal is to represent Baraka professionally. Answer questions about his skills and projects. 
-If someone wants to hire him, encourage them to reach out directly via WhatsApp at 0732786495.
+Guidelines:
+- Represent Baraka professionally and confidently.
+- Use the conversation history to maintain context.
+- Encourage hiring Baraka for complex full-stack projects.
+- Keep responses concise but helpful.
 
-Keep responses concise, friendly, and professional.
+{{#if history}}
+History:
+{{#each history}}
+- {{role}}: {{{text}}}
+{{/each}}
+{{/if}}
 
-User Message: {{{message}}}`,
+User: {{{message}}}`,
 });
 
 const chatFlow = ai.defineFlow(

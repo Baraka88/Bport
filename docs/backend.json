@@ -1,60 +1,54 @@
 
 {
   "entities": {
-    "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "UserProfile",
+    "ChatUser": {
+      "title": "ChatUser",
       "type": "object",
-      "description": "Represents the portfolio owner's personal and professional information.",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "phone": { "type": "string" },
-        "bio": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "user"] }
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "joinDate": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "name", "email", "role"]
+      "required": ["username", "email", "role", "joinDate"]
     },
-    "Project": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Project",
+    "Chat": {
+      "title": "Chat",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" }
-      },
-      "required": ["id", "title"]
-    },
-    "Comment": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Comment",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "authorName": { "type": "string" },
-        "commentText": { "type": "string" },
-        "projectId": { "type": "string" },
         "userId": { "type": "string" },
-        "parentId": { "type": "string" },
-        "likes": { "type": "array", "items": { "type": "string" } },
-        "submissionDate": { "type": "string", "format": "date-time" }
+        "title": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "authorName", "commentText", "projectId", "userId", "submissionDate"]
+      "required": ["userId", "title", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "ai"] },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "role", "text", "createdAt"]
     }
   },
   "auth": {
-    "providers": ["password", "anonymous"]
+    "providers": ["password"]
   },
   "firestore": {
     "/chat_users/{userId}": {
-      "schema": "UserProfile",
-      "description": "User storage for community and admin features."
+      "schema": "ChatUser",
+      "description": "User profiles and roles."
     },
-    "/comments/{commentId}": {
-      "schema": "Comment",
-      "description": "Feedback and discussion on portfolio projects."
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Chat session headers."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Individual messages within a chat session."
     }
   }
 }

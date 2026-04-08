@@ -1,6 +1,7 @@
+
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail, Shield } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
@@ -16,7 +17,7 @@ export function Footer() {
           <div className="col-span-2 space-y-4">
             <Link href="/" className="font-headline text-2xl font-bold text-primary">BRJ<span className="text-accent">DEV</span></Link>
             <p className="text-muted-foreground max-w-sm">
-              Helping businesses build reliable systems and engaging digital experiences with modern web technologies.
+              Full Stack solutions and high-performance system architectures. Kigali, Rwanda.
             </p>
             <div className="flex gap-4">
               <a href="https://github.com/baraka88" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Github className="h-5 w-5" /></a>
@@ -26,12 +27,12 @@ export function Footer() {
           </div>
           
           <div className="space-y-4">
-            <h4 className="font-bold">Quick Links</h4>
+            <h4 className="font-bold">Services</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
-              <li><Link href="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
-              <li><Link href="/#projects" className="hover:text-primary transition-colors">Projects</Link></li>
-              <li><Link href="/collab" className="hover:text-primary transition-colors">Collaborate</Link></li>
+              <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
+              <li><Link href="/comments" className="hover:text-primary transition-colors">Community</Link></li>
+              <li><Link href="/collab" className="hover:text-primary transition-colors">Collaboration</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Hire Me</Link></li>
             </ul>
           </div>
 
@@ -56,13 +57,16 @@ export function Footer() {
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> 0732786495</li>
               <li>Kigali, Rwanda</li>
               <li className="pt-2">
-                <a href="https://wa.me/250732786495" target="_blank" className="text-accent font-bold hover:underline">WhatsApp Me Now</a>
+                <a href="https://wa.me/250732786495" target="_blank" className="text-accent font-bold hover:underline">WhatsApp Now</a>
               </li>
             </ul>
           </div>
         </div>
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} BRJDEV. All rights reserved. Created by Baraka Ruzibiza Junior.</p>
+          <p>© {new Date().getFullYear()} BRJDEV. All rights reserved.</p>
+          <Link href="/admin" className="opacity-0 hover:opacity-100 transition-opacity">
+            <Shield className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </footer>
