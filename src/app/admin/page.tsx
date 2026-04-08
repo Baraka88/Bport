@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, deleteDoc, doc, getDocs, where } from 'firebase/firestore';
+import { collection, query, orderBy, deleteDoc, doc, getDoc, where } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -29,14 +29,14 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [search, setSearch] = useState('');
 
-  // 1. Verify Admin Role
+  // 1. Verify Admin Role using UID
   useEffect(() => {
     if (!isUserLoading && !user) router.push('/auth');
     if (user && db) {
       const checkAdmin = async () => {
         const docRef = doc(db, 'chat_users', user.uid);
-        const snap = await getDocs(query(collection(db, 'chat_users'), where('email', '==', user.email)));
-        if (!snap.empty && (snap.docs[0].data().role === 'admin' || snap.docs[0].data().role === 'admin ')) {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && (docSnap.data().role === 'admin' || docSnap.data().role === 'admin ')) {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);

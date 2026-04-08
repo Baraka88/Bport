@@ -37,13 +37,11 @@ service cloud.firestore {
     // chat_messages collection
     // -------------------
     match /chat_messages/{messageId} {
+      // Simplified rule to use direct userId check for better performance and list compatibility
       allow read, write: if request.auth != null && (
         isAdmin() ||
-        // User can read/write messages in their own chats
-        (exists(/databases/$(database)/documents/chats/$(resource.data.chatId)) && 
-         get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid) ||
-        (exists(/databases/$(database)/documents/chats/$(request.resource.data.chatId)) && 
-         get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid)
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid
       );
     }
 
