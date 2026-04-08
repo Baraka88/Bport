@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -5,7 +6,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebas
 import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, MessageCircle, Home } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -19,50 +20,35 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [hasProfile, setHasProfile] = useState(false);
 
-  // Check admin role to determine query strategy
+  // Check for profile to allow history view
   useEffect(() => {
     if (user && db) {
-      const checkRole = async () => {
-        const docRef = doc(db, 'chat_users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const role = docSnap.data().role;
-          setIsAdmin(role === 'admin' || role === 'admin ');
-        } else {
-          setIsAdmin(false);
-        }
+      const checkProfile = async () => {
+        const docSnap = await getDoc(doc(db, 'chat_users', user.uid));
+        setHasProfile(docSnap.exists());
       };
-      checkRole();
+      checkProfile();
     }
   }, [user, db]);
 
   const chatsQuery = useMemoFirebase(() => {
-    if (!db || !user || isAdmin === null) return null;
-    
-    // If Admin, show all chats. If User, filter by userId to satisfy security rules.
-    if (isAdmin) {
-      return query(
-        collection(db, 'chats'),
-        orderBy('createdAt', 'desc')
-      );
-    }
-    
+    if (!db || !user || !hasProfile) return null;
     return query(
       collection(db, 'chats'),
       where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
-  }, [db, user, isAdmin]);
+  }, [db, user, hasProfile]);
 
   const { data: chats, isLoading } = useCollection(chatsQuery);
 
   const createNewChat = async () => {
-    if (!db || !user) return;
+    if (!db || !user || !hasProfile) return;
     const docRef = await addDoc(collection(db, 'chats'), {
       userId: user.uid,
-      title: 'New Conversation',
+      title: 'New Discussion',
       createdAt: serverTimestamp(),
     });
     router.push(`/chat/${docRef.id}`);
@@ -74,13 +60,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     if (!db) return;
     await deleteDoc(doc(db, 'chats', id));
     if (params.chatId === id) router.push('/chat');
-  };
-
-  const startEditing = (id: string, title: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEditingId(id);
-    setEditTitle(title);
   };
 
   const saveTitle = async (id: string) => {
@@ -98,7 +77,8 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         <div className="p-4 flex flex-col h-full space-y-4">
           <Button 
             onClick={createNewChat} 
-            className="w-full justify-start h-12 rounded-xl font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/10"
+            disabled={!hasProfile}
+            className="w-full justify-start h-12 rounded-xl font-bold bg-primary text-primary-foreground shadow-lg"
           >
             <Plus className="mr-2 h-4 w-4" /> New Conversation
           </Button>
@@ -112,8 +92,8 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                   key={chat.id} 
                   href={`/chat/${chat.id}`}
                   className={cn(
-                    "flex items-center group px-3 py-3 rounded-xl transition-all hover:bg-primary/5",
-                    params.chatId === chat.id ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                    "flex items-center group px-3 py-3 rounded-xl transition-all",
+                    params.chatId === chat.id ? "bg-primary/10 text-primary font-bold" : "text-muted-foreground hover:bg-primary/5"
                   )}
                 >
                   <MessageSquare className="h-4 w-4 mr-3 shrink-0" />
@@ -127,21 +107,30 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                       onKeyDown={(e) => e.key === 'Enter' && saveTitle(chat.id)}
                     />
                   ) : (
-                    <span className="flex-1 truncate font-medium text-sm">{chat.title}</span>
+                    <span className="flex-1 truncate text-sm">{chat.title}</span>
                   )}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={(e) => startEditing(chat.id, chat.title, e)} className="p-1 hover:text-primary"><Edit3 className="h-3.5 w-3.5" /></button>
+                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingId(chat.id); setEditTitle(chat.title); }} className="p-1 hover:text-primary"><Edit3 className="h-3.5 w-3.5" /></button>
                     <button onClick={(e) => deleteChat(chat.id, e)} className="p-1 hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </Link>
               ))}
+              {!isLoading && !chats?.length && hasProfile && (
+                <p className="text-center text-xs text-muted-foreground pt-10 px-4">No chat history yet. Start your first session!</p>
+              )}
             </div>
           </ScrollArea>
 
-          <div className="pt-4 border-t border-primary/10">
+          <div className="pt-4 border-t space-y-2">
+            <Link 
+              href="/"
+              className="flex items-center px-3 py-3 rounded-xl text-muted-foreground hover:bg-secondary transition-all font-bold text-sm"
+            >
+              <Home className="h-4 w-4 mr-3" /> Back Home
+            </Link>
             <Link 
               href="/comments"
-              className="flex items-center px-3 py-3 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all font-bold text-sm"
+              className="flex items-center px-3 py-3 rounded-xl text-muted-foreground hover:bg-secondary transition-all font-bold text-sm"
             >
               <MessageCircle className="h-4 w-4 mr-3" /> Community Wall
             </Link>

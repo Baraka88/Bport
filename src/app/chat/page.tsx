@@ -1,39 +1,129 @@
 
 'use client';
 
-import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { Loader2, MessageSquarePlus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useUser, useFirestore, useDoc } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, MessageSquarePlus, ShieldCheck, UserCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ChatMainPage() {
   const { user, isUserLoading } = useUser();
-  const router = useRouter();
   const db = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
 
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [username, setUsername] = useState('');
+
+  // Check if user has completed the access form
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/auth');
+      return;
     }
-  }, [user, isUserLoading, router]);
 
-  const startNewChat = async () => {
-    if (!db || !user) return;
-    const docRef = await addDoc(collection(db, 'chats'), {
-      userId: user.uid,
-      title: 'New Conversation',
-      createdAt: serverTimestamp(),
-    });
-    router.push(`/chat/${docRef.id}`);
+    if (user && db) {
+      const checkProfile = async () => {
+        const docRef = doc(db, 'chat_users', user.uid);
+        const { data: profile } = await import('firebase/firestore').then(f => f.getDoc(docRef));
+        setHasProfile(!!profile);
+      };
+      checkProfile();
+    }
+  }, [user, isUserLoading, db, router]);
+
+  const handleAccessFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!db || !user || !username.trim()) return;
+
+    setIsSubmitting(true);
+    const joinDate = new Date().toISOString();
+
+    try {
+      const profileData = {
+        username: username,
+        email: user.email || 'anonymous',
+        joinDate: joinDate,
+        createdAt: serverTimestamp(),
+      };
+
+      // 1. Save to Firestore
+      await setDoc(doc(db, 'chat_users', user.uid), profileData);
+
+      // 2. Send notification to Baraka via Formspree
+      await fetch('https://formspree.io/f/mlgoveej', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: 'New ChatBRJ AI Access Registration',
+          username: username,
+          email: user.email,
+          uid: user.uid,
+          timestamp: joinDate,
+        }),
+      });
+
+      toast({ title: 'Access Granted', description: 'Welcome to ChatBRJ AI.' });
+      setHasProfile(true);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || hasProfile === null) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If user doesn't have a profile, show the mandatory form
+  if (!hasProfile) {
+    return (
+      <div className="container mx-auto px-4 py-20 flex items-center justify-center">
+        <Card className="max-w-md w-full rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl">
+          <CardHeader className="bg-primary text-primary-foreground p-10 text-center">
+            <UserCheck className="h-12 w-12 mx-auto mb-4" />
+            <CardTitle className="text-3xl font-black font-headline">Access Form</CardTitle>
+            <CardDescription className="text-primary-foreground/80">
+              Please provide your name to unlock the AI conversation features.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-10">
+            <form onSubmit={handleAccessFormSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Your Full Name</Label>
+                <Input 
+                  required 
+                  className="h-12 rounded-xl" 
+                  placeholder="Enter your name..."
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Progress value={username ? 100 : 10} className="h-2" />
+                <p className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3" /> Details will be sent to Baraka Junior
+                </p>
+              </div>
+              <Button type="submit" className="w-full h-14 rounded-xl text-lg font-black shadow-xl" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="animate-spin" /> : 'Unlock ChatBRJ'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -44,14 +134,11 @@ export default function ChatMainPage() {
         <MessageSquarePlus className="h-10 w-10 text-primary" />
       </div>
       <div className="space-y-2">
-        <h1 className="text-3xl font-black font-headline">Welcome to ChatBRJ</h1>
+        <h1 className="text-3xl font-black font-headline">ChatBRJ AI Ready</h1>
         <p className="text-muted-foreground max-w-sm">
-          Select a conversation from the sidebar or start a new AI-powered discussion about Baraka's services.
+          Select an existing conversation or start a new discussion from the sidebar.
         </p>
       </div>
-      <Button onClick={startNewChat} size="lg" className="rounded-2xl h-14 px-8 font-bold shadow-xl shadow-primary/20">
-        Start a New Chat
-      </Button>
     </div>
   );
 }

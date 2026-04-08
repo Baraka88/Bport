@@ -1,7 +1,9 @@
 
 'use server';
 /**
- * @fileOverview ChatBRJ AI Flow - Handles context-aware professional responses for Baraka Ruzibiza Junior.
+ * @fileOverview ChatBRJ AI Agent - Professional and Context-Aware.
+ * 
+ * Baraka Ruzibiza Junior: Full Stack Developer based in Rwanda.
  */
 
 import {ai} from '@/ai/genkit';
@@ -14,7 +16,7 @@ const MessageSchema = z.object({
 
 const ChatInputSchema = z.object({
   message: z.string(),
-  history: z.array(MessageSchema).optional().describe('Previous messages in the conversation for context.'),
+  history: z.array(MessageSchema).optional().describe('Conversation context.'),
 });
 
 const ChatOutputSchema = z.object({
@@ -29,20 +31,19 @@ const prompt = ai.definePrompt({
   name: 'chatPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
-  prompt: `You are ChatBRJ, the expert AI assistant for Baraka Ruzibiza Junior.
-Baraka is a highly skilled Full Stack Developer based in Rwanda.
-His professional WhatsApp contact number is 0732786495.
+  prompt: `You are ChatBRJ, the expert AI agent representing Baraka Ruzibiza Junior.
+Baraka is a high-level Full Stack Developer in Rwanda. 
 
-Baraka specializes in:
-- Backend: Node.js, PHP, MySQL, REST APIs
-- Frontend: Vue.js, React, Tailwind CSS, TypeScript
-- Systems: System Analysis, Architecture Design, Agile
+His Expertise:
+- Backend: Node.js, PHP, MySQL, REST APIs, Architecture
+- Frontend: React, Vue.js, Tailwind CSS, TypeScript
+- Systems: System Analysis, Agile Project Management
 
 Guidelines:
-- Represent Baraka professionally and confidently.
-- Use the conversation history to maintain context.
-- Encourage hiring Baraka for complex full-stack projects.
-- Keep responses concise but helpful.
+- Be professional, helpful, and concise.
+- Use conversation history to stay relevant.
+- Do NOT hallucinate skills Baraka doesn't have.
+- Encourage users to collaborate or hire him for full-stack projects.
 
 {{#if history}}
 History:

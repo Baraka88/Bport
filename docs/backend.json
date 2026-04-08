@@ -7,10 +7,9 @@
       "properties": {
         "username": { "type": "string" },
         "email": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "admin"] },
         "joinDate": { "type": "string", "format": "date-time" }
       },
-      "required": ["username", "email", "role", "joinDate"]
+      "required": ["username", "email", "joinDate"]
     },
     "Chat": {
       "title": "Chat",
@@ -27,11 +26,12 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
+        "chatId": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "ai"] },
         "text": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "role", "text", "createdAt"]
+      "required": ["userId", "chatId", "role", "text", "createdAt"]
     }
   },
   "auth": {
@@ -40,15 +40,15 @@
   "firestore": {
     "/chat_users/{userId}": {
       "schema": "ChatUser",
-      "description": "User profiles and roles."
+      "description": "User profiles. Access form must be completed to create this."
     },
     "/chats/{chatId}": {
       "schema": "Chat",
-      "description": "Chat session headers."
+      "description": "User conversation sessions."
     },
-    "/chats/{chatId}/messages/{messageId}": {
+    "/chat_messages/{messageId}": {
       "schema": "ChatMessage",
-      "description": "Individual messages within a chat session."
+      "description": "Messages within a session. Filtered by chatId."
     }
   }
 }

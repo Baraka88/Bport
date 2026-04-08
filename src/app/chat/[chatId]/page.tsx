@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -6,37 +7,32 @@ import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2, Bot, User, Trash2, Sparkles } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { Send, Loader2, Bot, User, Trash2, Sparkles, AlertCircle } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { getChatResponse } from '@/ai/flows/chat-flow';
 import { cn } from '@/lib/utils';
 
 export default function ChatConversationPage() {
   const { chatId } = useParams();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
-  // Check admin role to determine query strategy
+  // 1. Mandatory Profile Check
   useEffect(() => {
+    if (!isUserLoading && !user) router.push('/auth');
     if (user && db) {
-      const checkRole = async () => {
-        const docRef = doc(db, 'chat_users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const role = docSnap.data().role;
-          setIsAdmin(role === 'admin' || role === 'admin ');
-        } else {
-          setIsAdmin(false);
-        }
-      };
-      checkRole();
+      getDoc(doc(db, 'chat_users', user.uid)).then(snap => {
+        if (!snap.exists()) router.push('/chat');
+        else setHasProfile(true);
+      });
     }
-  }, [user, db]);
+  }, [user, isUserLoading, db, router]);
 
   const chatRef = useMemoFirebase(() => {
     if (!db || !chatId) return null;
@@ -46,25 +42,14 @@ export default function ChatConversationPage() {
   const { data: chatData, isLoading: chatLoading } = useDoc(chatRef);
 
   const messagesQuery = useMemoFirebase(() => {
-    if (!db || !chatId || !user || isAdmin === null) return null;
-    
-    // If Admin, query all messages for this chat.
-    // If User, query messages for this chat where they are the owner (as per rules requirements for listing)
-    if (isAdmin) {
-      return query(
-        collection(db, 'chat_messages'),
-        where('chatId', '==', chatId),
-        orderBy('createdAt', 'asc')
-      );
-    }
-
+    if (!db || !chatId || !user || !hasProfile) return null;
     return query(
       collection(db, 'chat_messages'),
       where('chatId', '==', chatId),
       where('userId', '==', user.uid),
       orderBy('createdAt', 'asc')
     );
-  }, [db, chatId, user, isAdmin]);
+  }, [db, chatId, user, hasProfile]);
 
   const { data: messages } = useCollection(messagesQuery);
 
@@ -84,8 +69,7 @@ export default function ChatConversationPage() {
 
     const messagesRef = collection(db, 'chat_messages');
 
-    // Add user message to Firestore
-    // Structure: userId, role, text, createdAt, chatId
+    // Add user message
     addDoc(messagesRef, {
       chatId: chatId as string,
       userId: user.uid,
@@ -102,10 +86,10 @@ export default function ChatConversationPage() {
 
       const response = await getChatResponse({ message: userText, history });
 
-      // Add AI response to Firestore
+      // Add AI response
       addDoc(messagesRef, {
         chatId: chatId as string,
-        userId: user.uid, // Owned by the conversation owner
+        userId: user.uid,
         role: 'ai',
         text: response.text,
         createdAt: serverTimestamp(),
@@ -122,8 +106,8 @@ export default function ChatConversationPage() {
     deleteDoc(doc(db, 'chat_messages', msgId));
   };
 
-  if (chatLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!chatData) return <div className="flex-1 flex items-center justify-center">Conversation not found or access denied.</div>;
+  if (chatLoading || hasProfile === null) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  if (!chatData) return <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground"><AlertCircle className="h-10 w-10" /><p>Conversation access denied.</p></div>;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
@@ -132,7 +116,7 @@ export default function ChatConversationPage() {
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Sparkles className="h-5 w-5 text-primary" />
           </div>
-          <h2 className="font-bold truncate max-w-[200px] sm:max-w-md">{chatData.title}</h2>
+          <h2 className="font-bold truncate max-w-[250px]">{chatData.title}</h2>
         </div>
       </header>
 
@@ -158,7 +142,7 @@ export default function ChatConversationPage() {
                     "px-4 py-3 rounded-2xl text-sm leading-relaxed relative whitespace-pre-wrap",
                     msg.role === 'user' 
                       ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-secondary/50 rounded-tl-none"
+                      : "bg-secondary/50 rounded-tl-none border border-border"
                   )}>
                     {msg.text}
                     <button 
@@ -198,11 +182,11 @@ export default function ChatConversationPage() {
           <Input 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask anything about Baraka's services..."
-            className="rounded-xl h-12 bg-background/50 border-primary/10 focus:border-primary"
+            placeholder="Talk with Baraka's AI agent..."
+            className="rounded-xl h-12 bg-background/50"
             disabled={isTyping}
           />
-          <Button type="submit" size="icon" className="h-12 w-12 rounded-xl shadow-lg shadow-primary/20" disabled={isTyping || !input.trim()}>
+          <Button type="submit" size="icon" className="h-12 w-12 rounded-xl shadow-lg" disabled={isTyping || !input.trim()}>
             {isTyping ? <Loader2 className="animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </form>

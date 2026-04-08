@@ -1,70 +1,44 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function getRole() {
-      return get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role;
-    }
-
-    function isAdmin() {
-      return request.auth != null && 
-             exists(/databases/$(database)/documents/chat_users/$(request.auth.uid)) &&
-             (getRole() == "admin" || getRole() == "admin ");
-    }
-
-    // -------------------
-    // chat_users collection
-    // -------------------
+    
+    // Authenticated users can only read/write their own profile
     match /chat_users/{userId} {
-      allow read, write: if request.auth != null && (
-        isAdmin() ||
-        request.auth.uid == userId
-      );
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // -------------------
-    // chats collection
-    // -------------------
+    // Authenticated users can only read/write their own chats
     match /chats/{chatId} {
       allow read, write: if request.auth != null && (
-        isAdmin() ||
-        resource.data.userId == request.auth.uid ||
-        request.resource.data.userId == request.auth.uid
+        resource == null || resource.data.userId == request.auth.uid
+      ) && (
+        request.resource == null || request.resource.data.userId == request.auth.uid
       );
     }
 
-    // -------------------
-    // chat_messages collection
-    // -------------------
+    // Authenticated users can only read/write their own messages
     match /chat_messages/{messageId} {
-      // Simplified rule to use direct userId check for better performance and list compatibility
       allow read, write: if request.auth != null && (
-        isAdmin() ||
-        resource.data.userId == request.auth.uid ||
-        request.resource.data.userId == request.auth.uid
+        resource == null || resource.data.userId == request.auth.uid
+      ) && (
+        request.resource == null || request.resource.data.userId == request.auth.uid
       );
     }
 
-    // -------------------
-    // Inquiry collections
-    // -------------------
+    // Public inquiries
     match /inquiries_collaboration/{id} {
       allow create: if true;
-      allow read, write: if isAdmin();
     }
-    
     match /inquiries_hire_me/{id} {
       allow create: if true;
-      allow read, write: if isAdmin();
     }
 
-    // -------------------
-    // Comments collection
-    // -------------------
+    // Community comments
     match /comments/{id} {
       allow read: if true;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }
