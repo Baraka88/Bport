@@ -3,29 +3,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BRJDEV SECURITY RULES
+     * BRJDEV SECURITY RULES (Prototype Mode)
      * 
-     * Access is granted based on Authentication status and Admin roles.
+     * Simplified rules to ensure smooth development.
+     * Permissions are focused on authentication status.
      */
 
     // --- Helper Functions ---
 
     function isSignedIn() {
       return request.auth != null;
-    }
-
-    function isAdmin() {
-      // In prototype, allow admin if signed in and exists in roles_admin
-      // or if we broaden it for the owner's account.
-      return isSignedIn() && (
-        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
-        // Fallback for primary user if not in roles_admin yet
-        request.auth.token.email == "barakaruzibiza680@gmail.com"
-      );
-    }
-
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
     }
 
     // --- Collection Rules ---
@@ -37,32 +24,32 @@ service cloud.firestore {
 
     match /user_profile/portfolioOwner {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /projects/{projectId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /technologies/{technologyId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /certificates/{certificateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /services/{serviceId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /images/{imageId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isSignedIn();
     }
 
     match /inquiries_hire_me/{inquiryId} {
@@ -77,23 +64,21 @@ service cloud.firestore {
 
     match /comments/{commentId} {
       allow create: if true;
-      allow read: if true; // Allow public to see approved comments handled by UI
+      allow read: if true; 
       allow update, delete: if isSignedIn();
     }
 
     match /chat_users/{chatUserId} {
       allow read: if isSignedIn();
-      allow create: if isOwner(chatUserId);
-      allow update: if isOwner(chatUserId) || isAdmin();
-      allow delete: if isSignedIn(); // Broaden for admin management
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
     }
 
     match /chat_messages/{messageId} {
-      // Allow signed in users to read messages. UI filters by chatUserId.
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && (request.resource.data.chatUserId == request.auth.uid);
-      allow delete: if isSignedIn() && (resource.data.chatUserId == request.auth.uid || isAdmin());
-      allow update: if isAdmin();
+      allow create: if isSignedIn();
+      allow delete: if isSignedIn();
+      allow update: if isSignedIn();
     }
   }
 }

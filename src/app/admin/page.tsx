@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useFirestore, useCollection, useMemoFirebase, useUser } from "@/firebase"
 import { 
   collection, 
-  deleteDoc, 
   doc, 
   updateDoc,
   query, 
@@ -12,6 +11,7 @@ import {
   serverTimestamp,
   addDoc
 } from "firebase/firestore"
+import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -47,12 +47,12 @@ export default function AdminPage() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [editUsername, setEditUsername] = useState("")
 
-  // Protect queries
-  const imagesQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked, user])
-  const collabQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
-  const hireQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
-  const chatUsersQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked, user])
-  const commentsQuery = useMemoFirebase(() => (db && unlocked && user) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked, user])
+  // Protect queries - only run if system is unlocked
+  const imagesQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
+  const collabQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
+  const hireQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
+  const chatUsersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked])
+  const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
@@ -76,42 +76,35 @@ export default function AdminPage() {
     }
   }
 
-  async function handleAddImage(e: React.FormEvent) {
+  function handleAddImage(e: React.FormEvent) {
     e.preventDefault()
     setIsPending(true)
-    try {
-      await addDoc(collection(db, "images"), {
-        url: newImageUrl,
-        description: newImageDesc,
-        altText: newImageDesc,
-        category: "gallery",
-        uploadDate: serverTimestamp()
-      })
+    addDoc(collection(db!, "images"), {
+      url: newImageUrl,
+      description: newImageDesc,
+      altText: newImageDesc,
+      category: "gallery",
+      uploadDate: serverTimestamp()
+    }).then(() => {
       setNewImageUrl("")
       setNewImageDesc("")
       toast({ title: "Asset Added", description: "Image published to gallery." })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Upload failed." })
-    } finally {
+    }).finally(() => {
       setIsPending(false)
-    }
+    })
   }
 
-  async function handleDeleteDoc(colName: string, id: string) {
-    if (!confirm("Are you sure? This action is permanent.")) return
-    try {
-      await deleteDoc(doc(db, colName, id))
-      toast({ title: "Deleted", description: "Document removed successfully." })
-    } catch (error) {
-      console.error("Delete Error:", error)
-      toast({ variant: "destructive", title: "Error", description: "Delete failed. Check permissions." })
-    }
+  function handleDeleteDoc(colName: string, id: string) {
+    if (!confirm("Are you sure? This action is permanent and will remove the document from the database.")) return
+    const docRef = doc(db!, colName, id)
+    deleteDocumentNonBlocking(docRef)
+    toast({ title: "Operation Initiated", description: "Deleting document..." })
   }
 
   async function handleUpdateUsername(userId: string) {
     if (!editUsername.trim()) return
     try {
-      await updateDoc(doc(db, "chat_users", userId), { username: editUsername })
+      await updateDoc(doc(db!, "chat_users", userId), { username: editUsername })
       setEditingUserId(null)
       toast({ title: "Updated", description: "Username changed." })
     } catch (error) {
@@ -262,7 +255,7 @@ export default function AdminPage() {
               {imagesLoading ? <Loader2 className="animate-spin mx-auto text-primary" /> : images?.map((img) => (
                 <Card key={img.id} className="rounded-3xl overflow-hidden group border-none shadow-lg">
                   <div className="relative aspect-video">
-                    <img src={img.url} className="w-full h-full object-cover" />
+                    <img src={img.url} className="w-full h-full object-cover" alt={img.description} />
                     <Button variant="destructive" size="icon" className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleDeleteDoc("images", img.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -317,7 +310,7 @@ export default function AdminPage() {
               </div>
               <div className="flex gap-2">
                 {!comment.isApproved && (
-                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateDoc(doc(db, "comments", comment.id), { isApproved: true })}>Approve</Button>
+                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateDoc(doc(db!, "comments", comment.id), { isApproved: true })}>Approve</Button>
                 )}
                 <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc("comments", comment.id)}><Trash2 className="h-4 w-4" /></Button>
               </div>

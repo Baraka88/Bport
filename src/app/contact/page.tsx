@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Mail, Phone, MapPin } from "lucide-react"
 import React from "react"
 
@@ -22,8 +22,8 @@ export default function ContactPage() {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Email</h3>
-              <p className="text-muted-foreground">Direct professional inquiries</p>
-              <p className="text-primary font-bold">barakaruzibiza680@gmail.com</p>
+              <p className="text-muted-foreground">Professional Inquiries</p>
+              <p className="text-primary font-bold break-all">barakaruzibiza680@gmail.com</p>
             </div>
           </Card>
 
@@ -51,10 +51,10 @@ export default function ContactPage() {
         </div>
 
         <div className="p-12 rounded-[3rem] bg-secondary/30 text-center space-y-6">
-          <h2 className="text-2xl font-bold font-headline">Interested in a project?</h2>
+          <h2 className="text-2xl font-bold font-headline">Ready to start a project?</h2>
           <p className="text-lg text-muted-foreground">
-            If you're looking for professional web development or system analysis services, 
-            the most efficient way to get started is by sending an email with your project requirements.
+            The most efficient way to discuss your requirements is via direct email. 
+            Send me a message and I'll respond promptly with a proposal.
           </p>
         </div>
       </div>
