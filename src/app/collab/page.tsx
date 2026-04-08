@@ -15,7 +15,7 @@ export default function CollabPage() {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold font-headline leading-tight">Build the <span className="text-primary">Future</span> Together</h1>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-            I'm always looking for talented developers and designers to collaborate on open-source projects or innovative ventures.
+            I'm always looking for talented developers and designers to collaborate on innovative ventures and scalable systems.
           </p>
           
           <div className="space-y-6">
@@ -57,16 +57,17 @@ export default function CollabPage() {
         <div className="relative">
           <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative group">
             <Image
-              src="https://picsum.photos/seed/collab/800/1000"
-              alt="Collaboration"
+              src="https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png"
+              alt="Baraka Junior Profile"
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-110"
-              data-ai-hint="team collaboration"
+              unoptimized
+              data-ai-hint="professional portrait"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
             <div className="absolute bottom-8 left-8 right-8 text-white">
-              <p className="text-lg font-bold">"Great things in business are never done by one person."</p>
-              <p className="text-sm opacity-80 mt-2">— Steve Jobs</p>
+              <p className="text-lg font-bold">"Collaboration is the key to creating impactful technology."</p>
+              <p className="text-sm opacity-80 mt-2">— BRJDEV</p>
             </div>
           </div>
         </div>
@@ -78,8 +79,8 @@ export default function CollabPage() {
         <p className="text-xl opacity-90 max-w-2xl mx-auto">
           If you have a project idea or a partnership proposal, reaching out directly via WhatsApp or Email is the fastest way to get in touch.
         </p>
-        <Button size="lg" variant="secondary" className="rounded-full px-12 py-8 text-xl font-bold" asChild>
-          <a href="mailto:barakaruzibiza680@gmail.com">Send an Email</a>
+        <Button size="lg" variant="secondary" className="rounded-full px-12 py-8 text-xl font-bold" onClick={() => window.location.href = 'mailto:barakaruzibiza680@gmail.com'}>
+          Send an Email
         </Button>
       </div>
     </div>
