@@ -11,5 +11,16 @@ service cloud.firestore {
     match /{document=**} {
       allow read, write: if true;
     }
+    
+    // Explicitly allow common collections to avoid rule-as-filter issues
+    match /chat_messages/{id} { allow read, write: if true; }
+    match /chat_users/{id} { allow read, write: if true; }
+    match /comments/{id} { allow read, write: if true; }
+    match /inquiries_hire_me/{id} { allow read, write: if true; }
+    match /inquiries_collaboration/{id} { allow read, write: if true; }
+    match /projects/{id} { allow read, write: if true; }
+    match /images/{id} { allow read, write: if true; }
+    match /technologies/{id} { allow read, write: if true; }
+    match /certificates/{id} { allow read, write: if true; }
   }
 }
