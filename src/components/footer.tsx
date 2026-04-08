@@ -23,20 +23,20 @@ export function Footer() {
             <ul className="space-y-2 text-muted-foreground">
               <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
               <li><Link href="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
-              <li><Link href="/collab" className="hover:text-primary transition-colors">Collaborate</Link></li>
               <li><Link href="/#projects" className="hover:text-primary transition-colors">Projects</Link></li>
               <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
             </ul>
           </div>
 
           <div className="space-y-4">
             <h4 className="font-bold">Contact</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> Via Contact Form</li>
+              <li className="flex items-center gap-2 font-bold text-primary">barakaruzibiza680@gmail.com</li>
               <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> 0732786495</li>
               <li>Kigali, Rwanda</li>
               <li className="pt-2">
-                <Link href="/contact" className="text-accent font-bold hover:underline">Hire Me Now</Link>
+                <a href="https://wa.me/250732786495" target="_blank" className="text-accent font-bold hover:underline">WhatsApp Me Now</a>
               </li>
             </ul>
           </div>

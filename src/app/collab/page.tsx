@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -28,7 +27,7 @@ export default function CollabPage() {
                 <Mail className="text-primary h-6 w-6" />
                 <div>
                   <p className="text-sm font-bold text-muted-foreground">Email</p>
-                  <p className="font-bold">Reach out via Email</p>
+                  <p className="font-bold">barakaruzibiza680@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 p-4 bg-secondary rounded-2xl">

@@ -24,7 +24,6 @@ import {
   LayoutDashboard, 
   ImageIcon, 
   Users, 
-  Briefcase, 
   MessageCircle, 
   MessageSquare,
   Trash2,
@@ -49,15 +48,11 @@ export default function AdminPage() {
 
   // Protect queries - only run if system is unlocked
   const imagesQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
-  const collabQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
-  const hireQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
   const chatUsersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked])
   const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
-  const { data: collabs, isLoading: collabsLoading } = useCollection(collabQuery)
-  const { data: hireRequests, isLoading: hireLoading } = useCollection(hireQuery)
   const { data: chatUsers, isLoading: chatUsersLoading } = useCollection(chatUsersQuery)
   const { data: comments, isLoading: commentsLoading } = useCollection(commentsQuery)
 
@@ -166,9 +161,6 @@ export default function AdminPage() {
           <TabsTrigger value="gallery" className="rounded-2xl px-6 py-3 font-bold flex gap-2">
             <ImageIcon className="h-4 w-4" /> Gallery
           </TabsTrigger>
-          <TabsTrigger value="inquiries" className="rounded-2xl px-6 py-3 font-bold flex gap-2">
-            <Users className="h-4 w-4" /> Inquiries
-          </TabsTrigger>
           <TabsTrigger value="comments" className="rounded-2xl px-6 py-3 font-bold flex gap-2">
             <MessageSquare className="h-4 w-4" /> Comments
           </TabsTrigger>
@@ -263,37 +255,6 @@ export default function AdminPage() {
                     </Button>
                   </div>
                   <CardContent className="p-4"><p className="text-sm font-medium line-clamp-1">{img.description}</p></CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="inquiries" className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold font-headline flex items-center gap-2"><Briefcase className="h-5 w-5" /> Hire Me</h3>
-              {hireLoading ? <Loader2 className="animate-spin text-primary" /> : hireRequests?.map((hire) => (
-                <Card key={hire.id} className="rounded-2xl p-4 border-none shadow-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold">{hire.name}</h4>
-                    <Button variant="ghost" size="icon" className="text-red-500 h-6 w-6" onClick={() => handleDeleteDoc("inquiries_hire_me", hire.id)}><Trash2 className="h-3 w-3" /></Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">{hire.email} | {hire.phone}</p>
-                  <p className="text-sm line-clamp-2 italic">"{hire.message}"</p>
-                </Card>
-              ))}
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold font-headline flex items-center gap-2"><Users className="h-5 w-5" /> Collabs</h3>
-              {collabsLoading ? <Loader2 className="animate-spin text-primary" /> : collabs?.map((collab) => (
-                <Card key={collab.id} className="rounded-2xl p-4 border-none shadow-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold">{collab.name}</h4>
-                    <Button variant="ghost" size="icon" className="text-red-500 h-6 w-6" onClick={() => handleDeleteDoc("inquiries_collaboration", collab.id)}><Trash2 className="h-3 w-3" /></Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-2">{collab.email} | {collab.phone}</p>
-                  <p className="text-sm line-clamp-2 italic">"{collab.idea}"</p>
                 </Card>
               ))}
             </div>

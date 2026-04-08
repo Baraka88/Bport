@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Card } from "@/components/ui/card"
@@ -25,7 +24,7 @@ export default function ContactPage() {
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Email</h3>
               <p className="text-muted-foreground text-sm">Professional Inquiries</p>
-              <p className="text-primary font-bold break-all">Reach out via Email</p>
+              <p className="text-primary font-bold break-all">barakaruzibiza680@gmail.com</p>
             </div>
             <Button className="w-full rounded-xl" asChild>
               <a href="mailto:barakaruzibiza680@gmail.com">Send Message</a>
