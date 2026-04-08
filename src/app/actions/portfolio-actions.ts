@@ -2,6 +2,9 @@
 
 import { generateProjectDescription } from "@/ai/flows/generate-project-description-flow";
 
+/**
+ * Generates an AI-enhanced project description.
+ */
 export async function getAIDescription(technicalDetails: string, projectGoals: string) {
   try {
     const result = await generateProjectDescription({ technicalDetails, projectGoals });

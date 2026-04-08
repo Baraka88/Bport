@@ -9,9 +9,8 @@ import {
   query, 
   orderBy, 
   serverTimestamp,
-  addDoc
+  deleteDoc
 } from "firebase/firestore"
-import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -21,17 +20,14 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { 
   LayoutDashboard, 
-  ImageIcon, 
   MessageSquare,
   Trash2,
-  Plus,
-  Loader2,
-  ShieldAlert,
   Unlock,
+  ShieldAlert,
   Briefcase,
   Users,
   Check,
-  X
+  Loader2
 } from "lucide-react"
 
 export default function AdminPage() {
@@ -45,12 +41,10 @@ export default function AdminPage() {
   const hireMeQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_hire_me"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
   const collabQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "inquiries_collaboration"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
   const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
-  const galleryQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
 
   const { data: hireInquiries, isLoading: hireLoading } = useCollection(hireMeQuery)
   const { data: collabInquiries, isLoading: collabLoading } = useCollection(collabQuery)
   const { data: comments, isLoading: commentsLoading } = useCollection(commentsQuery)
-  const { data: gallery, isLoading: galleryLoading } = useCollection(galleryQuery)
 
   function verifyAdmin(e: React.FormEvent) {
     e.preventDefault()
@@ -70,7 +64,7 @@ export default function AdminPage() {
 
   function handleDelete(col: string, id: string) {
     if (!db || !confirm("Delete this document forever?")) return
-    deleteDocumentNonBlocking(doc(db, col, id))
+    deleteDoc(doc(db, col, id))
     toast({ title: "Deleted", description: "Document removed from database." })
   }
 
@@ -124,7 +118,6 @@ export default function AdminPage() {
           <TabsTrigger value="hire" className="rounded-xl px-6">Hire Me</TabsTrigger>
           <TabsTrigger value="collab" className="rounded-xl px-6">Collab</TabsTrigger>
           <TabsTrigger value="comments" className="rounded-xl px-6">Comments</TabsTrigger>
-          <TabsTrigger value="gallery" className="rounded-xl px-6">Gallery</TabsTrigger>
         </TabsList>
 
         <TabsContent value="hire">
@@ -196,11 +189,6 @@ export default function AdminPage() {
               </Card>
             ))}
           </div>
-        </TabsContent>
-
-        <TabsContent value="gallery">
-          {/* Gallery management logic here */}
-          <div className="text-center py-20 opacity-50">Gallery management enabled. Add assets via the global image collection.</div>
         </TabsContent>
       </Tabs>
     </div>

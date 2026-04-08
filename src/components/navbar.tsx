@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users, MessageSquare } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"

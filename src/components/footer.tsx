@@ -12,9 +12,9 @@ export function Footer() {
               Helping businesses build reliable systems and engaging digital experiences with modern web technologies.
             </p>
             <div className="flex gap-4">
-              <a href="https://github.com/baraka88" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Github className="h-5 w-5" /></a>
-              <a href="https://linkedin.com/in/baraka-junior" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Linkedin className="h-5 w-5" /></a>
-              <a href="https://instagram.com/barakaruzibiza680" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Instagram className="h-5 w-5" /></a>
+              <a href="https://github.com/baraka88" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Github className="h-5 w-5" /></a>
+              <a href="https://linkedin.com/in/baraka-junior" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Linkedin className="h-5 w-5" /></a>
+              <a href="https://instagram.com/barakaruzibiza680" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Instagram className="h-5 w-5" /></a>
             </div>
           </div>
           
@@ -24,7 +24,7 @@ export function Footer() {
               <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
               <li><Link href="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
               <li><Link href="/#projects" className="hover:text-primary transition-colors">Projects</Link></li>
-              <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
+              <li><Link href="/collab" className="hover:text-primary transition-colors">Collaborate</Link></li>
             </ul>
           </div>
 
