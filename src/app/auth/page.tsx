@@ -40,7 +40,7 @@ export default function AuthPage() {
         const userCred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         await updateProfile(userCred.user, { displayName: formData.username });
         
-        // Create User Profile in Firestore
+        // Schema: email, joinDate, role, username
         await setDoc(doc(db, 'chat_users', userCred.user.uid), {
           username: formData.username,
           email: formData.email,

@@ -1,12 +1,12 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, Layout } from 'lucide-react';
+import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -17,18 +17,45 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   const db = useFirestore();
   const router = useRouter();
   const params = useParams();
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [editTitle, setEditTitle] = React.useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  // Check admin role to determine query strategy
+  useEffect(() => {
+    if (user && db) {
+      const checkRole = async () => {
+        const docRef = doc(db, 'chat_users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const role = docSnap.data().role;
+          setIsAdmin(role === 'admin' || role === 'admin ');
+        } else {
+          setIsAdmin(false);
+        }
+      };
+      checkRole();
+    }
+  }, [user, db]);
 
   const chatsQuery = useMemoFirebase(() => {
-    if (!db || !user) return null;
+    if (!db || !user || isAdmin === null) return null;
+    
+    // If Admin, show all chats. If User, filter by userId to satisfy security rules.
+    if (isAdmin) {
+      return query(
+        collection(db, 'chats'),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    
     return query(
       collection(db, 'chats'),
       where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
-  }, [db, user]);
+  }, [db, user, isAdmin]);
 
   const { data: chats, isLoading } = useCollection(chatsQuery);
 
@@ -65,7 +92,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen bg-background overflow-hidden border-t">
-      {/* Sidebar */}
       <aside className={cn(
         "bg-secondary/20 border-r flex flex-col transition-all duration-300 relative",
         isSidebarOpen ? "w-80" : "w-0 overflow-hidden border-none"
@@ -115,7 +141,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col relative min-w-0">
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}

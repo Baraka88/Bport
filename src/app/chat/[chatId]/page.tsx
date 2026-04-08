@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, Bot, User, Trash2, Sparkles } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { getChatResponse } from '@/ai/flows/chat-flow';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +30,7 @@ export default function ChatConversationPage() {
 
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !chatId) return null;
-    // Query the top-level chat_messages collection filtered by chatId
+    // Query filtered by chatId as per user rules
     return query(
       collection(db, 'chat_messages'),
       where('chatId', '==', chatId),
@@ -56,7 +56,7 @@ export default function ChatConversationPage() {
 
     const messagesRef = collection(db, 'chat_messages');
 
-    // 1. Add User Message
+    // Schema: chatUserId, messageContent, role, timestamp, userId
     addDoc(messagesRef, {
       chatId: chatId as string,
       userId: user.uid,
@@ -74,10 +74,9 @@ export default function ChatConversationPage() {
 
       const response = await getChatResponse({ message: userText, history });
 
-      // 2. Add AI Message
       addDoc(messagesRef, {
         chatId: chatId as string,
-        userId: user.uid, // Associated with this user's chat
+        userId: user.uid, 
         chatUserId: 'ai',
         role: 'ai',
         messageContent: response.text,
