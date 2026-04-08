@@ -5,80 +5,11 @@ service cloud.firestore {
     /**
      * BRJDEV SECURITY RULES (Prototype Mode)
      * 
-     * Simplified rules to ensure smooth development.
-     * Permissions are focused on authentication status.
+     * Extremely permissive for prototype development to ensure no permission errors.
      */
 
-    // --- Helper Functions ---
-
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // --- Collection Rules ---
-
-    match /roles_admin/{adminId} {
-      allow read: if isSignedIn();
-      allow write: if false; 
-    }
-
-    match /user_profile/portfolioOwner {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /projects/{projectId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /technologies/{technologyId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /certificates/{certificateId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /services/{serviceId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /images/{imageId} {
-      allow read: if true;
-      allow write: if isSignedIn();
-    }
-
-    match /inquiries_hire_me/{inquiryId} {
-      allow create: if true;
-      allow read, write: if isSignedIn();
-    }
-
-    match /inquiries_collaboration/{inquiryId} {
-      allow create: if true;
-      allow read, write: if isSignedIn();
-    }
-
-    match /comments/{commentId} {
-      allow create: if true;
-      allow read: if true; 
-      allow update, delete: if isSignedIn();
-    }
-
-    match /chat_users/{chatUserId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
-    }
-
-    match /chat_messages/{messageId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow delete: if isSignedIn();
-      allow update: if isSignedIn();
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

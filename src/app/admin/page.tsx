@@ -78,8 +78,9 @@ export default function AdminPage() {
 
   function handleAddImage(e: React.FormEvent) {
     e.preventDefault()
+    if (!db) return
     setIsPending(true)
-    addDoc(collection(db!, "images"), {
+    addDoc(collection(db, "images"), {
       url: newImageUrl,
       description: newImageDesc,
       altText: newImageDesc,
@@ -95,16 +96,17 @@ export default function AdminPage() {
   }
 
   function handleDeleteDoc(colName: string, id: string) {
+    if (!db) return
     if (!confirm("Are you sure? This action is permanent and will remove the document from the database.")) return
-    const docRef = doc(db!, colName, id)
+    const docRef = doc(db, colName, id)
     deleteDocumentNonBlocking(docRef)
     toast({ title: "Operation Initiated", description: "Deleting document..." })
   }
 
   async function handleUpdateUsername(userId: string) {
-    if (!editUsername.trim()) return
+    if (!db || !editUsername.trim()) return
     try {
-      await updateDoc(doc(db!, "chat_users", userId), { username: editUsername })
+      await updateDoc(doc(db, "chat_users", userId), { username: editUsername })
       setEditingUserId(null)
       toast({ title: "Updated", description: "Username changed." })
     } catch (error) {
@@ -122,8 +124,8 @@ export default function AdminPage() {
             <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
               <ShieldAlert className="h-10 w-10" />
             </div>
-            <CardTitle className="text-3xl font-black">Admin Access</CardTitle>
-            <CardDescription>Enter your master password to manage BRJDEV</CardDescription>
+            <CardTitle className="text-3xl font-black font-headline tracking-tighter">Admin Access</CardTitle>
+            <CardDescription>Enter master password to manage BRJDEV</CardDescription>
           </CardHeader>
           <CardContent className="p-8 pt-0">
             <form onSubmit={verifyAdmin} className="space-y-6">
@@ -148,7 +150,7 @@ export default function AdminPage() {
     <div className="container mx-auto px-4 py-12">
       <header className="mb-12 flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-black flex items-center gap-3">
+          <h1 className="text-4xl font-black font-headline flex items-center gap-3">
             <LayoutDashboard className="h-10 w-10 text-primary" /> BRJDEV Control
           </h1>
           <p className="text-muted-foreground font-medium">Administrator Environment</p>
@@ -309,8 +311,8 @@ export default function AdminPage() {
                 <p className="text-sm text-muted-foreground">"{comment.commentText}"</p>
               </div>
               <div className="flex gap-2">
-                {!comment.isApproved && (
-                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateDoc(doc(db!, "comments", comment.id), { isApproved: true })}>Approve</Button>
+                {!comment.isApproved && db && (
+                  <Button variant="outline" size="sm" className="rounded-full" onClick={() => updateDoc(doc(db, "comments", comment.id), { isApproved: true })}>Approve</Button>
                 )}
                 <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteDoc("comments", comment.id)}><Trash2 className="h-4 w-4" /></Button>
               </div>
