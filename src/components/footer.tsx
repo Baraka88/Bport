@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail, Shield } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
@@ -64,9 +64,6 @@ export function Footer() {
         </div>
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} BRJDEV. All rights reserved.</p>
-          <Link href="/admin" className="opacity-0 hover:opacity-100 transition-opacity">
-            <Shield className="h-4 w-4" />
-          </Link>
         </div>
       </div>
     </footer>

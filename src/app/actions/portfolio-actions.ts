@@ -1,3 +1,4 @@
+
 "use server"
 
 import { generateProjectDescription } from "@/ai/flows/generate-project-description-flow";
@@ -10,7 +11,6 @@ export async function getAIDescription(technicalDetails: string, projectGoals: s
     const result = await generateProjectDescription({ technicalDetails, projectGoals });
     return result.description;
   } catch (error) {
-    console.error("AI Generation Error:", error);
     return "Could not generate description at this time.";
   }
 }

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -16,7 +16,6 @@ export default function ChatConversationPage() {
   const { chatId } = useParams();
   const { user } = useUser();
   const db = useFirestore();
-  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState('');
@@ -31,9 +30,11 @@ export default function ChatConversationPage() {
 
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !chatId) return null;
+    // Query the top-level chat_messages collection filtered by chatId
     return query(
-      collection(db, 'chats', chatId as string, 'messages'),
-      orderBy('createdAt', 'asc')
+      collection(db, 'chat_messages'),
+      where('chatId', '==', chatId),
+      orderBy('timestamp', 'asc')
     );
   }, [db, chatId]);
 
@@ -53,32 +54,34 @@ export default function ChatConversationPage() {
     setInput('');
     setIsTyping(true);
 
-    const messagesRef = collection(db, 'chats', chatId as string, 'messages');
+    const messagesRef = collection(db, 'chat_messages');
 
     // 1. Add User Message
-    await addDoc(messagesRef, {
+    addDoc(messagesRef, {
+      chatId: chatId as string,
       userId: user.uid,
+      chatUserId: user.uid,
       role: 'user',
-      text: userText,
-      createdAt: serverTimestamp(),
+      messageContent: userText,
+      timestamp: serverTimestamp(),
     });
 
     try {
-      // 2. Prepare History for AI Context
       const history = (messages || []).map(m => ({
         role: m.role as 'user' | 'ai',
-        text: m.text,
-      })).slice(-10); // Last 10 messages for context
+        text: m.messageContent,
+      })).slice(-10);
 
-      // 3. Get AI Response
       const response = await getChatResponse({ message: userText, history });
 
-      // 4. Add AI Message
-      await addDoc(messagesRef, {
-        userId: 'ai',
+      // 2. Add AI Message
+      addDoc(messagesRef, {
+        chatId: chatId as string,
+        userId: user.uid, // Associated with this user's chat
+        chatUserId: 'ai',
         role: 'ai',
-        text: response.text,
-        createdAt: serverTimestamp(),
+        messageContent: response.text,
+        timestamp: serverTimestamp(),
       });
     } catch (error) {
       console.error('AI Error:', error);
@@ -88,8 +91,8 @@ export default function ChatConversationPage() {
   };
 
   const deleteMessage = async (msgId: string) => {
-    if (!db || !chatId) return;
-    await deleteDoc(doc(db, 'chats', chatId as string, 'messages', msgId));
+    if (!db) return;
+    deleteDoc(doc(db, 'chat_messages', msgId));
   };
 
   if (chatLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
@@ -97,7 +100,6 @@ export default function ChatConversationPage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
-      {/* Header */}
       <header className="px-6 py-4 border-b bg-card flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -107,7 +109,6 @@ export default function ChatConversationPage() {
         </div>
       </header>
 
-      {/* Messages */}
       <ScrollArea className="flex-1 p-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {messages?.map((msg) => (
@@ -132,7 +133,7 @@ export default function ChatConversationPage() {
                       ? "bg-primary text-primary-foreground rounded-tr-none" 
                       : "bg-secondary/50 rounded-tl-none"
                   )}>
-                    {msg.text}
+                    {msg.messageContent}
                     <button 
                       onClick={() => deleteMessage(msg.id)}
                       className="absolute top-0 -right-8 p-1 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
@@ -141,7 +142,7 @@ export default function ChatConversationPage() {
                     </button>
                   </div>
                   <span className="text-[10px] text-muted-foreground px-1">
-                    {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                    {msg.timestamp?.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
                   </span>
                 </div>
               </div>
@@ -165,7 +166,6 @@ export default function ChatConversationPage() {
         </div>
       </ScrollArea>
 
-      {/* Input */}
       <div className="p-6 border-t bg-card/50">
         <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-4">
           <Input 
