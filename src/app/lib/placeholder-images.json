@@ -26,12 +26,6 @@
       "imageHint": "frontend dashboard"
     },
     {
-      "id": "profile-pic",
-      "description": "Professional profile picture of Baraka Junior",
-      "imageUrl": "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png",
-      "imageHint": "professional portrait"
-    },
-    {
       "id": "collab-1",
       "description": "Developers collaborating on a project",
       "imageUrl": "https://picsum.photos/seed/team1/1200/400",

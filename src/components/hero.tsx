@@ -3,7 +3,6 @@
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
 import { ChevronRight, Sparkles, MessageCircle } from "lucide-react"
 import Link from "next/link"
 
@@ -47,69 +46,45 @@ function TypewriterText({ messages, speed = 150, delay = 2000 }: { messages: str
 }
 
 export function Hero() {
-  const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";
-
   return (
-    <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
-      <div className="container mx-auto px-4 relative z-10 grid lg:grid-cols-2 gap-16 items-center py-12">
-        <div className="space-y-8 text-center lg:text-left">
+    <section className="relative min-h-[70vh] flex items-center bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10 py-20 text-center">
+        <div className="max-w-4xl mx-auto space-y-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-bold tracking-wider uppercase border border-accent/20 animate-pulse">
             <Sparkles className="h-4 w-4" /> Available for Hire
           </div>
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-8xl font-black leading-tight font-headline tracking-tighter">
-              I am <span className="text-primary block lg:inline decoration-accent underline-offset-[12px] underline">Baraka Junior</span>
+          <div className="space-y-6">
+            <h1 className="text-6xl md:text-9xl font-black leading-tight font-headline tracking-tighter">
+              I am <span className="text-primary decoration-accent underline-offset-[12px] underline">Baraka Junior</span>
             </h1>
-            <div className="h-16 flex items-center justify-center lg:justify-start">
-              <p className="text-2xl md:text-4xl text-muted-foreground font-headline font-medium">
+            <div className="h-20 flex items-center justify-center">
+              <p className="text-3xl md:text-5xl text-muted-foreground font-headline font-medium">
                 <TypewriterText messages={mainMessages} />
               </p>
             </div>
           </div>
-          <p className="text-xl text-muted-foreground max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
             A results-driven Software Engineer and System Analyst specializing in robust backend architectures and dynamic, high-performance web experiences.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 pt-6 justify-center lg:justify-start">
-            <Button size="lg" className="rounded-full shadow-2xl group px-10 py-8 text-xl font-bold bg-primary hover:scale-105 transition-transform" asChild>
+          <div className="flex flex-col sm:flex-row gap-6 pt-10 justify-center">
+            <Button size="lg" className="rounded-full shadow-2xl group px-12 py-10 text-2xl font-bold bg-primary hover:scale-105 transition-transform" asChild>
               <Link href="/#projects">
                 View Portfolio
-                <ChevronRight className="ml-2 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                <ChevronRight className="ml-2 h-8 w-8 group-hover:translate-x-2 transition-transform" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="rounded-full px-10 py-8 text-xl font-bold border-2 hover:bg-secondary/50 transition-all" asChild>
+            <Button variant="outline" size="lg" className="rounded-full px-12 py-10 text-2xl font-bold border-2 hover:bg-secondary/50 transition-all" asChild>
               <a href="https://wa.me/250732786495" target="_blank">
-                <MessageCircle className="mr-2 h-6 w-6" /> WhatsApp Me
+                <MessageCircle className="mr-2 h-8 w-8" /> WhatsApp Me
               </a>
             </Button>
           </div>
         </div>
-
-        <div className="relative group perspective-1000">
-          <div className="absolute -inset-4 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-1000" />
-          <div className="relative aspect-[4/5] md:aspect-square w-full max-w-2xl mx-auto rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border-8 border-background/50 backdrop-blur-sm group-hover:rotate-1 transition-transform duration-1000">
-            <Image
-              src={profileImg}
-              alt="Baraka Junior Profile"
-              fill
-              className="object-cover"
-              priority
-              unoptimized
-              data-ai-hint="professional portrait"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
-            
-            <div className="absolute bottom-10 left-10 right-10 bg-background/20 backdrop-blur-md p-6 rounded-3xl border border-white/20 text-white">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-1 bg-accent rounded-full animate-pulse" />
-                <span className="text-sm font-bold uppercase tracking-widest opacity-80">Principal Engineer</span>
-              </div>
-              <p className="mt-2 text-lg font-headline font-bold drop-shadow-lg">
-                Baraka Junior
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
+      
+      {/* Decorative background elements instead of a profile picture */}
+      <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
     </section>
   )
 }
