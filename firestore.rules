@@ -3,11 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper to check if the user is an admin
-    // Note: User sample provided role as "admin " (with a space)
+    // Handles both "admin" and "admin " (with trailing space) as seen in your sample data
     function isAdmin() {
-      return request.auth != null && 
-        (get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin" || 
-         get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin ");
+      let userRole = get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role;
+      return request.auth != null && (userRole == "admin" || userRole == "admin ");
     }
 
     // -------------------
@@ -35,14 +34,22 @@ service cloud.firestore {
     // chat_messages collection
     // -------------------
     match /chat_messages/{messageId} {
-      allow read, write: if request.auth != null && (
+      // For listing messages, we use resource.data.chatId which aligns with the chatId == userId structure
+      allow read: if request.auth != null && (
         isAdmin() ||
-        get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid ||
-        get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid
+        resource.data.userId == request.auth.uid ||
+        resource.data.chatId == request.auth.uid
       );
+      
+      allow create: if request.auth != null && (
+        isAdmin() ||
+        request.resource.data.userId == request.auth.uid
+      );
+
+      allow update, delete: if request.auth != null && isAdmin();
     }
 
-    // PUBLIC COLLECTIONS: Always readable by anyone for portfolio visibility
+    // PUBLIC COLLECTIONS
     match /projects/{id} { allow read: if true; }
     match /images/{id} { allow read: if true; }
     match /technologies/{id} { allow read: if true; }

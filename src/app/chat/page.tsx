@@ -30,12 +30,12 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
-  // Query chat_messages filtered by chatId (which is the user's uid)
+  // Query chat_messages filtered by userId/chatId to satisfy security rules
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !user) return null
     return query(
       collection(db, "chat_messages"), 
-      where("chatId", "==", user.uid),
+      where("userId", "==", user.uid),
       orderBy("timestamp", "desc"), 
       limit(100)
     )
@@ -66,7 +66,7 @@ export default function ChatPage() {
       if (db) {
         const batch = writeBatch(db)
         
-        // Write to chat_users collection as per requested structure
+        // Write to chat_users collection with required schema
         const userDocRef = doc(db, "chat_users", userCredential.user.uid)
         batch.set(userDocRef, {
           email: email,
@@ -75,7 +75,7 @@ export default function ChatPage() {
           username: username
         })
 
-        // Initialize user's chat document to satisfy security rules
+        // Initialize user's chat document
         const chatDocRef = doc(db, "chats", userCredential.user.uid)
         batch.set(chatDocRef, {
           userId: userCredential.user.uid,
@@ -100,13 +100,13 @@ export default function ChatPage() {
     setMessage("")
 
     try {
-      // Ensure parent chat document exists (idempotent)
+      // Ensure parent chat document exists
       await setDoc(doc(db, "chats", user.uid), {
         userId: user.uid,
         createdAt: serverTimestamp()
       }, { merge: true })
 
-      // Add user message to chat_messages
+      // Add user message to chat_messages with full schema
       await addDoc(collection(db, "chat_messages"), {
         chatId: user.uid,
         chatUserId: user.uid,
@@ -135,11 +135,11 @@ export default function ChatPage() {
 
   async function handleDeleteConversation() {
     if (!user || !db) return
-    if (!confirm("Are you sure you want to delete your entire chat history? This cannot be undone.")) return
+    if (!confirm("Are you sure you want to delete your entire chat history?")) return
 
     setIsPending(true)
     try {
-      const q = query(collection(db, "chat_messages"), where("chatId", "==", user.uid))
+      const q = query(collection(db, "chat_messages"), where("userId", "==", user.uid))
       const snapshot = await getDocs(q)
       
       const batch = writeBatch(db)
