@@ -62,24 +62,28 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      // Initialize chat user record and the parent chat document
-      const batch = writeBatch(db)
-      
-      const userDocRef = doc(db, "chat_users", userCredential.user.uid)
-      batch.set(userDocRef, {
-        id: userCredential.user.uid,
-        username: username,
-        email: email,
-        joinDate: serverTimestamp()
-      })
+      // Initialize user record and the parent chat document
+      if (db) {
+        const batch = writeBatch(db)
+        
+        // Use the 'users' collection with role logic as requested
+        const userDocRef = doc(db, "users", userCredential.user.uid)
+        batch.set(userDocRef, {
+          uid: userCredential.user.uid,
+          username: username,
+          email: email,
+          role: "user",
+          joinDate: serverTimestamp()
+        })
 
-      const chatDocRef = doc(db, "chats", userCredential.user.uid)
-      batch.set(chatDocRef, {
-        userId: userCredential.user.uid,
-        createdAt: serverTimestamp()
-      })
+        const chatDocRef = doc(db, "chats", userCredential.user.uid)
+        batch.set(chatDocRef, {
+          userId: userCredential.user.uid,
+          createdAt: serverTimestamp()
+        })
 
-      await batch.commit()
+        await batch.commit()
+      }
       toast({ title: "Registration Successful", description: "You can now participate in the chat." })
     } catch (error: any) {
       toast({ variant: "destructive", title: "Registration Failed", description: error.message })

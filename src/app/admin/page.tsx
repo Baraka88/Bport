@@ -32,7 +32,8 @@ import {
   ShieldAlert,
   Unlock,
   Edit2,
-  Check
+  Check,
+  ShieldCheck
 } from "lucide-react"
 
 export default function AdminPage() {
@@ -42,18 +43,18 @@ export default function AdminPage() {
   const [unlocked, setUnlocked] = useState(false)
   const [password, setPassword] = useState("")
 
-  // Edit states for Chat Users
+  // Edit states for Users
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [editUsername, setEditUsername] = useState("")
 
   // Protect queries - only run if system is unlocked
   const imagesQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
-  const chatUsersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "chat_users"), orderBy("joinDate", "desc")) : null, [db, unlocked])
+  const usersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "users"), orderBy("joinDate", "desc")) : null, [db, unlocked])
   const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
 
   // Data
   const { data: images, isLoading: imagesLoading } = useCollection(imagesQuery)
-  const { data: chatUsers, isLoading: chatUsersLoading } = useCollection(chatUsersQuery)
+  const { data: usersData, isLoading: usersLoading } = useCollection(usersQuery)
   const { data: comments, isLoading: commentsLoading } = useCollection(commentsQuery)
 
   // Asset Form
@@ -101,7 +102,7 @@ export default function AdminPage() {
   async function handleUpdateUsername(userId: string) {
     if (!db || !editUsername.trim()) return
     try {
-      await updateDoc(doc(db, "chat_users", userId), { username: editUsername })
+      await updateDoc(doc(db, "users", userId), { username: editUsername })
       setEditingUserId(null)
       toast({ title: "Updated", description: "Username changed." })
     } catch (error) {
@@ -156,7 +157,7 @@ export default function AdminPage() {
       <Tabs defaultValue="chat" className="space-y-10">
         <TabsList className="flex flex-wrap h-auto p-2 bg-secondary rounded-3xl gap-2">
           <TabsTrigger value="chat" className="rounded-2xl px-6 py-3 font-bold flex gap-2">
-            <MessageCircle className="h-4 w-4" /> Chat Users
+            <Users className="h-4 w-4" /> Users
           </TabsTrigger>
           <TabsTrigger value="gallery" className="rounded-2xl px-6 py-3 font-bold flex gap-2">
             <ImageIcon className="h-4 w-4" /> Gallery
@@ -170,12 +171,12 @@ export default function AdminPage() {
           <Card className="rounded-3xl border-none shadow-xl">
             <CardHeader>
               <CardTitle>User Directory</CardTitle>
-              <CardDescription>Manage community members of ChatBRJ</CardDescription>
+              <CardDescription>Manage community members of BRJDEV</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {chatUsersLoading ? <Loader2 className="animate-spin mx-auto text-primary" /> : chatUsers?.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between p-5 bg-secondary/30 rounded-2xl">
+                {usersLoading ? <Loader2 className="animate-spin mx-auto text-primary" /> : usersData?.map((u) => (
+                  <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-secondary/30 rounded-2xl gap-4">
                     <div className="flex items-center gap-4 flex-1">
                       <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center font-black">
                         {u.username?.charAt(0) || "U"}
@@ -195,6 +196,9 @@ export default function AdminPage() {
                         ) : (
                           <div className="flex items-center gap-2">
                             <p className="font-bold">{u.username}</p>
+                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0 h-4">
+                              {u.role || 'user'}
+                            </Badge>
                             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-40 hover:opacity-100" onClick={() => {
                               setEditingUserId(u.id)
                               setEditUsername(u.username || "")
@@ -207,12 +211,12 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="hidden sm:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>
+                      <p className="hidden md:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         className="text-red-500 hover:bg-red-50" 
-                        onClick={() => handleDeleteDoc("chat_users", u.id)}
+                        onClick={() => handleDeleteDoc("users", u.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
