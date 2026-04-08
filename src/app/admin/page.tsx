@@ -47,7 +47,8 @@ export default function AdminPage() {
 
   // Protect queries - only run if system is unlocked
   const imagesQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
-  const usersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "users"), orderBy("role", "asc")) : null, [db, unlocked])
+  // Updated users query to use chat_users ordered by role
+  const usersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "chat_users"), orderBy("role", "asc")) : null, [db, unlocked])
   const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
 
   // Data
@@ -91,7 +92,7 @@ export default function AdminPage() {
 
   function handleDeleteDoc(colName: string, id: string) {
     if (!db) return
-    if (!confirm("Are you sure? This action is permanent and will remove the user from the database.")) return
+    if (!confirm("Are you sure? This action is permanent and will remove the document from the database.")) return
     const docRef = doc(db, colName, id)
     deleteDocumentNonBlocking(docRef)
     toast({ title: "Operation Initiated", description: "Removing document..." })
@@ -100,7 +101,7 @@ export default function AdminPage() {
   async function handleUpdateUsername(userId: string) {
     if (!db || !editUsername.trim()) return
     try {
-      await updateDoc(doc(db, "users", userId), { username: editUsername })
+      await updateDoc(doc(db, "chat_users", userId), { username: editUsername })
       setEditingUserId(null)
       toast({ title: "Updated", description: "Username changed." })
     } catch (error) {
@@ -194,7 +195,7 @@ export default function AdminPage() {
                         ) : (
                           <div className="flex items-center gap-2">
                             <p className="font-bold">{u.username || "Anonymous User"}</p>
-                            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0 h-4">
+                            <Badge variant={(u.role?.trim() === 'admin') ? 'default' : 'secondary'} className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0 h-4">
                               {u.role || 'user'}
                             </Badge>
                             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-40 hover:opacity-100" onClick={() => {
@@ -209,12 +210,12 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      {u.joinDate && <p className="hidden md:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>}
+                      {u.joinDate && <p className="hidden md:block text-xs font-medium opacity-60">Joined: {new Date(u.joinDate).toLocaleDateString()}</p>}
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         className="text-red-500 hover:bg-red-50" 
-                        onClick={() => handleDeleteDoc("users", u.id)}
+                        onClick={() => handleDeleteDoc("chat_users", u.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

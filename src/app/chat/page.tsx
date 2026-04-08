@@ -15,7 +15,7 @@ import {
   signOut,
   updateProfile 
 } from "firebase/auth"
-import { collection, addDoc, doc, setDoc, serverTimestamp, query, orderBy, limit, getDocs, writeBatch } from "firebase/firestore"
+import { collection, addDoc, doc, setDoc, serverTimestamp, query, orderBy, limit, getDocs, writeBatch, where } from "firebase/firestore"
 import { askChatBot } from "@/app/actions/portfolio-actions"
 
 export default function ChatPage() {
@@ -30,10 +30,12 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
+  // Query chat_messages filtered by chatId (which is the user's uid)
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !user) return null
     return query(
-      collection(db, "chats", user.uid, "messages"), 
+      collection(db, "chat_messages"), 
+      where("chatId", "==", user.uid),
       orderBy("timestamp", "desc"), 
       limit(100)
     )
@@ -64,14 +66,13 @@ export default function ChatPage() {
       if (db) {
         const batch = writeBatch(db)
         
-        // Use the 'users' collection with role logic as requested
-        const userDocRef = doc(db, "users", userCredential.user.uid)
+        // Write to chat_users collection as per requested structure
+        const userDocRef = doc(db, "chat_users", userCredential.user.uid)
         batch.set(userDocRef, {
-          uid: userCredential.user.uid,
-          username: username,
           email: email,
+          joinDate: new Date().toISOString(),
           role: "user",
-          joinDate: serverTimestamp()
+          username: username
         })
 
         // Initialize user's chat document to satisfy security rules
@@ -102,23 +103,29 @@ export default function ChatPage() {
       // Ensure parent chat document exists (idempotent)
       await setDoc(doc(db, "chats", user.uid), {
         userId: user.uid,
-        lastMessageAt: serverTimestamp()
+        createdAt: serverTimestamp()
       }, { merge: true })
 
-      await addDoc(collection(db, "chats", user.uid, "messages"), {
-        senderName: user.displayName || "You",
+      // Add user message to chat_messages
+      await addDoc(collection(db, "chat_messages"), {
+        chatId: user.uid,
+        chatUserId: user.uid,
         messageContent: userMsgContent,
+        role: "user",
         timestamp: serverTimestamp(),
-        isAI: false
+        userId: user.uid
       })
 
       const aiResponse = await askChatBot(userMsgContent)
 
-      await addDoc(collection(db, "chats", user.uid, "messages"), {
-        senderName: "ChatBRJ AI",
+      // Add AI response to chat_messages
+      await addDoc(collection(db, "chat_messages"), {
+        chatId: user.uid,
+        chatUserId: "AI_ASSISTANT",
         messageContent: aiResponse,
+        role: "assistant",
         timestamp: serverTimestamp(),
-        isAI: true
+        userId: user.uid
       })
 
     } catch (error) {
@@ -132,7 +139,7 @@ export default function ChatPage() {
 
     setIsPending(true)
     try {
-      const q = query(collection(db, "chats", user.uid, "messages"))
+      const q = query(collection(db, "chat_messages"), where("chatId", "==", user.uid))
       const snapshot = await getDocs(q)
       
       const batch = writeBatch(db)
@@ -309,7 +316,7 @@ export default function ChatPage() {
       <Card className="flex-1 rounded-[2rem] border-none shadow-2xl flex flex-col overflow-hidden bg-card/50 backdrop-blur-xl border border-white/10">
         <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 flex flex-col-reverse">
           {messages && messages.map((msg) => {
-            const isMe = !msg.isAI;
+            const isMe = msg.role === "user";
             
             return (
               <div 

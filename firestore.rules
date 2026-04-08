@@ -1,31 +1,48 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper to check if the user is an admin
+    // Note: User sample provided role as "admin " (with a space)
     function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+      return request.auth != null && 
+        (get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin" || 
+         get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == "admin ");
     }
 
-    // USERS: Admins can see all, users can manage their own profile for auth reasons.
-    match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if request.auth != null && request.auth.uid == userId;
-      allow delete: if request.auth != null && isAdmin();
+    // -------------------
+    // chat_users collection
+    // -------------------
+    match /chat_users/{userId} {
+      allow read, write: if request.auth != null && (
+        isAdmin() ||
+        request.auth.uid == userId
+      );
     }
 
-    // CHATS: Owner or admin access.
+    // -------------------
+    // chats collection
+    // -------------------
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && (request.auth.uid == chatId || isAdmin());
-
-      // Messages inside chat: Admin or the owner of the parent chat.
-      match /messages/{messageId} {
-        allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == chatId);
-      }
+      allow read, write: if request.auth != null && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid
+      );
     }
 
-    // PUBLIC COLLECTIONS: Always readable by anyone.
+    // -------------------
+    // chat_messages collection
+    // -------------------
+    match /chat_messages/{messageId} {
+      allow read, write: if request.auth != null && (
+        isAdmin() ||
+        get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid
+      );
+    }
+
+    // PUBLIC COLLECTIONS: Always readable by anyone for portfolio visibility
     match /projects/{id} { allow read: if true; }
     match /images/{id} { allow read: if true; }
     match /technologies/{id} { allow read: if true; }
@@ -34,15 +51,19 @@ service cloud.firestore {
     match /comments/{id} { 
       allow read: if true;
       allow write: if request.auth != null;
-      allow delete: if request.auth != null && isAdmin();
+      allow delete: if isAdmin();
     }
 
-    // COLLABORATION INQUIRIES: Admin or owner.
-    match /inquiries_collaboration/{docId} {
-      allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.userId);
+    // INQUIRIES
+    match /inquiries_collaboration/{inquiryId} {
+      allow read, write: if request.auth != null && (
+        isAdmin() ||
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId
+      );
     }
 
-    // Block everything else by default
+    // Block everything else
     match /{document=**} {
       allow read, write: if false;
     }
