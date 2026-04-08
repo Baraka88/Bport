@@ -16,7 +16,7 @@ export function ContactHome() {
           </p>
           <div className="flex flex-wrap justify-center gap-6 pt-4">
             <Button size="lg" variant="secondary" className="rounded-full px-8 py-6 text-primary font-bold shadow-xl" asChild>
-              <Link href="/contact">Get Contact Details</Link>
+              <Link href="/contact">View Contact Details</Link>
             </Button>
             <div className="flex gap-8">
               <div className="flex flex-col items-center">

@@ -37,21 +37,6 @@ export default function CollabPage() {
               </div>
             </div>
           </div>
-
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Professional Profiles</h3>
-            <div className="flex flex-wrap gap-4">
-              <Button variant="outline" className="rounded-full gap-2 border-primary text-primary hover:bg-primary hover:text-white" asChild>
-                <a href="https://github.com/baraka88" target="_blank" rel="noopener noreferrer"><Github className="h-4 w-4" /> GitHub</a>
-              </Button>
-              <Button variant="outline" className="rounded-full gap-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" asChild>
-                <a href="https://linkedin.com/in/baraka-junior" target="_blank" rel="noopener noreferrer"><Linkedin className="h-4 w-4" /> LinkedIn</a>
-              </Button>
-              <Button variant="outline" className="rounded-full gap-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white" asChild>
-                <a href="https://instagram.com/barakaruzibiza680" target="_blank" rel="noopener noreferrer"><Instagram className="h-4 w-4" /> Instagram</a>
-              </Button>
-            </div>
-          </div>
         </div>
 
         <div className="relative">
@@ -62,7 +47,6 @@ export default function CollabPage() {
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-110"
               unoptimized
-              data-ai-hint="professional portrait"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
             <div className="absolute bottom-8 left-8 right-8 text-white">

@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Mail, Phone, MapPin, Instagram, Linkedin, Github, MessageSquare } from "lucide-react"
+import { Mail, Phone, Instagram, Linkedin, Github, MessageSquare, MapPin } from "lucide-react"
 import React from "react"
 import { Button } from "@/components/ui/button"
 
@@ -23,8 +23,8 @@ export default function ContactPage() {
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold">Email</h3>
-              <p className="text-muted-foreground text-sm">Professional Inquiries Only</p>
-              <p className="text-primary font-bold break-all">Available via WhatsApp for faster response</p>
+              <p className="text-muted-foreground text-sm">Professional Inquiries</p>
+              <p className="text-primary font-bold break-all">barakaruzibiza680@gmail.com</p>
             </div>
           </Card>
 
@@ -53,8 +53,8 @@ export default function ContactPage() {
               <a href="https://instagram.com/barakaruzibiza680" target="_blank" rel="noopener noreferrer"><Instagram className="h-6 w-6" /></a>
             </Button>
           </div>
-          <p className="text-lg text-muted-foreground font-medium">
-            Based in Kigali, Rwanda. I am most responsive via direct messaging.
+          <p className="text-lg text-muted-foreground font-medium flex items-center justify-center gap-2">
+            <MapPin className="h-5 w-5 text-primary" /> Based in Kigali, Rwanda.
           </p>
         </div>
       </div>

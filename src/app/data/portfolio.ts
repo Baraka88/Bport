@@ -1,5 +1,3 @@
-import { PlaceHolderImages } from "@/app/lib/placeholder-images";
-
 export interface Project {
   id: string;
   title: string;
@@ -37,7 +35,7 @@ export const PROJECTS: Project[] = [
     description: "Real-time stock tracking and automated alerts for retail businesses.",
     longDescription: "A comprehensive solution for managing inventory across multiple warehouses. Built with Node.js and MySQL, it features a robust dashboard for monitoring stock levels, generating reports, and predicting reorder points.",
     tech: ["Node.js", "MySQL", "Vue.js", "System Analysis"],
-    imageUrl: "https://picsum.photos/seed/inv/800/600",
+    imageUrl: "https://picsum.photos/seed/inventory/800/600",
     liveUrl: "#",
     repoUrl: "#"
   },
@@ -47,7 +45,7 @@ export const PROJECTS: Project[] = [
     description: "An intelligent AI assistant powered by Genkit and Gemini.",
     longDescription: "Integrated directly into this portfolio, ChatBRJ AI uses advanced RAG techniques to provide instant answers about my professional background, skills, and projects.",
     tech: ["Genkit", "Gemini AI", "TypeScript", "Firebase"],
-    imageUrl: "https://picsum.photos/seed/ai/800/600",
+    imageUrl: "https://picsum.photos/seed/chat-ai/800/600",
     liveUrl: "/chat",
     repoUrl: "#"
   },
@@ -57,7 +55,7 @@ export const PROJECTS: Project[] = [
     description: "Digital storefront and backend management for booksellers.",
     longDescription: "This project addresses the unique needs of independent bookstores, including ISBN integration, customer loyalty tracking, and secure payment processing using modern web technologies.",
     tech: ["PHP", "MySQL", "Tailwind CSS", "REST APIs"],
-    imageUrl: "https://picsum.photos/seed/book/800/600",
+    imageUrl: "https://picsum.photos/seed/bookstore/800/600",
     liveUrl: "#",
     repoUrl: "#"
   }
@@ -67,17 +65,17 @@ export const SKILLS: Skill[] = [
   { 
     category: "Backend", 
     items: ["Node.js", "PHP", "MySQL", "REST APIs"],
-    imageUrl: "https://picsum.photos/seed/backend/400/300"
+    imageUrl: "https://picsum.photos/seed/backend-dev/400/300"
   },
   { 
     category: "Frontend", 
     items: ["Vue.js", "React", "Tailwind CSS", "TypeScript"],
-    imageUrl: "https://picsum.photos/seed/frontend/400/300"
+    imageUrl: "https://picsum.photos/seed/frontend-dev/400/300"
   },
   { 
     category: "Systems", 
     items: ["System Analysis", "Architecture Design", "Agile", "Docker"],
-    imageUrl: "https://picsum.photos/seed/systems/400/300"
+    imageUrl: "https://picsum.photos/seed/systems-analysis/400/300"
   }
 ];
 
