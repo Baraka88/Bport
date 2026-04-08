@@ -8,20 +8,20 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
-    // USERS: Users can manage their own profile, admins can see all.
+    // USERS: Admins can see all, users can manage their own profile for auth reasons.
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow write: if request.auth != null && request.auth.uid == userId;
       allow delete: if request.auth != null && isAdmin();
     }
 
-    // CHATS: Only owner or admin can read/write chat headers.
+    // CHATS: Owner or admin access.
     match /chats/{chatId} {
       allow read, write: if request.auth != null && (request.auth.uid == chatId || isAdmin());
 
-      // Messages inside chat: Only owner (via parent chatId check) or admin can read/write.
+      // Messages inside chat: Admin or the owner of the parent chat.
       match /messages/{messageId} {
-        allow read, write: if request.auth != null && (request.auth.uid == chatId || isAdmin());
+        allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == chatId);
       }
     }
 
@@ -37,7 +37,7 @@ service cloud.firestore {
       allow delete: if request.auth != null && isAdmin();
     }
 
-    // INQUIRIES
+    // COLLABORATION INQUIRIES: Admin or owner.
     match /inquiries_collaboration/{docId} {
       allow read, write: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.userId);
     }

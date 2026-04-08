@@ -30,7 +30,6 @@ export default function ChatPage() {
   const [isPending, setIsPending] = React.useState(false)
   const [message, setMessage] = React.useState("")
 
-  // Filter messages specifically for the logged-in user using the nested structure
   const messagesQuery = useMemoFirebase(() => {
     if (!db || !user) return null
     return query(
@@ -62,7 +61,6 @@ export default function ChatPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       await updateProfile(userCredential.user, { displayName: username })
       
-      // Initialize user record and the parent chat document
       if (db) {
         const batch = writeBatch(db)
         
@@ -76,6 +74,7 @@ export default function ChatPage() {
           joinDate: serverTimestamp()
         })
 
+        // Initialize user's chat document to satisfy security rules
         const chatDocRef = doc(db, "chats", userCredential.user.uid)
         batch.set(chatDocRef, {
           userId: userCredential.user.uid,
@@ -106,7 +105,6 @@ export default function ChatPage() {
         lastMessageAt: serverTimestamp()
       }, { merge: true })
 
-      // 1. Add user message to nested Firestore path
       await addDoc(collection(db, "chats", user.uid, "messages"), {
         senderName: user.displayName || "You",
         messageContent: userMsgContent,
@@ -114,10 +112,8 @@ export default function ChatPage() {
         isAI: false
       })
 
-      // 2. Trigger AI Bot Response
       const aiResponse = await askChatBot(userMsgContent)
 
-      // 3. Add AI message to nested Firestore path
       await addDoc(collection(db, "chats", user.uid, "messages"), {
         senderName: "ChatBRJ AI",
         messageContent: aiResponse,

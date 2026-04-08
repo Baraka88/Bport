@@ -24,7 +24,6 @@ import {
   LayoutDashboard, 
   ImageIcon, 
   Users, 
-  MessageCircle, 
   MessageSquare,
   Trash2,
   Plus,
@@ -32,8 +31,7 @@ import {
   ShieldAlert,
   Unlock,
   Edit2,
-  Check,
-  ShieldCheck
+  Check
 } from "lucide-react"
 
 export default function AdminPage() {
@@ -49,7 +47,7 @@ export default function AdminPage() {
 
   // Protect queries - only run if system is unlocked
   const imagesQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "images"), orderBy("uploadDate", "desc")) : null, [db, unlocked])
-  const usersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "users"), orderBy("joinDate", "desc")) : null, [db, unlocked])
+  const usersQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "users"), orderBy("role", "asc")) : null, [db, unlocked])
   const commentsQuery = useMemoFirebase(() => (db && unlocked) ? query(collection(db, "comments"), orderBy("submissionDate", "desc")) : null, [db, unlocked])
 
   // Data
@@ -93,10 +91,10 @@ export default function AdminPage() {
 
   function handleDeleteDoc(colName: string, id: string) {
     if (!db) return
-    if (!confirm("Are you sure? This action is permanent and will remove the document from the database.")) return
+    if (!confirm("Are you sure? This action is permanent and will remove the user from the database.")) return
     const docRef = doc(db, colName, id)
     deleteDocumentNonBlocking(docRef)
-    toast({ title: "Operation Initiated", description: "Deleting document..." })
+    toast({ title: "Operation Initiated", description: "Removing document..." })
   }
 
   async function handleUpdateUsername(userId: string) {
@@ -170,8 +168,8 @@ export default function AdminPage() {
         <TabsContent value="chat" className="space-y-6">
           <Card className="rounded-3xl border-none shadow-xl">
             <CardHeader>
-              <CardTitle>User Directory</CardTitle>
-              <CardDescription>Manage community members of BRJDEV</CardDescription>
+              <CardTitle>Community Members</CardTitle>
+              <CardDescription>Manage your ChatBRJ user base</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -195,7 +193,7 @@ export default function AdminPage() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <p className="font-bold">{u.username}</p>
+                            <p className="font-bold">{u.username || "Anonymous User"}</p>
                             <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="text-[10px] uppercase font-bold tracking-widest px-1.5 py-0 h-4">
                               {u.role || 'user'}
                             </Badge>
@@ -211,7 +209,7 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <p className="hidden md:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>
+                      {u.joinDate && <p className="hidden md:block text-xs font-medium opacity-60">Joined: {u.joinDate?.toDate().toLocaleDateString()}</p>}
                       <Button 
                         variant="ghost" 
                         size="icon" 

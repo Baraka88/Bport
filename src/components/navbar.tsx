@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, MessageCircle, Phone } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, MessageCircle } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -14,7 +14,6 @@ const navItems = [
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Gallery", href: "/gallery", icon: ImageIcon },
   { name: "ChatBRJ", href: "/chat", icon: MessageCircle },
-  { name: "Contact", href: "/contact", icon: Phone },
 ]
 
 export function Navbar() {

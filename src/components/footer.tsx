@@ -1,4 +1,4 @@
-import { Github, Linkedin, Instagram, Mail, Phone, Lock } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Lock } from "lucide-react"
 import Link from "next/link"
 
 export function Footer() {
@@ -25,7 +25,6 @@ export function Footer() {
               <li><Link href="/gallery" className="hover:text-primary transition-colors">Gallery</Link></li>
               <li><Link href="/#projects" className="hover:text-primary transition-colors">Projects</Link></li>
               <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
-              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact</Link></li>
             </ul>
           </div>
 
