@@ -1,11 +1,14 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import React from "react"
-import { Github, Linkedin, Instagram, Users, Rocket, Mail, Phone } from "lucide-react"
+import { Users, Rocket, Mail, MessageCircle } from "lucide-react"
 
 export default function CollabPage() {
+  const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";
+
   return (
     <div className="container mx-auto px-4 py-20 space-y-24">
       <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -25,11 +28,11 @@ export default function CollabPage() {
                 <Mail className="text-primary h-6 w-6" />
                 <div>
                   <p className="text-sm font-bold text-muted-foreground">Email</p>
-                  <p className="font-bold">barakaruzibiza680@gmail.com</p>
+                  <p className="font-bold">Reach out via Email</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 p-4 bg-secondary rounded-2xl">
-                <Phone className="text-accent h-6 w-6" />
+                <MessageCircle className="text-accent h-6 w-6" />
                 <div>
                   <p className="text-sm font-bold text-muted-foreground">WhatsApp</p>
                   <p className="font-bold">0732786495</p>
@@ -42,7 +45,7 @@ export default function CollabPage() {
         <div className="relative">
           <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative group">
             <Image
-              src="https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png"
+              src={profileImg}
               alt="Baraka Junior Profile"
               fill
               className="object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -63,9 +66,14 @@ export default function CollabPage() {
         <p className="text-xl opacity-90 max-w-2xl mx-auto">
           If you have a project idea or a partnership proposal, reaching out directly via WhatsApp or Email is the fastest way to get in touch.
         </p>
-        <Button size="lg" variant="secondary" className="rounded-full px-12 py-8 text-xl font-bold" onClick={() => window.location.href = 'mailto:barakaruzibiza680@gmail.com'}>
-          Send an Email
-        </Button>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button size="lg" variant="secondary" className="rounded-full px-12 py-8 text-xl font-bold" asChild>
+            <a href="mailto:barakaruzibiza680@gmail.com">Send an Email</a>
+          </Button>
+          <Button size="lg" variant="outline" className="rounded-full px-12 py-8 text-xl font-bold bg-white/10 hover:bg-white/20 border-white/20" asChild>
+            <a href="https://wa.me/250732786495" target="_blank">Chat on WhatsApp</a>
+          </Button>
+        </div>
       </div>
     </div>
   )

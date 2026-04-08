@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -7,10 +8,8 @@ service cloud.firestore {
       return request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    // New Chats structure as requested
+    // Chat structure supporting user siloing and admin access
     match /chats/{chatId} {
-      // Allow user to read/write their own chat document
-      // chatId usually matches uid for simplicity in this implementation
       allow read, write: if request.auth != null && (request.auth.uid == chatId || isAdmin());
 
       // Messages inside chat
@@ -19,7 +18,7 @@ service cloud.firestore {
       }
     }
 
-    // Legacy/Shared collections for BRJDEV
+    // Chat users directory
     match /chat_users/{userId} {
       allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
@@ -31,7 +30,7 @@ service cloud.firestore {
     match /certificates/{id} { allow read: if true; }
     match /services/{id} { allow read: if true; }
 
-    // Admin protected areas
+    // Admin moderated areas
     match /inquiries_hire_me/{id} { allow read, write: if isAdmin(); }
     match /inquiries_collaboration/{id} { allow read, write: if isAdmin(); }
     match /comments/{id} { 
@@ -40,12 +39,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Admin roles management
+    // Admin roles management (Read-only for authenticated users to check existence)
     match /roles_admin/{id} {
       allow read: if request.auth != null;
     }
 
-    // Default deny for everything else (Safe default)
+    // Default deny for everything else unless admin
     match /{document=**} {
       allow read, write: if isAdmin();
     }
