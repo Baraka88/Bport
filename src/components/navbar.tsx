@@ -1,10 +1,9 @@
-
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users, MessageSquare } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -14,6 +13,7 @@ const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Gallery", href: "/gallery", icon: ImageIcon },
+  { name: "Comments", href: "/comments", icon: MessageSquare },
   { name: "Collaborate", href: "/collab", icon: Users },
 ]
 
@@ -83,7 +83,10 @@ export function Navbar() {
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center space-x-2 text-lg font-medium py-2 border-b"
+                    className={cn(
+                      "flex items-center space-x-2 text-lg font-medium py-2 border-b",
+                      pathname === item.href && "text-primary"
+                    )}
                   >
                     <item.icon className="h-5 w-5 text-primary" />
                     <span>{item.name}</span>
