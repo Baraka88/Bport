@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Code, Briefcase, Mail, Image as ImageIcon, MessageCircle, Zap } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Code, Briefcase, Image as ImageIcon, MessageCircle } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -14,7 +15,6 @@ const navItems = [
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Gallery", href: "/gallery", icon: ImageIcon },
   { name: "Collab", href: "/collab", icon: Code },
-  { name: "Contact", href: "/contact", icon: Mail },
   { name: "ChatBRJ", href: "/chat", icon: MessageCircle },
 ]
 
@@ -45,11 +45,6 @@ export function Navbar() {
             </Link>
           ))}
           <div className="h-6 w-px bg-border mx-2" />
-          <Button variant="default" size="sm" className="rounded-full gap-2" asChild>
-            <Link href="/contact">
-              <Zap className="h-4 w-4 fill-current" /> Hire Me Now
-            </Link>
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -94,11 +89,6 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
-                <Button className="w-full rounded-xl py-6 mt-4 gap-2" asChild onClick={() => setIsOpen(false)}>
-                  <Link href="/contact">
-                    <Zap className="h-5 w-5" /> Hire Me Now
-                  </Link>
-                </Button>
               </nav>
             </SheetContent>
           </Sheet>

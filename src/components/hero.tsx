@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { ChevronRight, Sparkles } from "lucide-react"
+import { ChevronRight, Sparkles, MessageCircle } from "lucide-react"
 import Link from "next/link"
 
 const mainMessages = [
@@ -76,12 +77,13 @@ export function Hero() {
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="rounded-full px-10 py-8 text-xl font-bold border-2 hover:bg-secondary/50 transition-all" asChild>
-              <Link href="/contact">Get in Touch</Link>
+              <a href="https://wa.me/250732786495" target="_blank">
+                <MessageCircle className="mr-2 h-6 w-6" /> WhatsApp Me
+              </a>
             </Button>
           </div>
         </div>
 
-        {/* Hero Visual - Single Image focus */}
         <div className="relative group perspective-1000">
           <div className="absolute -inset-4 bg-primary/20 rounded-[3rem] blur-3xl group-hover:bg-primary/30 transition-all duration-1000" />
           <div className="relative aspect-[4/5] md:aspect-square w-full max-w-2xl mx-auto rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border-8 border-background/50 backdrop-blur-sm group-hover:rotate-1 transition-transform duration-1000">
