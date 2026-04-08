@@ -14,6 +14,7 @@ export interface Project {
 export interface Skill {
   category: string;
   items: string[];
+  imageUrl: string;
 }
 
 export interface Certificate {
@@ -33,8 +34,8 @@ export const PROJECTS: Project[] = [
   {
     id: "inventory-mgmt",
     title: "Inventory Management System",
-    description: "A robust real-time tracking solution for retail and warehouses with automated stock alerts.",
-    longDescription: "This system provides end-to-end visibility into supply chains. Built with Node.js and MySQL, it features a sophisticated dashboard for monitoring stock levels, generating reports, and predicting reorder points using historical data.",
+    description: "Real-time stock tracking and automated alerts for retail businesses.",
+    longDescription: "A comprehensive solution for managing inventory across multiple warehouses. Built with Node.js and MySQL, it features a robust dashboard for monitoring stock levels, generating reports, and predicting reorder points.",
     tech: ["Node.js", "MySQL", "Vue.js", "System Analysis"],
     imageUrl: "https://picsum.photos/seed/inv/800/600",
     liveUrl: "#",
@@ -43,8 +44,8 @@ export const PROJECTS: Project[] = [
   {
     id: "chatbrj-ai",
     title: "ChatBRJ AI Assistant",
-    description: "An intelligent chatbot powered by Genkit and Gemini to handle portfolio inquiries and user interaction.",
-    longDescription: "ChatBRJ AI is an agentic chat system integrated directly into this portfolio. It uses RAG-like context to answer questions about skills and projects, providing a seamless bridge between me and potential clients.",
+    description: "An intelligent AI assistant powered by Genkit and Gemini.",
+    longDescription: "Integrated directly into this portfolio, ChatBRJ AI uses advanced RAG techniques to provide instant answers about my professional background, skills, and projects.",
     tech: ["Genkit", "Gemini AI", "TypeScript", "Firebase"],
     imageUrl: "https://picsum.photos/seed/ai/800/600",
     liveUrl: "/chat",
@@ -53,8 +54,8 @@ export const PROJECTS: Project[] = [
   {
     id: "bookstore-mgmt",
     title: "Book Store Management System",
-    description: "A comprehensive digital storefront and backend management system for independent booksellers.",
-    longDescription: "This project focuses on the unique needs of bookstore owners, including ISBN integration, customer loyalty tracking, and secure payment processing. Developed using the LAMP stack with a focus on ease of use.",
+    description: "Digital storefront and backend management for booksellers.",
+    longDescription: "This project addresses the unique needs of independent bookstores, including ISBN integration, customer loyalty tracking, and secure payment processing using modern web technologies.",
     tech: ["PHP", "MySQL", "Tailwind CSS", "REST APIs"],
     imageUrl: "https://picsum.photos/seed/book/800/600",
     liveUrl: "#",
@@ -63,9 +64,21 @@ export const PROJECTS: Project[] = [
 ];
 
 export const SKILLS: Skill[] = [
-  { category: "Backend", items: ["Node.js", "PHP", "MySQL", "REST APIs"] },
-  { category: "Frontend", items: ["Vue.js", "React", "Tailwind CSS", "TypeScript"] },
-  { category: "Systems", items: ["System Analysis", "Architecture Design", "Agile", "Docker"] }
+  { 
+    category: "Backend", 
+    items: ["Node.js", "PHP", "MySQL", "REST APIs"],
+    imageUrl: "https://picsum.photos/seed/backend/400/300"
+  },
+  { 
+    category: "Frontend", 
+    items: ["Vue.js", "React", "Tailwind CSS", "TypeScript"],
+    imageUrl: "https://picsum.photos/seed/frontend/400/300"
+  },
+  { 
+    category: "Systems", 
+    items: ["System Analysis", "Architecture Design", "Agile", "Docker"],
+    imageUrl: "https://picsum.photos/seed/systems/400/300"
+  }
 ];
 
 export const CERTIFICATES: Certificate[] = [

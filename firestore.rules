@@ -3,17 +3,17 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * BRJDEV ULTIMATE PERMISSIVE RULES (Prototype Mode)
+     * BRJDEV PROTOTYPE RULES
      * 
-     * This set of rules is designed to ensure NO permission errors during development.
-     * It allows any authenticated user to read and write to all collections.
+     * Allows any authenticated user to read and write to all collections.
+     * This ensures no permission errors occur during development for logged-in users.
      */
 
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
     
-    // Explicitly allow public collections for unauthenticated users if necessary
+    // Explicitly allow public read access for unauthenticated visitors to key areas
     match /projects/{id} { allow read: if true; }
     match /images/{id} { allow read: if true; }
     match /technologies/{id} { allow read: if true; }
