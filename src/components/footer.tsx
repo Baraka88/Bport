@@ -1,14 +1,32 @@
-
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail, ShieldAlert } from "lucide-react"
 import Link from "next/link"
 import React from "react"
+import { useUser, useFirestore } from "@/firebase"
+import { doc, getDoc } from "firebase/firestore"
 
 export function Footer() {
   const [showEmail, setShowEmail] = React.useState(false)
+  const [isAdmin, setIsAdmin] = React.useState(false)
+  const { user } = useUser()
+  const db = useFirestore()
   const emailUser = "barakaruzibiza680"
   const emailDomain = "gmail.com"
+
+  React.useEffect(() => {
+    if (user && db) {
+      const checkRole = async () => {
+        const docRef = doc(db, "chat_users", user.uid)
+        const snap = await getDoc(docRef)
+        if (snap.exists()) {
+          const role = snap.data().role
+          setIsAdmin(role === 'admin' || role === 'admin ')
+        }
+      }
+      checkRole()
+    }
+  }, [user, db])
 
   return (
     <footer className="bg-card border-t py-12">
@@ -64,6 +82,13 @@ export function Footer() {
         </div>
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} BRJDEV. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <Link href="/admin" className="p-1.5 rounded-full hover:bg-secondary text-muted-foreground hover:text-primary transition-colors" title="Admin Locker">
+                <ShieldAlert className="h-4 w-4" />
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </footer>

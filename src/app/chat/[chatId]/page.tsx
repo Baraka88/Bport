@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,6 +19,24 @@ export default function ChatConversationPage() {
 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  // Check admin role to determine query strategy
+  useEffect(() => {
+    if (user && db) {
+      const checkRole = async () => {
+        const docRef = doc(db, 'chat_users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const role = docSnap.data().role;
+          setIsAdmin(role === 'admin' || role === 'admin ');
+        } else {
+          setIsAdmin(false);
+        }
+      };
+      checkRole();
+    }
+  }, [user, db]);
 
   const chatRef = useMemoFirebase(() => {
     if (!db || !chatId) return null;
@@ -28,14 +46,25 @@ export default function ChatConversationPage() {
   const { data: chatData, isLoading: chatLoading } = useDoc(chatRef);
 
   const messagesQuery = useMemoFirebase(() => {
-    if (!db || !chatId) return null;
-    // Query filtered by chatId as per user rules
+    if (!db || !chatId || !user || isAdmin === null) return null;
+    
+    // If Admin, query all messages for this chat.
+    // If User, query messages for this chat where they are the owner (as per rules requirements for listing)
+    if (isAdmin) {
+      return query(
+        collection(db, 'chat_messages'),
+        where('chatId', '==', chatId),
+        orderBy('createdAt', 'asc')
+      );
+    }
+
     return query(
       collection(db, 'chat_messages'),
       where('chatId', '==', chatId),
-      orderBy('timestamp', 'asc')
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'asc')
     );
-  }, [db, chatId]);
+  }, [db, chatId, user, isAdmin]);
 
   const { data: messages } = useCollection(messagesQuery);
 
@@ -56,18 +85,19 @@ export default function ChatConversationPage() {
     const messagesRef = collection(db, 'chat_messages');
 
     // Add user message to Firestore
+    // Structure: userId, role, text, createdAt, chatId
     addDoc(messagesRef, {
       chatId: chatId as string,
       userId: user.uid,
       role: 'user',
-      messageContent: userText,
-      timestamp: serverTimestamp(),
+      text: userText,
+      createdAt: serverTimestamp(),
     });
 
     try {
       const history = (messages || []).map(m => ({
         role: m.role as 'user' | 'ai',
-        text: m.messageContent,
+        text: m.text,
       })).slice(-10);
 
       const response = await getChatResponse({ message: userText, history });
@@ -75,10 +105,10 @@ export default function ChatConversationPage() {
       // Add AI response to Firestore
       addDoc(messagesRef, {
         chatId: chatId as string,
-        userId: user.uid, // Still owned by the user context
+        userId: user.uid, // Owned by the conversation owner
         role: 'ai',
-        messageContent: response.text,
-        timestamp: serverTimestamp(),
+        text: response.text,
+        createdAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('AI Error:', error);
@@ -93,7 +123,7 @@ export default function ChatConversationPage() {
   };
 
   if (chatLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!chatData) return <div className="flex-1 flex items-center justify-center">Conversation not found.</div>;
+  if (!chatData) return <div className="flex-1 flex items-center justify-center">Conversation not found or access denied.</div>;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
@@ -125,12 +155,12 @@ export default function ChatConversationPage() {
                 </div>
                 <div className="space-y-1">
                   <div className={cn(
-                    "px-4 py-3 rounded-2xl text-sm leading-relaxed relative",
+                    "px-4 py-3 rounded-2xl text-sm leading-relaxed relative whitespace-pre-wrap",
                     msg.role === 'user' 
                       ? "bg-primary text-primary-foreground rounded-tr-none" 
                       : "bg-secondary/50 rounded-tl-none"
                   )}>
-                    {msg.messageContent}
+                    {msg.text}
                     <button 
                       onClick={() => deleteMessage(msg.id)}
                       className="absolute top-0 -right-8 p-1 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
@@ -139,7 +169,7 @@ export default function ChatConversationPage() {
                     </button>
                   </div>
                   <span className="text-[10px] text-muted-foreground px-1">
-                    {msg.timestamp?.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                    {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
                   </span>
                 </div>
               </div>

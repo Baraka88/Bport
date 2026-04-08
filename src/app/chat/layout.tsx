@@ -5,7 +5,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebas
 import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -137,6 +137,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
               ))}
             </div>
           </ScrollArea>
+
+          <div className="pt-4 border-t border-primary/10">
+            <Link 
+              href="/comments"
+              className="flex items-center px-3 py-3 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all font-bold text-sm"
+            >
+              <MessageCircle className="h-4 w-4 mr-3" /> Community Wall
+            </Link>
+          </div>
         </div>
       </aside>
 

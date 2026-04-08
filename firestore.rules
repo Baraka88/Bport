@@ -7,7 +7,9 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return request.auth != null && (getRole() == "admin" || getRole() == "admin ");
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/chat_users/$(request.auth.uid)) &&
+             (getRole() == "admin" || getRole() == "admin ");
     }
 
     // -------------------
@@ -38,8 +40,10 @@ service cloud.firestore {
       allow read, write: if request.auth != null && (
         isAdmin() ||
         // User can read/write messages in their own chats
-        get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid ||
-        get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid
+        (exists(/databases/$(database)/documents/chats/$(resource.data.chatId)) && 
+         get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid) ||
+        (exists(/databases/$(database)/documents/chats/$(request.resource.data.chatId)) && 
+         get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.userId == request.auth.uid)
       );
     }
 

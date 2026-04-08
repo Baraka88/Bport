@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -35,8 +34,9 @@ export default function AdminPage() {
     if (!isUserLoading && !user) router.push('/auth');
     if (user && db) {
       const checkAdmin = async () => {
-        const userDoc = await getDocs(query(collection(db, 'chat_users'), where('email', '==', user.email)));
-        if (!userDoc.empty && userDoc.docs[0].data().role === 'admin') {
+        const docRef = doc(db, 'chat_users', user.uid);
+        const snap = await getDocs(query(collection(db, 'chat_users'), where('email', '==', user.email)));
+        if (!snap.empty && (snap.docs[0].data().role === 'admin' || snap.docs[0].data().role === 'admin ')) {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
@@ -58,7 +58,7 @@ export default function AdminPage() {
   const { data: allInquiries } = useCollection(hireQuery);
 
   const exportToCSV = (data: any[], filename: string) => {
-    if (!data.length) return;
+    if (!data || !data.length) return;
     const headers = Object.keys(data[0]);
     const csv = [
       headers.join(','),
@@ -116,19 +116,19 @@ export default function AdminPage() {
             />
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allUsers?.filter(u => u.username.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())).map(u => (
+            {allUsers?.filter(u => u.username?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())).map(u => (
               <Card key={u.id} className="rounded-2xl border-none shadow-lg overflow-hidden">
                 <CardHeader className="bg-secondary/30 pb-4">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg font-bold truncate">{u.username}</CardTitle>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${u.role === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${u.role === 'admin' || u.role === 'admin ' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
                       {u.role}
                     </span>
                   </div>
                   <CardDescription className="truncate">{u.email}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-4 flex justify-between items-center">
-                  <span className="text-[10px] text-muted-foreground font-medium">Joined: {new Date(u.joinDate).toLocaleDateString()}</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">Joined: {u.joinDate ? new Date(u.joinDate).toLocaleDateString() : 'Unknown'}</span>
                   <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => deleteItem('chat_users', u.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -148,7 +148,7 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <h4 className="font-bold">{chat.title}</h4>
-                    <p className="text-xs text-muted-foreground">Session ID: {chat.id}</p>
+                    <p className="text-xs text-muted-foreground">User ID: {chat.userId}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
