@@ -1,68 +1,161 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
-import { Mail, MessageSquare, MapPin, Github, Linkedin, Instagram } from "lucide-react"
-import React from "react"
+import React, { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Mail, MessageSquare, MapPin, Github, Linkedin, Instagram, Loader2, Send } from "lucide-react"
+import { useFirestore } from "@/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ContactPage() {
+  const db = useFirestore()
+  const { toast } = useToast()
+  const [isPending, setIsPending] = useState(false)
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    service: ""
+  })
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!db) return
+    setIsPending(true)
+
+    try {
+      await addDoc(collection(db, "inquiries_hire_me"), {
+        clientName: formData.name,
+        clientEmail: formData.email,
+        clientPhone: formData.phone,
+        message: formData.message,
+        status: "new",
+        submissionDate: new Date().toISOString(),
+        isSpam: false,
+        createdAt: serverTimestamp()
+      })
+      
+      toast({ title: "Inquiry Sent", description: "I'll get back to you shortly!" })
+      setFormData({ name: "", email: "", phone: "", message: "", service: "" })
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Could not send inquiry." })
+    } finally {
+      setIsPending(false)
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-20">
-      <div className="max-w-4xl mx-auto space-y-16">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold font-headline">Direct <span className="text-primary">Communication</span></h1>
-          <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            I've simplified my contact process to ensure the fastest response. Reach out directly via the channels below for professional inquiries.
-          </p>
-        </div>
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16">
+        <div className="space-y-12">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline">Let's <span className="text-primary">Connect</span></h1>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Whether you have a specific project in mind or just want to discuss potential collaborations, I'm all ears.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card className="rounded-[2.5rem] border-none shadow-xl bg-card/50 backdrop-blur-sm p-10 text-center space-y-6">
-            <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary">
-              <Mail className="h-10 w-10" />
+          <div className="grid gap-6">
+            <div className="flex items-center gap-6 p-6 bg-secondary/30 rounded-3xl">
+              <div className="w-14 h-14 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center">
+                <Mail className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground uppercase">Email</p>
+                <p className="text-lg font-bold">barakaruzibiza680@gmail.com</p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold">Email</h3>
-              <p className="text-muted-foreground text-sm">Professional Inquiries</p>
-              <p className="text-primary font-bold break-all text-lg">barakaruzibiza680@gmail.com</p>
+            <div className="flex items-center gap-6 p-6 bg-secondary/30 rounded-3xl">
+              <div className="w-14 h-14 bg-accent text-accent-foreground rounded-2xl flex items-center justify-center">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground uppercase">WhatsApp</p>
+                <p className="text-lg font-bold">0732786495</p>
+              </div>
             </div>
-            <Button size="lg" className="w-full rounded-2xl h-14 font-bold" asChild>
-              <a href="mailto:barakaruzibiza680@gmail.com">Send Message</a>
-            </Button>
-          </Card>
+            <div className="flex items-center gap-6 p-6 bg-secondary/30 rounded-3xl">
+              <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                <MapPin className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground uppercase">Location</p>
+                <p className="text-lg font-bold">Kigali, Rwanda</p>
+              </div>
+            </div>
+          </div>
 
-          <Card className="rounded-[2.5rem] border-none shadow-xl bg-card/50 backdrop-blur-sm p-10 text-center space-y-6">
-            <div className="w-20 h-20 bg-accent/10 rounded-3xl flex items-center justify-center mx-auto text-accent">
-              <MessageSquare className="h-10 w-10" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold">WhatsApp</h3>
-              <p className="text-muted-foreground text-sm">Direct Voice & Text</p>
-              <p className="text-accent font-bold text-3xl">0732786495</p>
-            </div>
-            <Button variant="outline" size="lg" className="w-full rounded-2xl h-14 font-bold border-2" asChild>
-              <a href="https://wa.me/250732786495" target="_blank">Chat Now</a>
+          <div className="flex gap-4">
+            <Button variant="outline" size="icon" className="rounded-2xl h-14 w-14" asChild>
+              <a href="https://github.com/baraka88" target="_blank"><Github className="h-6 w-6" /></a>
             </Button>
-          </Card>
-        </div>
-
-        <div className="p-16 rounded-[4rem] bg-secondary/30 text-center space-y-10">
-          <h2 className="text-4xl font-black font-headline text-primary">Connect on Social</h2>
-          <div className="flex justify-center gap-8">
-            <Button variant="outline" className="rounded-full h-16 w-16 p-0 border-primary/20 hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg" asChild>
-              <a href="https://github.com/baraka88" target="_blank" rel="noopener noreferrer"><Github className="h-8 w-8" /></a>
+            <Button variant="outline" size="icon" className="rounded-2xl h-14 w-14" asChild>
+              <a href="https://linkedin.com/in/baraka-junior" target="_blank"><Linkedin className="h-6 w-6" /></a>
             </Button>
-            <Button variant="outline" className="rounded-full h-16 w-16 p-0 border-primary/20 hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg" asChild>
-              <a href="https://linkedin.com/in/baraka-junior" target="_blank" rel="noopener noreferrer"><Linkedin className="h-8 w-8" /></a>
-            </Button>
-            <Button variant="outline" className="rounded-full h-16 w-16 p-0 border-primary/20 hover:bg-primary hover:text-white transition-all hover:scale-110 shadow-lg" asChild>
-              <a href="https://instagram.com/barakaruzibiza680" target="_blank" rel="noopener noreferrer"><Instagram className="h-8 w-8" /></a>
+            <Button variant="outline" size="icon" className="rounded-2xl h-14 w-14" asChild>
+              <a href="https://instagram.com/barakaruzibiza680" target="_blank"><Instagram className="h-6 w-6" /></a>
             </Button>
           </div>
-          <p className="text-xl text-muted-foreground font-medium flex items-center justify-center gap-3">
-            <MapPin className="h-6 w-6 text-primary" /> Based in Kigali, Rwanda.
-          </p>
         </div>
+
+        <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden">
+          <CardHeader className="p-10 pb-0">
+            <CardTitle className="text-3xl font-bold font-headline">Hire Me</CardTitle>
+            <CardDescription>Tell me about your project and business goals</CardDescription>
+          </CardHeader>
+          <CardContent className="p-10">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Full Name</Label>
+                  <Input 
+                    required 
+                    className="rounded-xl h-12" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input 
+                    type="email" 
+                    required 
+                    className="rounded-xl h-12" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Phone Number</Label>
+                <Input 
+                  className="rounded-xl h-12" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Project Details</Label>
+                <Textarea 
+                  required 
+                  className="rounded-xl min-h-[150px]" 
+                  placeholder="What can I build for you?"
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                />
+              </div>
+              <Button type="submit" className="w-full h-14 rounded-xl text-lg font-bold" disabled={isPending}>
+                {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Send Inquiry</>}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

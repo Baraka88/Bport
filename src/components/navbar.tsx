@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, MessageCircle } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Image as ImageIcon, Users } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -13,7 +13,7 @@ const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Gallery", href: "/gallery", icon: ImageIcon },
-  { name: "ChatBRJ", href: "/chat", icon: MessageCircle },
+  { name: "Collaborate", href: "/collab", icon: Users },
 ]
 
 export function Navbar() {
@@ -28,7 +28,6 @@ export function Navbar() {
           <span className="font-headline text-2xl font-bold text-primary">BRJ<span className="text-accent">DEV</span></span>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
             <Link
@@ -42,6 +41,9 @@ export function Navbar() {
               {item.name}
             </Link>
           ))}
+          <Button variant="default" size="sm" className="rounded-full ml-4" asChild>
+            <Link href="/contact">Hire Me</Link>
+          </Button>
           <div className="h-6 w-px bg-border mx-2" />
           <Button
             variant="ghost"
@@ -55,7 +57,6 @@ export function Navbar() {
           </Button>
         </nav>
 
-        {/* Mobile Nav */}
         <div className="flex items-center space-x-2 md:hidden">
           <Button
             variant="ghost"
@@ -73,8 +74,8 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetTitle>Menu Navigation</SheetTitle>
-              <SheetDescription>Access site links and settings</SheetDescription>
+              <SheetTitle>Navigation Menu</SheetTitle>
+              <SheetDescription>Explore the BRJDEV professional portfolio</SheetDescription>
               <nav className="flex flex-col space-y-4 mt-8">
                 {navItems.map((item) => (
                   <Link
@@ -87,6 +88,14 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
+                <Link
+                  href="/contact"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center space-x-2 text-lg font-bold text-primary py-2"
+                >
+                  <Briefcase className="h-5 w-5" />
+                  <span>Hire Me</span>
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>

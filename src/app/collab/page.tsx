@@ -1,78 +1,122 @@
 "use client"
 
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import React from "react"
-import { Users, Rocket, Mail, MessageCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Rocket, Users, Loader2, Send } from "lucide-react"
+import { useFirestore } from "@/firebase"
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CollabPage() {
-  const profileImg = "https://storage.googleapis.com/fetch-user-images-bucket/c5956041-073c-448c-9a4c-83b4009b7ebf.png";
+  const db = useFirestore()
+  const { toast } = useToast()
+  const [isPending, setIsPending] = useState(false)
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    idea: "",
+    scope: ""
+  })
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!db) return
+    setIsPending(true)
+
+    try {
+      await addDoc(collection(db, "inquiries_collaboration"), {
+        collaboratorName: formData.name,
+        collaboratorEmail: formData.email,
+        collaboratorPhone: formData.phone,
+        projectIdea: formData.idea,
+        projectScope: formData.scope,
+        status: "new",
+        submissionDate: new Date().toISOString(),
+        createdAt: serverTimestamp()
+      })
+      
+      toast({ title: "Collaboration Sent", description: "Let's innovate together!" })
+      setFormData({ name: "", email: "", phone: "", idea: "", scope: "" })
+    } catch (error) {
+      toast({ variant: "destructive", title: "Error", description: "Submission failed." })
+    } finally {
+      setIsPending(false)
+    }
+  }
 
   return (
-    <div className="container mx-auto px-4 py-20 space-y-24">
-      <div className="grid lg:grid-cols-2 gap-16 items-center">
-        <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full font-bold text-sm">
-            <Users className="h-4 w-4" /> Open for Collaboration
+    <div className="container mx-auto px-4 py-20">
+      <div className="max-w-4xl mx-auto space-y-16">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full font-bold text-sm">
+            <Users className="h-4 w-4" /> Open for Partnerships
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold font-headline leading-tight">Build the <span className="text-primary">Future</span> Together</h1>
-          <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
-            I'm always looking for talented developers and designers to collaborate on innovative ventures and scalable systems.
+          <h1 className="text-4xl md:text-6xl font-bold font-headline">Build the Future <span className="text-primary">Together</span></h1>
+          <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            I'm looking for talented developers and designers to collaborate on innovative ventures and scalable systems.
           </p>
-          
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold">Direct Channels</h3>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4 p-4 bg-secondary rounded-2xl">
-                <Mail className="text-primary h-6 w-6" />
-                <div>
-                  <p className="text-sm font-bold text-muted-foreground">Email</p>
-                  <p className="font-bold">barakaruzibiza680@gmail.com</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-secondary rounded-2xl">
-                <MessageCircle className="text-accent h-6 w-6" />
-                <div>
-                  <p className="text-sm font-bold text-muted-foreground">WhatsApp</p>
-                  <p className="font-bold">0732786495</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="relative">
-          <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl relative group">
-            <Image
-              src={profileImg}
-              alt="Baraka Junior Profile"
-              fill
-              className="object-cover transition-transform duration-1000 group-hover:scale-110"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
-            <div className="absolute bottom-8 left-8 right-8 text-white">
-              <p className="text-lg font-bold">"Collaboration is the key to creating impactful technology."</p>
-              <p className="text-sm opacity-80 mt-2">— BRJDEV</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto p-12 rounded-[3rem] bg-primary text-primary-foreground text-center space-y-8">
-        <Rocket className="h-16 w-16 text-accent mx-auto animate-bounce" />
-        <h2 className="text-3xl font-bold font-headline">Let's start something big</h2>
-        <p className="text-xl opacity-90 max-w-2xl mx-auto">
-          If you have a project idea or a partnership proposal, reaching out directly via WhatsApp or Email is the fastest way to get in touch.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Button size="lg" variant="secondary" className="rounded-full px-12 py-8 text-xl font-bold" asChild>
-            <a href="mailto:barakaruzibiza680@gmail.com">Send an Email</a>
-          </Button>
-          <Button size="lg" variant="outline" className="rounded-full px-12 py-8 text-xl font-bold bg-white/10 hover:bg-white/20 border-white/20" asChild>
-            <a href="https://wa.me/250732786495" target="_blank">Chat on WhatsApp</a>
-          </Button>
-        </div>
+        <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden">
+          <CardHeader className="p-10 bg-primary text-primary-foreground text-center">
+            <Rocket className="h-12 w-12 mx-auto mb-4" />
+            <CardTitle className="text-3xl">Collaboration Proposal</CardTitle>
+            <CardDescription className="text-primary-foreground/80">Share your vision and let's see how we can align</CardDescription>
+          </CardHeader>
+          <CardContent className="p-10">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Collaborator Name</Label>
+                  <Input 
+                    required 
+                    className="rounded-xl h-12" 
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email Address</Label>
+                  <Input 
+                    type="email" 
+                    required 
+                    className="rounded-xl h-12" 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Project Idea</Label>
+                <Textarea 
+                  required 
+                  className="rounded-xl min-h-[120px]" 
+                  placeholder="Describe your project idea..."
+                  value={formData.idea}
+                  onChange={(e) => setFormData({...formData, idea: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Proposed Scope & Your Role</Label>
+                <Textarea 
+                  className="rounded-xl h-24" 
+                  placeholder="What is your area of expertise?"
+                  value={formData.scope}
+                  onChange={(e) => setFormData({...formData, scope: e.target.value})}
+                />
+              </div>
+              <Button type="submit" className="w-full h-14 rounded-xl text-lg font-bold" disabled={isPending}>
+                {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Propose Collaboration</>}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

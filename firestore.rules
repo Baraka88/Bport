@@ -3,71 +3,43 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper to check if the user is an admin
-    // Handles both "admin" and "admin " (with trailing space) as seen in your sample data
     function isAdmin() {
-      let userRole = get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role;
-      return request.auth != null && (userRole == "admin" || userRole == "admin ");
-    }
-
-    // -------------------
-    // chat_users collection
-    // -------------------
-    match /chat_users/{userId} {
-      allow read, write: if request.auth != null && (
-        isAdmin() ||
-        request.auth.uid == userId
+      // Adjusted for common admin role values including trailing space
+      let adminPath = /databases/$(database)/documents/chat_users/$(request.auth.uid);
+      return request.auth != null && (
+        get(adminPath).data.role == "admin" || 
+        get(adminPath).data.role == "admin "
       );
     }
 
-    // -------------------
-    // chats collection
-    // -------------------
-    match /chats/{chatId} {
-      allow read, write: if request.auth != null && (
-        isAdmin() ||
-        resource.data.userId == request.auth.uid ||
-        request.resource.data.userId == request.auth.uid
-      );
-    }
-
-    // -------------------
-    // chat_messages collection
-    // -------------------
-    match /chat_messages/{messageId} {
-      // For listing messages, we use resource.data.chatId which aligns with the chatId == userId structure
-      allow read: if request.auth != null && (
-        isAdmin() ||
-        resource.data.userId == request.auth.uid ||
-        resource.data.chatId == request.auth.uid
-      );
-      
-      allow create: if request.auth != null && (
-        isAdmin() ||
-        request.resource.data.userId == request.auth.uid
-      );
-
-      allow update, delete: if request.auth != null && isAdmin();
-    }
-
-    // PUBLIC COLLECTIONS
+    // PUBLIC CONTENT
     match /projects/{id} { allow read: if true; }
     match /images/{id} { allow read: if true; }
     match /technologies/{id} { allow read: if true; }
     match /certificates/{id} { allow read: if true; }
     match /services/{id} { allow read: if true; }
-    match /comments/{id} { 
-      allow read: if true;
-      allow write: if request.auth != null;
-      allow delete: if isAdmin();
+
+    // INQUIRIES & COMMENTS
+    match /inquiries_hire_me/{id} {
+      allow create: if true;
+      allow read, write: if isAdmin();
+    }
+    
+    match /inquiries_collaboration/{id} {
+      allow create: if true;
+      allow read, write: if isAdmin();
+    }
+    
+    match /comments/{id} {
+      allow read: if resource.data.isApproved == true || isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
     }
 
-    // INQUIRIES
-    match /inquiries_collaboration/{inquiryId} {
-      allow read, write: if request.auth != null && (
-        isAdmin() ||
-        request.auth.uid == resource.data.userId ||
-        request.auth.uid == request.resource.data.userId
-      );
+    // USER ROLES
+    match /chat_users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
     }
 
     // Block everything else
