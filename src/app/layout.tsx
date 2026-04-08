@@ -7,8 +7,8 @@ import {Toaster} from '@/components/ui/toaster';
 import {FirebaseClientProvider} from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'BRJDEV | Baraka Junior',
-  description: 'Professional Portfolio of Baraka Junior - Software Engineer and Systems Analyst',
+  title: 'BRJDEV | Baraka Ruzibiza Junior',
+  description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
 };
 
 export default function RootLayout({

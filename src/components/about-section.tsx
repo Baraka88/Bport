@@ -1,4 +1,3 @@
-
 import { EXPERIENCE } from "@/app/data/portfolio"
 import { Briefcase, Calendar, GraduationCap, ShieldCheck, Terminal } from "lucide-react"
 
@@ -33,12 +32,12 @@ export function AboutSection() {
                   <ShieldCheck className="h-8 w-8" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-80">Certification</p>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-80">Methodology</p>
                   <p className="text-2xl font-black font-headline">Expert Analyst</p>
                 </div>
               </div>
               <p className="mt-6 font-medium text-lg leading-snug">
-                Bridging the gap between ambitious business goals and technical excellence.
+                Bridging the gap between ambitious business goals and technical excellence through full-stack proficiency.
               </p>
             </div>
           </div>
@@ -51,10 +50,10 @@ export function AboutSection() {
               <h2 className="text-5xl md:text-7xl font-black font-headline leading-none">The Visionary Behind the <span className="text-primary">Code</span></h2>
               <div className="w-24 h-2 bg-accent rounded-full" />
               <p className="text-xl text-muted-foreground leading-relaxed font-medium">
-                I am Baraka Junior, a passionate Software Engineer based in Rwanda. My journey in tech is driven by a desire to solve real-world problems through elegant code and robust system analysis.
+                I am Baraka Ruzibiza Junior, a passionate Full Stack Developer based in Rwanda. My journey in tech is driven by a desire to solve real-world problems through elegant code and robust system analysis.
               </p>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                With a background in both development and systems design, I bridge the gap between business requirements and technical implementation. I specialize in the LAMP/MERN stacks and have a proven track record of delivering high-performance applications.
+                With deep expertise in both frontend and backend development, I translate business requirements into high-performance digital solutions. I specialize in Node.js, PHP, and modern frontend frameworks like Vue and React.
               </p>
             </div>
 

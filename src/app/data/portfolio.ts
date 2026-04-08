@@ -15,12 +15,6 @@ export interface Skill {
   imageUrl: string;
 }
 
-export interface Certificate {
-  name: string;
-  issuer: string;
-  date: string;
-}
-
 export interface Experience {
   role: string;
   company: string;
@@ -37,16 +31,6 @@ export const PROJECTS: Project[] = [
     tech: ["Node.js", "MySQL", "Vue.js", "System Analysis"],
     imageUrl: "https://picsum.photos/seed/inventory/800/600",
     liveUrl: "#",
-    repoUrl: "#"
-  },
-  {
-    id: "chatbrj-ai",
-    title: "ChatBRJ AI Assistant",
-    description: "An intelligent AI assistant powered by Genkit and Gemini.",
-    longDescription: "Integrated directly into this portfolio, ChatBRJ AI uses advanced RAG techniques to provide instant answers about my professional background, skills, and projects.",
-    tech: ["Genkit", "Gemini AI", "TypeScript", "Firebase"],
-    imageUrl: "https://picsum.photos/seed/chat-ai/800/600",
-    liveUrl: "/chat",
     repoUrl: "#"
   },
   {
@@ -79,23 +63,17 @@ export const SKILLS: Skill[] = [
   }
 ];
 
-export const CERTIFICATES: Certificate[] = [
-  { name: "Full Stack Web Development", issuer: "Meta", date: "2023" },
-  { name: "MySQL Database Administrator", issuer: "Oracle", date: "2022" },
-  { name: "System Analysis Professional", issuer: "BCS", date: "2023" }
-];
-
 export const EXPERIENCE: Experience[] = [
   {
-    role: "Senior Software Engineer",
+    role: "Senior Full Stack Developer",
     company: "TechFlow Solutions",
     period: "2022 - Present",
-    description: "Leading a team of 5 developers in building scalable enterprise applications using Node.js and Vue.js."
+    description: "Leading development cycles for scalable enterprise applications using Node.js, Vue.js, and modern architectural patterns."
   },
   {
-    role: "Junior Developer",
+    role: "Full Stack Developer",
     company: "BlueChip Systems",
     period: "2020 - 2022",
-    description: "Developed and maintained legacy PHP systems while assisting in the migration to modern frameworks."
+    description: "Developed and maintained end-to-end web solutions using the LAMP stack while contributing to system analysis and requirement mapping."
   }
 ];

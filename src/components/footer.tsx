@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
@@ -63,7 +62,7 @@ export function Footer() {
           </div>
         </div>
         <div className="border-t mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} BRJDEV. All rights reserved. Created by Baraka Junior.</p>
+          <p>© {new Date().getFullYear()} BRJDEV. All rights reserved. Created by Baraka Ruzibiza Junior.</p>
         </div>
       </div>
     </footer>

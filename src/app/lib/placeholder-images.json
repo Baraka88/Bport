@@ -1,39 +1,38 @@
-
 {
   "placeholderImages": [
     {
       "id": "hero-1",
-      "description": "Developer coding on a laptop",
+      "description": "Full stack developer workspace with multiple screens",
       "imageUrl": "https://picsum.photos/seed/code1/1200/600",
       "imageHint": "coding workspace"
     },
     {
       "id": "hero-2",
-      "description": "System architecture diagram",
+      "description": "System architecture and cloud nodes",
       "imageUrl": "https://picsum.photos/seed/arch/1200/600",
       "imageHint": "system architecture"
     },
     {
       "id": "project-node",
-      "description": "Node.js application visualization",
+      "description": "Backend API development with Node.js",
       "imageUrl": "https://picsum.photos/seed/node/800/600",
       "imageHint": "backend technology"
     },
     {
       "id": "project-vue",
-      "description": "Vue.js dashboard",
+      "description": "Modern frontend dashboard design",
       "imageUrl": "https://picsum.photos/seed/vue/800/600",
       "imageHint": "frontend dashboard"
     },
     {
       "id": "collab-1",
-      "description": "Developers collaborating on a project",
+      "description": "Creative team collaboration on a digital project",
       "imageUrl": "https://picsum.photos/seed/team1/1200/400",
       "imageHint": "team collaboration"
     },
     {
       "id": "collab-2",
-      "description": "Pair programming session",
+      "description": "Developers working together on high-scale architecture",
       "imageUrl": "https://picsum.photos/seed/collab2/800/600",
       "imageHint": "pair programming"
     }

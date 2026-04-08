@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -7,7 +6,7 @@ import { ChevronRight, Sparkles, MessageCircle } from "lucide-react"
 import Link from "next/link"
 
 const mainMessages = [
-  "Software Engineer Extraordinaire",
+  "Full Stack Developer",
   "Master of Node.js & Vue.js",
   "Expert in System Analysis",
   "Crafting Digital Solutions"
@@ -55,7 +54,7 @@ export function Hero() {
           </div>
           <div className="space-y-6">
             <h1 className="text-6xl md:text-9xl font-black leading-tight font-headline tracking-tighter">
-              I am <span className="text-primary decoration-accent underline-offset-[12px] underline">Baraka Junior</span>
+              I am <span className="text-primary decoration-accent underline-offset-[12px] underline">Baraka Ruzibiza Junior</span>
             </h1>
             <div className="h-20 flex items-center justify-center">
               <p className="text-3xl md:text-5xl text-muted-foreground font-headline font-medium">
@@ -64,7 +63,7 @@ export function Hero() {
             </div>
           </div>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
-            A results-driven Software Engineer and System Analyst specializing in robust backend architectures and dynamic, high-performance web experiences.
+            A results-driven Full Stack Developer and System Analyst specializing in robust backend architectures and dynamic, high-performance web experiences.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 pt-10 justify-center">
             <Button size="lg" className="rounded-full shadow-2xl group px-12 py-10 text-2xl font-bold bg-primary hover:scale-105 transition-transform" asChild>
@@ -82,7 +81,6 @@ export function Hero() {
         </div>
       </div>
       
-      {/* Decorative background elements instead of a profile picture */}
       <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
     </section>
