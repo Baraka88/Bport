@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -56,11 +55,10 @@ export default function ChatConversationPage() {
 
     const messagesRef = collection(db, 'chat_messages');
 
-    // Schema: chatUserId, messageContent, role, timestamp, userId
+    // Add user message to Firestore
     addDoc(messagesRef, {
       chatId: chatId as string,
       userId: user.uid,
-      chatUserId: user.uid,
       role: 'user',
       messageContent: userText,
       timestamp: serverTimestamp(),
@@ -74,10 +72,10 @@ export default function ChatConversationPage() {
 
       const response = await getChatResponse({ message: userText, history });
 
+      // Add AI response to Firestore
       addDoc(messagesRef, {
         chatId: chatId as string,
-        userId: user.uid, 
-        chatUserId: 'ai',
+        userId: user.uid, // Still owned by the user context
         role: 'ai',
         messageContent: response.text,
         timestamp: serverTimestamp(),
@@ -94,8 +92,8 @@ export default function ChatConversationPage() {
     deleteDoc(doc(db, 'chat_messages', msgId));
   };
 
-  if (chatLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
-  if (!chatData) return <div className="flex-1 flex items-center justify-center">Chat not found</div>;
+  if (chatLoading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  if (!chatData) return <div className="flex-1 flex items-center justify-center">Conversation not found.</div>;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
