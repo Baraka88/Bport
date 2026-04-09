@@ -4,7 +4,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles, Facebook } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -47,6 +47,15 @@ export function Navbar() {
           
           <div className="h-6 w-px bg-border mx-2" />
           
+          <a 
+            href="https://www.facebook.com/profile.php?id=100076696350011" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Facebook className="h-5 w-5" />
+          </a>
+
           <Button variant="default" size="sm" className="rounded-full px-6 font-bold shadow-lg shadow-primary/20" asChild>
             <Link href="/contact">Hire Me</Link>
           </Button>
@@ -90,6 +99,13 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
+                <a 
+                  href="https://www.facebook.com/profile.php?id=100076696350011" 
+                  className="flex items-center space-x-2 text-lg font-medium py-2 border-b text-muted-foreground"
+                >
+                  <Facebook className="h-5 w-5 text-primary" />
+                  <span>Facebook Profile</span>
+                </a>
                 <Link href="/contact" onClick={() => setIsOpen(false)} className="text-lg font-bold text-accent">Hire Me</Link>
               </nav>
             </SheetContent>

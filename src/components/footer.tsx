@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail, Facebook } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
@@ -22,6 +22,7 @@ export function Footer() {
             <div className="flex gap-4">
               <a href="https://github.com/baraka88" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Github className="h-5 w-5" /></a>
               <a href="https://linkedin.com/in/baraka-junior" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Linkedin className="h-5 w-5" /></a>
+              <a href="https://www.facebook.com/profile.php?id=100076696350011" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Facebook className="h-5 w-5" /></a>
               <a href="https://instagram.com/barakaruzibiza680" target="_blank" className="p-2 bg-secondary rounded-full hover:bg-accent hover:text-accent-foreground transition-all"><Instagram className="h-5 w-5" /></a>
             </div>
           </div>

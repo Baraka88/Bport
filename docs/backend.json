@@ -42,6 +42,17 @@
         "status": { "type": "string" },
         "submissionDate": { "type": "string", "format": "date-time" }
       }
+    },
+    "GalleryImage": {
+      "title": "GalleryImage",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "description": { "type": "string" },
+        "altText": { "type": "string" },
+        "uploadDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["url", "description", "uploadDate"]
     }
   },
   "auth": {
@@ -59,6 +70,10 @@
     "/inquiries_collaboration/{id}": {
       "schema": "InquiryCollab",
       "description": "Collaboration proposals."
+    },
+    "/images/{imageId}": {
+      "schema": "GalleryImage",
+      "description": "Professional gallery images."
     }
   }
 }
