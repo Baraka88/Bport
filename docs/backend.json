@@ -1,54 +1,63 @@
 
 {
   "entities": {
-    "ChatUser": {
-      "title": "ChatUser",
+    "Comment": {
+      "title": "Comment",
       "type": "object",
       "properties": {
-        "username": { "type": "string" },
-        "email": { "type": "string" },
-        "joinDate": { "type": "string", "format": "date-time" }
-      },
-      "required": ["username", "email", "joinDate"]
-    },
-    "Chat": {
-      "title": "Chat",
-      "type": "object",
-      "properties": {
+        "authorName": { "type": "string" },
+        "commentText": { "type": "string" },
+        "projectId": { "type": "string" },
         "userId": { "type": "string" },
-        "title": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "parentId": { "type": "string" },
+        "likes": { "type": "array", "items": { "type": "string" } },
+        "submissionDate": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "title", "createdAt"]
+      "required": ["authorName", "commentText", "submissionDate"]
     },
-    "ChatMessage": {
-      "title": "ChatMessage",
+    "InquiryHireMe": {
+      "title": "InquiryHireMe",
       "type": "object",
       "properties": {
-        "userId": { "type": "string" },
-        "chatId": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "ai"] },
-        "text": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string", "format": "email" },
+        "clientPhone": { "type": "string" },
+        "message": { "type": "string" },
+        "serviceIds": { "type": "array", "items": { "type": "string" } },
+        "budget": { "type": "string" },
+        "timeline": { "type": "string" },
+        "urgency": { "type": "string" },
+        "submissionDate": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "chatId", "role", "text", "createdAt"]
+      "required": ["clientName", "clientEmail", "message", "submissionDate"]
+    },
+    "InquiryCollab": {
+      "title": "InquiryCollab",
+      "type": "object",
+      "properties": {
+        "collaboratorName": { "type": "string" },
+        "collaboratorEmail": { "type": "string", "format": "email" },
+        "projectIdea": { "type": "string" },
+        "submissionDate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["collaboratorName", "collaboratorEmail", "projectIdea", "submissionDate"]
     }
   },
   "auth": {
-    "providers": ["password"]
+    "providers": []
   },
   "firestore": {
-    "/chat_users/{userId}": {
-      "schema": "ChatUser",
-      "description": "User profiles. Access form must be completed to create this."
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Community feedback and project comments."
     },
-    "/chats/{chatId}": {
-      "schema": "Chat",
-      "description": "User conversation sessions."
+    "/inquiries_hire_me/{id}": {
+      "schema": "InquiryHireMe",
+      "description": "Professional service requests."
     },
-    "/chat_messages/{messageId}": {
-      "schema": "ChatMessage",
-      "description": "Messages within a session. Filtered by chatId."
+    "/inquiries_collaboration/{id}": {
+      "schema": "InquiryCollab",
+      "description": "Project collaboration proposals."
     }
   }
 }

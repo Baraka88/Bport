@@ -1,28 +1,27 @@
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Bot } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { useUser } from "@/firebase"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
-  { name: "ChatBRJ", href: "/chat", icon: Bot },
   { name: "Community", href: "/comments", icon: MessageSquare },
   { name: "Collab", href: "/collab", icon: Users },
+  { name: "Gallery", href: "/gallery", icon: Layout },
 ]
 
 export function Navbar() {
   const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
-  const { user } = useUser()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
@@ -38,7 +37,7 @@ export function Navbar() {
               href={item.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-primary",
-                pathname.startsWith(item.href) && item.href !== '/' ? "text-primary font-bold" : "text-muted-foreground"
+                pathname === item.href ? "text-primary font-bold" : "text-muted-foreground"
               )}
             >
               {item.name}
@@ -47,17 +46,7 @@ export function Navbar() {
           
           <div className="h-6 w-px bg-border mx-2" />
           
-          {user ? (
-            <Button variant="ghost" size="sm" className="rounded-full font-bold" asChild>
-              <Link href="/chat">Hi, {user.displayName || 'Dev'}</Link>
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" className="rounded-full font-bold" asChild>
-              <Link href="/auth">Sign In</Link>
-            </Button>
-          )}
-
-          <Button variant="default" size="sm" className="rounded-full px-6 font-bold" asChild>
+          <Button variant="default" size="sm" className="rounded-full px-6 font-bold shadow-lg shadow-primary/20" asChild>
             <Link href="/contact">Hire Me</Link>
           </Button>
 
@@ -100,7 +89,6 @@ export function Navbar() {
                     <span>{item.name}</span>
                   </Link>
                 ))}
-                <Link href="/auth" onClick={() => setIsOpen(false)} className="text-lg font-bold text-primary">Sign In</Link>
                 <Link href="/contact" onClick={() => setIsOpen(false)} className="text-lg font-bold text-accent">Hire Me</Link>
               </nav>
             </SheetContent>

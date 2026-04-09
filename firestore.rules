@@ -3,40 +3,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Authenticated users can only read/write their own profile
-    match /chat_users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Authenticated users can only read/write their own chats
-    match /chats/{chatId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-    }
-
-    // Authenticated users can only read/write their own messages
-    match /chat_messages/{messageId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
-    }
-
-    // Public inquiries
-    match /inquiries_collaboration/{id} {
-      allow create: if true;
-    }
-    match /inquiries_hire_me/{id} {
-      allow create: if true;
-    }
-
-    // Community comments
+    // Public can view comments and create new ones
     match /comments/{id} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if true;
+      // Update/Delete usually restricted to author, but keeping it simple for now as per "remove auth" request
+      allow update, delete: if false; 
+    }
+
+    // Public can create inquiries
+    match /inquiries_hire_me/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    match /inquiries_collaboration/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // Gallery images are public
+    match /images/{id} {
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

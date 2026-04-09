@@ -13,8 +13,8 @@ export function Footer() {
   return (
     <footer className="bg-card border-t py-12">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-12">
-          <div className="col-span-2 space-y-4">
+        <div className="grid md:grid-cols-3 gap-12">
+          <div className="space-y-4">
             <Link href="/" className="font-headline text-2xl font-bold text-primary">BRJ<span className="text-accent">DEV</span></Link>
             <p className="text-muted-foreground max-w-sm">
               Full Stack solutions and high-performance system architectures. Kigali, Rwanda.
@@ -27,12 +27,12 @@ export function Footer() {
           </div>
           
           <div className="space-y-4">
-            <h4 className="font-bold">Services</h4>
+            <h4 className="font-bold">Navigation</h4>
             <ul className="space-y-2 text-muted-foreground">
-              <li><Link href="/chat" className="hover:text-primary transition-colors">ChatBRJ AI</Link></li>
-              <li><Link href="/comments" className="hover:text-primary transition-colors">Community</Link></li>
+              <li><Link href="/comments" className="hover:text-primary transition-colors">Community Wall</Link></li>
               <li><Link href="/collab" className="hover:text-primary transition-colors">Collaboration</Link></li>
               <li><Link href="/contact" className="hover:text-primary transition-colors">Hire Me</Link></li>
+              <li><Link href="/gallery" className="hover:text-primary transition-colors">Visual Gallery</Link></li>
             </ul>
           </div>
 
