@@ -4,7 +4,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles, Bot } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
-  { name: "AI Chat", href: "/chat", icon: Bot },
   { name: "Community", href: "/comments", icon: MessageSquare },
   { name: "Quotes", href: "/motivation", icon: Sparkles },
   { name: "Collab", href: "/collab", icon: Users },
