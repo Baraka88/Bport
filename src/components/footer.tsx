@@ -1,7 +1,6 @@
-
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Lock, MessageSquare, Briefcase, Terminal, Database } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Terminal, Database } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
@@ -46,7 +45,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
+                <Link href="/comments" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
                   <Database className="h-3 w-3" /> Logs
                 </Link>
               </li>
