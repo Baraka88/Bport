@@ -5,25 +5,23 @@ service cloud.firestore {
     
     // Authenticated users can only read/write their own profile
     match /chat_users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
     }
 
     // Authenticated users can only read/write their own chats
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && (
-        resource == null || resource.data.userId == request.auth.uid
-      ) && (
-        request.resource == null || request.resource.data.userId == request.auth.uid
-      );
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
     // Authenticated users can only read/write their own messages
     match /chat_messages/{messageId} {
-      allow read, write: if request.auth != null && (
-        resource == null || resource.data.userId == request.auth.uid
-      ) && (
-        request.resource == null || request.resource.data.userId == request.auth.uid
-      );
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
     // Public inquiries

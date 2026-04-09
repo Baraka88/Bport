@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useUser, useFirestore, useDoc } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,8 @@ export default function ChatMainPage() {
     if (user && db) {
       const checkProfile = async () => {
         const docRef = doc(db, 'chat_users', user.uid);
-        const { data: profile } = await import('firebase/firestore').then(f => f.getDoc(docRef));
-        setHasProfile(!!profile);
+        const docSnap = await getDoc(docRef);
+        setHasProfile(docSnap.exists());
       };
       checkProfile();
     }
