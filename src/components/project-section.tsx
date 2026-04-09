@@ -33,7 +33,7 @@ export function ProjectSection() {
         </div>
         <h2 className="text-4xl md:text-6xl font-black font-headline tracking-tighter">Dynamic <span className="text-primary">Portfolio</span></h2>
         <div className="w-24 h-2 bg-accent rounded-full" />
-        <p className="text-xl text-muted-foreground max-w-2xl font-medium">
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
           A live collection of complex system analysis and full-stack web implementations.
         </p>
       </div>
@@ -88,7 +88,7 @@ export function ProjectSection() {
           <Briefcase className="h-20 w-20 mx-auto opacity-10" />
           <div className="space-y-2">
             <p className="text-2xl font-black font-headline">Portfolio is Empty</p>
-            <p className="text-muted-foreground font-medium">Use the Admin Workspace to push your first project.</p>
+            <p className="text-muted-foreground font-medium">Use the Architecture link in the footer to push your first project.</p>
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Terminal, Database } from "lucide-react"
+import { Github, Linkedin, Phone, Mail, Facebook, ShieldCheck, Terminal, Database, Instagram } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
