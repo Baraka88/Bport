@@ -7,7 +7,7 @@ import { collection, query, where, orderBy, serverTimestamp, doc, getDoc } from 
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, MessageCircle, Home } from 'lucide-react';
+import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, Home, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';

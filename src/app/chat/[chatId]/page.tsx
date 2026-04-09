@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, orderBy, serverTimestamp, doc, getDoc } from 'firebase/firestore';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,7 +12,6 @@ import { Send, Loader2, Bot, User, Trash2, Sparkles, AlertCircle } from 'lucide-
 import { useParams, useRouter } from 'next/navigation';
 import { getChatResponse } from '@/ai/flows/chat-flow';
 import { cn } from '@/lib/utils';
-import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function ChatConversationPage() {
   const params = useParams();
@@ -119,7 +118,8 @@ export default function ChatConversationPage() {
     );
   }
 
-  if (!chatData) {
+  // Ensure user owns the chat they are looking at
+  if (!chatData || chatData.userId !== user?.uid) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
         <AlertCircle className="h-10 w-10" />

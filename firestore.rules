@@ -9,19 +9,23 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // User profiles
+    // User profiles: Only owner can manage
     match /chat_users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Chats: Users can only see and manage their own chats
+    // Chats: Users manage their own conversations
     match /chats/{chatId} {
-      allow read, write: if request.auth != null && request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
-    // Chat Messages: Ownership enforced by chatId lookup or direct userId field
+    // Chat Messages: Ownership enforced by direct userId field
     match /chat_messages/{messageId} {
-      allow read, write: if request.auth != null && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
     // Professional Inquiries
