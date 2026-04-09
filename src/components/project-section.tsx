@@ -4,10 +4,10 @@
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { PROJECTS } from "@/app/data/portfolio"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, ExternalLink, Github, Loader2, Sparkles } from "lucide-react"
+import { Briefcase, Github, Loader2, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -47,7 +47,7 @@ export function ProjectSection() {
       ) : displayProjects.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayProjects.map((project) => (
-            <Card key={project.id} className="group overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-300 bg-card/50 backdrop-blur-sm">
+            <Card key={project.id} className="group overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-300 bg-card/50 backdrop-blur-sm flex flex-col h-full">
               <div className="relative h-64 overflow-hidden">
                 <Image
                   src={project.imageUrl}
@@ -61,8 +61,15 @@ export function ProjectSection() {
                   </Button>
                 </div>
               </div>
-              <CardHeader>
-                <CardTitle className="text-2xl font-black font-headline group-hover:text-primary transition-colors">{project.title}</CardTitle>
+              <CardHeader className="flex-1">
+                <div className="flex justify-between items-start gap-4">
+                  <CardTitle className="text-2xl font-black font-headline group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                  <div className="flex gap-2">
+                    {project.repoUrl && project.repoUrl !== "#" && (
+                      <a href={project.repoUrl} target="_blank" className="text-muted-foreground hover:text-primary transition-colors"><Github className="h-5 w-5" /></a>
+                    )}
+                  </div>
+                </div>
                 <CardDescription className="line-clamp-2 text-base font-medium">{project.description}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -74,16 +81,6 @@ export function ProjectSection() {
                   ))}
                 </div>
               </CardContent>
-              <CardFooter className="pt-0 flex justify-between border-t border-primary/5 mt-4 p-6">
-                <Link href={`/projects/${project.id}`} className="text-sm font-black uppercase tracking-widest text-primary hover:underline flex items-center gap-2">
-                  Review Details <ExternalLink className="h-3 w-3" />
-                </Link>
-                <div className="flex gap-4">
-                  {project.repoUrl && project.repoUrl !== "#" && (
-                    <a href={project.repoUrl} target="_blank" className="text-muted-foreground hover:text-primary transition-colors"><Github className="h-5 w-5" /></a>
-                  )}
-                </div>
-              </CardFooter>
             </Card>
           ))}
         </div>
