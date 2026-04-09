@@ -12,13 +12,13 @@ import {
   Loader2, 
   Reply,
   Lock,
-  Unlock,
   Trash2,
   Edit3,
   X,
   Save,
   ShieldCheck,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertCircle
 } from "lucide-react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { 
@@ -62,7 +62,7 @@ export default function CommentsPage() {
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
   const [isPending, setIsPending] = useState(false)
 
-  // Edit State
+  // Edit State for Admin CRUD
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({ authorName: "", commentText: "" })
 
@@ -81,7 +81,7 @@ export default function CommentsPage() {
     if (password === "brjadmin2024") {
       setIsAdmin(true)
       setIsLockerOpen(false)
-      toast({ title: "Admin Mode Enabled", description: "Comment management unlocked." })
+      toast({ title: "Wall Manager Unlocked", description: "Full CRUD access to activity feed." })
     } else {
       toast({ variant: "destructive", title: "Access Denied", description: "Incorrect master key." })
     }
@@ -91,7 +91,7 @@ export default function CommentsPage() {
   async function handlePostComment(e: React.FormEvent) {
     e.preventDefault()
     if (!db || !commentText.trim() || !name.trim()) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "Please provide your name and message." })
+      toast({ variant: "destructive", title: "Incomplete", description: "Name and message are required." })
       return
     }
     setIsPending(true)
@@ -114,29 +114,28 @@ export default function CommentsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          subject: `New Community Comment from ${name}`,
+          subject: `New Community Wall Entry from ${name}`,
           author: name,
           comment: commentText,
-          type: !!replyTo ? "Reply" : "New Comment",
           timestamp: new Date().toLocaleString()
         })
       })
 
-      toast({ title: "Comment Posted", description: "Thank you for participating!" })
+      toast({ title: "Success", description: "Your message is now on the wall!" })
       setCommentText("")
       setName("")
       setReplyTo(null)
     } catch (error) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to post comment." })
+      toast({ variant: "destructive", title: "Error", description: "Submission failed." })
     } finally {
       setIsPending(false)
     }
   }
 
   const handleDelete = (id: string) => {
-    if (!db || !confirm("Delete this comment permanently?")) return
+    if (!db || !confirm("Permanent Action: Delete this activity from the wall?")) return
     deleteDocumentNonBlocking(doc(db, "comments", id))
-    toast({ title: "Deleted", description: "Comment removed from database." })
+    toast({ title: "Activity Deleted", description: "Record removed from the public feed." })
   }
 
   const startEditing = (comment: Comment) => {
@@ -151,7 +150,7 @@ export default function CommentsPage() {
       commentText: editForm.commentText
     })
     setEditingId(null)
-    toast({ title: "Updated", description: "Comment record synchronized." })
+    toast({ title: "Activity Updated", description: "Feed record synchronized successfully." })
   }
 
   const renderComments = (parentId: string | null = null) => {
@@ -160,24 +159,30 @@ export default function CommentsPage() {
       .filter(c => c.parentId === parentId)
       .map((c) => (
         <div key={c.id} className={cn("space-y-4", parentId && "ml-8 mt-4 pl-4 border-l-2 border-primary/10")}>
-          <div className="p-6 bg-card border rounded-3xl shadow-sm hover:shadow-md transition-all group relative">
+          <div className="p-6 bg-card border rounded-[2rem] shadow-sm hover:shadow-md transition-all group relative">
             {editingId === c.id ? (
-              <div className="space-y-4 animate-in fade-in duration-300">
-                <Input 
-                  value={editForm.authorName}
-                  onChange={(e) => setEditForm({...editForm, authorName: e.target.value})}
-                  className="rounded-xl h-10 font-bold"
-                />
-                <Textarea 
-                  value={editForm.commentText}
-                  onChange={(e) => setEditForm({...editForm, commentText: e.target.value})}
-                  className="rounded-xl min-h-[100px] bg-background/50"
-                />
+              <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Modify Author</label>
+                  <Input 
+                    value={editForm.authorName}
+                    onChange={(e) => setEditForm({...editForm, authorName: e.target.value})}
+                    className="rounded-xl h-10 font-bold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Modify Message</label>
+                  <Textarea 
+                    value={editForm.commentText}
+                    onChange={(e) => setEditForm({...editForm, commentText: e.target.value})}
+                    className="rounded-xl min-h-[100px] bg-background/50"
+                  />
+                </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="rounded-lg flex-1" onClick={() => handleUpdate(c.id)}>
-                    <Save className="h-4 w-4 mr-2" /> Save Changes
+                  <Button size="sm" className="rounded-xl h-10 flex-1 font-bold" onClick={() => handleUpdate(c.id)}>
+                    <Save className="h-4 w-4 mr-2" /> Sync Changes
                   </Button>
-                  <Button size="sm" variant="outline" className="rounded-lg h-10 w-10 p-0" onClick={() => setEditingId(null)}>
+                  <Button size="sm" variant="outline" className="rounded-xl h-10 w-10 p-0" onClick={() => setEditingId(null)}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -186,26 +191,36 @@ export default function CommentsPage() {
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center font-bold text-primary">
                       {c.authorName.charAt(0)}
                     </div>
                     <div>
                       <h4 className="font-bold text-foreground leading-none">{c.authorName}</h4>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{new Date(c.submissionDate).toLocaleString()}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{new Date(c.submissionDate).toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     {isAdmin && (
-                      <div className="flex items-center gap-1 mr-2 bg-secondary/50 p-1 rounded-lg">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary" onClick={() => startEditing(c)}>
+                      <div className="flex items-center gap-1 mr-2 bg-secondary/50 p-1.5 rounded-xl border border-primary/10">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary" 
+                          onClick={() => startEditing(c)}
+                        >
                           <Edit3 className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => handleDelete(c.id)}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive" 
+                          onClick={() => handleDelete(c.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => {
                       setReplyTo(c)
                       document.getElementById('comment-form')?.scrollIntoView({ behavior: 'smooth' })
                     }}>
@@ -224,14 +239,14 @@ export default function CommentsPage() {
 
   return (
     <div className="container mx-auto px-4 py-20 min-h-screen">
-      <div className="max-w-4xl mx-auto space-y-16">
+      <div className="max-w-4xl mx-auto space-y-20">
         <div className="text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
-            <MessageSquare className="h-3 w-3" /> Community Wall
+            <MessageSquare className="h-3 w-3" /> Community Feedback
           </div>
-          <h1 className="text-4xl md:text-7xl font-black font-headline">The Wall of <span className="text-primary">Voices</span></h1>
+          <h1 className="text-4xl md:text-8xl font-black font-headline tracking-tighter">The Wall of <span className="text-primary">Junior</span></h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
-            Join the discussion, share project feedback, or suggest new collaborations.
+            Join the conversation, leave project feedback, or suggest new full-stack collaborations.
           </p>
 
           <div className="pt-4">
@@ -246,23 +261,22 @@ export default function CommentsPage() {
               </Button>
             ) : (
               <div className="flex items-center justify-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-600 text-xs font-black uppercase tracking-widest border border-green-500/20">
-                  <ShieldCheck className="h-3 w-3" /> Admin Mode Active
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-black uppercase tracking-widest border border-green-500/20 shadow-sm">
+                  <ShieldCheck className="h-3 w-3" /> Management Active
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setIsAdmin(false)}>Exit Management</Button>
+                <Button variant="ghost" size="sm" className="text-xs font-bold" onClick={() => setIsAdmin(false)}>Close Manager</Button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Admin Locker Form */}
+        {/* Admin Locker Entry */}
         {isLockerOpen && !isAdmin && (
-          <Card className="max-w-md mx-auto mb-16 border-primary/20 bg-card/50 backdrop-blur-xl shadow-2xl rounded-[2rem] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-            <CardHeader className="bg-primary text-primary-foreground p-8">
-              <CardTitle className="text-2xl font-black flex items-center gap-3">
-                <Lock className="h-6 w-6" /> Management Key
-              </CardTitle>
-              <CardDescription className="text-primary-foreground/80 font-medium">Unlock full CRUD permissions for the wall.</CardDescription>
+          <Card className="max-w-md mx-auto mb-16 border-primary/20 bg-card/50 backdrop-blur-xl shadow-2xl rounded-[2.5rem] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+            <CardHeader className="bg-primary text-primary-foreground p-8 text-center">
+              <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <CardTitle className="text-2xl font-black font-headline">Wall Manager</CardTitle>
+              <CardDescription className="text-primary-foreground/80 font-medium italic">Enter master key to enable CRUD tools.</CardDescription>
             </CardHeader>
             <CardContent className="p-8">
               <form onSubmit={handleLockerUnlock} className="space-y-4">
@@ -274,82 +288,91 @@ export default function CommentsPage() {
                       placeholder="••••••••" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="rounded-xl h-12 bg-background/50"
+                      className="rounded-xl h-12 bg-background/50 font-mono"
                     />
                     <Button type="submit" className="rounded-xl h-12 px-6 font-bold">Unlock</Button>
                   </div>
                 </div>
-                <Button variant="ghost" className="w-full text-xs" onClick={() => setIsLockerOpen(false)}>Cancel</Button>
+                <Button variant="ghost" className="w-full text-xs font-bold" onClick={() => setIsLockerOpen(false)}>Cancel Entry</Button>
               </form>
             </CardContent>
           </Card>
         )}
 
-        {/* Comment Posting Form */}
+        {/* Post Form */}
         <div id="comment-form" className="scroll-mt-24">
-          <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl">
-            <CardHeader className="bg-primary text-primary-foreground p-8">
-              <CardTitle className="text-2xl font-black flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard className="h-6 w-6" />
-                  {replyTo ? `Replying to ${replyTo.authorName}` : "Post Feedback"}
+          <Card className="rounded-[3rem] border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl">
+            <CardHeader className="bg-primary text-primary-foreground p-10">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-3xl font-black font-headline flex items-center gap-3">
+                    <LayoutDashboard className="h-8 w-8 opacity-50" />
+                    {replyTo ? `Replying to ${replyTo.authorName}` : "Share Your Voice"}
+                  </CardTitle>
+                  <CardDescription className="text-primary-foreground/70 font-medium">Your feedback drives the evolution of BRJ projects.</CardDescription>
                 </div>
                 {replyTo && (
-                  <Button variant="secondary" size="sm" className="rounded-full" onClick={() => setReplyTo(null)}>Cancel</Button>
+                  <Button variant="secondary" size="sm" className="rounded-full h-8 px-4" onClick={() => setReplyTo(null)}>Cancel</Button>
                 )}
-              </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-10">
               <form onSubmit={handlePostComment} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Your Identity*</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Full Identity*</label>
                   <Input 
                     placeholder="Enter your name..." 
                     required
-                    className="rounded-xl h-12 bg-background/50" 
+                    className="rounded-2xl h-14 bg-background/50 text-lg border-none ring-1 ring-primary/10" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Your Voice*</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Thoughts*</label>
                   <Textarea 
-                    placeholder={replyTo ? "Write your reply..." : "Share your thoughts or project ideas..."} 
+                    placeholder={replyTo ? "Compose your response..." : "Share a thought, project idea, or critique..."} 
                     required 
-                    className="rounded-2xl min-h-[160px] bg-background/50 resize-none text-lg" 
+                    className="rounded-3xl min-h-[180px] bg-background/50 border-none ring-1 ring-primary/10 resize-none text-xl p-6" 
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                   />
                 </div>
-                <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-black shadow-xl" disabled={isPending}>
-                  {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-2 h-5 w-5" /> Push to the Wall</>}
+                <Button type="submit" className="w-full h-16 rounded-3xl text-xl font-black shadow-2xl shadow-primary/30" disabled={isPending}>
+                  {isPending ? <Loader2 className="animate-spin" /> : <><Send className="mr-3 h-6 w-6" /> Push to the Wall</>}
                 </Button>
               </form>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-10">
-          <div className="flex items-center justify-between border-b pb-6">
-            <h2 className="text-2xl font-black font-headline">Wall Activity</h2>
-            <div className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold">
-              {allComments?.length || 0} Records
+        {/* Activity Feed */}
+        <div className="space-y-12">
+          <div className="flex items-center justify-between border-b-2 border-primary/5 pb-8">
+            <div className="space-y-1">
+              <h2 className="text-4xl font-black font-headline tracking-tight">Wall Activity</h2>
+              <p className="text-sm text-muted-foreground font-medium">Public community records and feedback loop.</p>
+            </div>
+            <div className="px-5 py-2 rounded-2xl bg-secondary text-secondary-foreground text-xs font-black shadow-inner">
+              {allComments?.length || 0} TOTAL ENTRIES
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-10">
             {commentsLoading ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <Loader2 className="animate-spin h-12 w-12 text-primary opacity-20" />
-                <p className="text-sm font-black uppercase tracking-widest text-muted-foreground animate-pulse">Syncing Feed...</p>
+              <div className="flex flex-col items-center justify-center py-32 gap-6">
+                <Loader2 className="animate-spin h-14 w-14 text-primary opacity-20" />
+                <p className="text-sm font-black uppercase tracking-widest text-muted-foreground animate-pulse">Synchronizing Live Feed...</p>
               </div>
             ) : allComments && allComments.length > 0 ? (
               renderComments(null)
             ) : (
-              <div className="text-center py-32 opacity-30 border-4 border-dashed rounded-[3rem] bg-secondary/5">
-                <MessageSquare className="h-24 w-24 mx-auto mb-6 opacity-10" />
-                <p className="text-3xl font-black font-headline">The wall is empty.</p>
-                <p className="font-medium max-w-xs mx-auto mt-2 text-muted-foreground">Be the first to leave your mark on the Community Wall.</p>
+              <div className="text-center py-40 opacity-30 border-4 border-dashed rounded-[4rem] bg-secondary/5 space-y-6">
+                <AlertCircle className="h-24 w-24 mx-auto opacity-10" />
+                <div className="space-y-2">
+                  <p className="text-3xl font-black font-headline">The Wall is Clean.</p>
+                  <p className="font-medium max-w-xs mx-auto text-muted-foreground">Be the first developer or client to leave your mark on the Wall Activity feed.</p>
+                </div>
               </div>
             )}
           </div>
