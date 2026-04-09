@@ -1,4 +1,3 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
@@ -42,7 +41,7 @@ export default function RootLayout({
         <FirebaseClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <div className="flex-1">{children}</div>
             <Footer />
             <Toaster />
           </ThemeProvider>
