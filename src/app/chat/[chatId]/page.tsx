@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, orderBy, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, serverTimestamp, doc } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,20 +22,6 @@ export default function ChatConversationPage() {
 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/auth');
-      return;
-    }
-    if (user && db) {
-      getDoc(doc(db, 'chat_users', user.uid)).then(snap => {
-        if (!snap.exists()) router.push('/chat');
-        else setHasProfile(true);
-      });
-    }
-  }, [user, isUserLoading, db, router]);
 
   const chatRef = useMemoFirebase(() => {
     if (!db || !chatId) return null;
@@ -46,14 +31,13 @@ export default function ChatConversationPage() {
   const { data: chatData, isLoading: chatLoading } = useDoc(chatRef);
 
   const messagesQuery = useMemoFirebase(() => {
-    if (!db || !chatId || !user || !hasProfile) return null;
+    if (!db || !chatId) return null;
     return query(
       collection(db, 'chat_messages'),
       where('chatId', '==', chatId),
-      where('userId', '==', user.uid),
       orderBy('createdAt', 'asc')
     );
-  }, [db, chatId, user, hasProfile]);
+  }, [db, chatId]);
 
   const { data: messages } = useCollection(messagesQuery);
 
@@ -110,7 +94,7 @@ export default function ChatConversationPage() {
     deleteDocumentNonBlocking(doc(db, 'chat_messages', msgId));
   };
 
-  if (chatLoading || hasProfile === null || isUserLoading) {
+  if (chatLoading || isUserLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <Loader2 className="animate-spin text-primary h-8 w-8" />
@@ -118,12 +102,11 @@ export default function ChatConversationPage() {
     );
   }
 
-  // Ensure user owns the chat they are looking at
-  if (!chatData || chatData.userId !== user?.uid) {
+  if (!chatData) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
         <AlertCircle className="h-10 w-10" />
-        <p>Conversation access denied or not found.</p>
+        <p>Conversation not found.</p>
       </div>
     );
   }

@@ -1,10 +1,10 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase, useAuth } from '@/firebase';
+import { collection, query, where, orderBy, serverTimestamp, doc } from 'firebase/firestore';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, Plus, Trash2, Edit3, Loader2, ChevronLeft, ChevronRight, Home, MessageCircle } from 'lucide-react';
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
   const params = useParams();
@@ -23,38 +24,28 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
-  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
+  // Automatically sign in anonymously if not authenticated
   useEffect(() => {
-    if (user && db) {
-      const checkProfile = async () => {
-        try {
-          const docSnap = await getDoc(doc(db, 'chat_users', user.uid));
-          setHasProfile(docSnap.exists());
-        } catch (e) {
-          setHasProfile(false);
-        }
-      };
-      checkProfile();
-    } else if (!isUserLoading && !user) {
-      setHasProfile(false);
+    if (!isUserLoading && !user && auth) {
+      initiateAnonymousSignIn(auth);
     }
-  }, [user, db, isUserLoading]);
+  }, [user, isUserLoading, auth]);
 
-  // Unified chats query with ownership filter
+  // Unified chats query - show user's own chats if logged in, otherwise empty list
   const chatsQuery = useMemoFirebase(() => {
-    if (!db || !user || !hasProfile) return null;
+    if (!db || !user) return null;
     return query(
       collection(db, 'chats'),
       where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
-  }, [db, user, hasProfile]);
+  }, [db, user]);
 
   const { data: chats, isLoading } = useCollection(chatsQuery);
 
   const createNewChat = () => {
-    if (!db || !user || !hasProfile) return;
+    if (!db || !user) return;
     const chatsRef = collection(db, 'chats');
     addDocumentNonBlocking(chatsRef, {
       userId: user.uid,
@@ -91,7 +82,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         <div className="p-4 flex flex-col h-full space-y-4">
           <Button 
             onClick={createNewChat} 
-            disabled={!hasProfile || isLoading}
+            disabled={!user || isLoading}
             className="w-full justify-start h-12 rounded-xl font-bold bg-primary text-primary-foreground shadow-lg"
           >
             <Plus className="mr-2 h-4 w-4" /> New Conversation
@@ -129,7 +120,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                   </div>
                 </Link>
               ))}
-              {!isLoading && !chats?.length && hasProfile && (
+              {!isLoading && !chats?.length && user && (
                 <p className="text-center text-xs text-muted-foreground pt-10 px-4">No chat history yet. Start your first session!</p>
               )}
             </div>
