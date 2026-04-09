@@ -15,6 +15,21 @@
       },
       "required": ["authorName", "commentText", "submissionDate"]
     },
+    "Project": {
+      "title": "Project",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "longDescription": { "type": "string" },
+        "tech": { "type": "array", "items": { "type": "string" } },
+        "imageUrl": { "type": "string" },
+        "liveUrl": { "type": "string" },
+        "repoUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "longDescription", "tech", "imageUrl"]
+    },
     "InquiryHire": {
       "title": "InquiryHire",
       "type": "object",
@@ -62,6 +77,10 @@
     "/comments/{commentId}": {
       "schema": "Comment",
       "description": "Community feedback."
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Dynamic portfolio projects."
     },
     "/inquiries_hire_me/{id}": {
       "schema": "InquiryHire",
