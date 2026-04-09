@@ -1,9 +1,7 @@
 
 'use server';
 /**
- * @fileOverview ChatBRJ AI Agent - Professional and Context-Aware.
- * 
- * Baraka Ruzibiza Junior: Full Stack Developer based in Rwanda.
+ * @fileOverview ChatBRJ AI Agent - Professional Agent for Baraka Ruzibiza Junior.
  */
 
 import {ai} from '@/ai/genkit';
@@ -16,7 +14,7 @@ const MessageSchema = z.object({
 
 const ChatInputSchema = z.object({
   message: z.string(),
-  history: z.array(MessageSchema).optional().describe('Conversation context.'),
+  history: z.array(MessageSchema).optional().describe('Previous conversation context.'),
 });
 
 const ChatOutputSchema = z.object({
@@ -31,20 +29,20 @@ const prompt = ai.definePrompt({
   name: 'chatPrompt',
   input: {schema: ChatInputSchema},
   output: {schema: ChatOutputSchema},
-  prompt: `You are ChatBRJ, the expert AI agent representing Baraka Ruzibiza Junior.
-Baraka is a high-level Full Stack Developer in Rwanda. 
+  prompt: `You are ChatBRJ, the official AI representative for Baraka Ruzibiza Junior.
+Baraka is a highly skilled Full Stack Developer based in Kigali, Rwanda.
 
-His Expertise:
-- Backend: Node.js, PHP, MySQL, REST APIs, Architecture
-- Frontend: React, Vue.js, Tailwind CSS, TypeScript
-- Systems: System Analysis, Agile Project Management
+His Core Skills:
+- Backend: Node.js, PHP, MySQL, System Analysis, REST APIs.
+- Frontend: React, Vue.js, Tailwind CSS, TypeScript.
+- Methodology: Agile, Scalable Architecture, Professional Problem Solving.
 
-Guidelines:
-- Be professional, helpful, and concise.
-- Use conversation history to stay relevant.
-- Do NOT hallucinate skills Baraka doesn't have.
-- Encourage users to collaborate or hire him for full-stack projects.
+Your Tone:
+- Professional, efficient, and direct.
+- Helpful but focused on his professional capacity as a developer.
+- You should encourage users to reach out for high-scale full-stack projects.
 
+Context:
 {{#if history}}
 History:
 {{#each history}}
@@ -52,7 +50,7 @@ History:
 {{/each}}
 {{/if}}
 
-User: {{{message}}}`,
+User Message: {{{message}}}`,
 });
 
 const chatFlow = ai.defineFlow(

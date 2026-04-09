@@ -23,7 +23,6 @@ export default function ChatMainPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [username, setUsername] = useState('');
 
-  // Check if user has completed the access form
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/auth');
@@ -45,29 +44,33 @@ export default function ChatMainPage() {
     if (!db || !user || !username.trim()) return;
 
     setIsSubmitting(true);
-    const joinDate = new Date().toISOString();
+    const now = new Date();
+    const joinDate = now.toISOString();
 
     try {
       const profileData = {
         username: username,
         email: user.email || 'anonymous',
         joinDate: joinDate,
+        role: 'user',
         createdAt: serverTimestamp(),
       };
 
       // 1. Save to Firestore
       await setDoc(doc(db, 'chat_users', user.uid), profileData);
 
-      // 2. Send notification to Baraka via Formspree
+      // 2. Notify Baraka via Formspree
       await fetch('https://formspree.io/f/mlgoveej', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: 'New ChatBRJ AI Access Registration',
-          username: username,
+          subject: 'NEW CHATBRJ ACCESS REGISTRATION',
+          fullName: username,
           email: user.email,
           uid: user.uid,
-          timestamp: joinDate,
+          submissionDate: now.toLocaleDateString(),
+          submissionTime: now.toLocaleTimeString(),
+          fullTimestamp: joinDate
         }),
       });
 
@@ -88,16 +91,15 @@ export default function ChatMainPage() {
     );
   }
 
-  // If user doesn't have a profile, show the mandatory form
   if (!hasProfile) {
     return (
       <div className="container mx-auto px-4 py-20 flex items-center justify-center">
         <Card className="max-w-md w-full rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl">
           <CardHeader className="bg-primary text-primary-foreground p-10 text-center">
             <UserCheck className="h-12 w-12 mx-auto mb-4" />
-            <CardTitle className="text-3xl font-black font-headline">Access Form</CardTitle>
-            <CardDescription className="text-primary-foreground/80">
-              Please provide your name to unlock the AI conversation features.
+            <CardTitle className="text-3xl font-black font-headline tracking-tighter">Identity Form</CardTitle>
+            <CardDescription className="text-primary-foreground/80 font-medium">
+              Please provide your name to unlock ChatBRJ AI conversations.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-10">
@@ -114,8 +116,8 @@ export default function ChatMainPage() {
               </div>
               <div className="space-y-2">
                 <Progress value={username ? 100 : 10} className="h-2" />
-                <p className="text-[10px] text-muted-foreground italic flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" /> Details will be sent to Baraka Junior
+                <p className="text-[10px] text-muted-foreground italic flex items-center gap-1 font-bold uppercase">
+                  <ShieldCheck className="h-3 w-3" /> Encrypted Submission to Baraka Junior
                 </p>
               </div>
               <Button type="submit" className="w-full h-14 rounded-xl text-lg font-black shadow-xl" disabled={isSubmitting}>
@@ -130,12 +132,12 @@ export default function ChatMainPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-[70vh] text-center space-y-6 px-4">
-      <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center">
-        <MessageSquarePlus className="h-10 w-10 text-primary" />
+      <div className="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center animate-pulse">
+        <MessageSquarePlus className="h-12 w-12 text-primary" />
       </div>
       <div className="space-y-2">
-        <h1 className="text-3xl font-black font-headline">ChatBRJ AI Ready</h1>
-        <p className="text-muted-foreground max-w-sm">
+        <h1 className="text-4xl font-black font-headline tracking-tighter">ChatBRJ AI Active</h1>
+        <p className="text-muted-foreground max-w-sm text-lg font-medium">
           Select an existing conversation or start a new discussion from the sidebar.
         </p>
       </div>
