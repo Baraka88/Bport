@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Terminal, Database } from "lucide-react"
@@ -40,12 +41,12 @@ export function Footer() {
             <h4 className="font-black text-xs uppercase tracking-[0.3em] text-muted-foreground">System Operations</h4>
             <ul className="space-y-4 text-sm font-bold">
               <li>
-                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
+                <Link href="/admin?tab=projects" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
                   <Terminal className="h-3 w-3" /> Architecture
                 </Link>
               </li>
               <li>
-                <Link href="/comments" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
+                <Link href="/admin?tab=comments" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
                   <Database className="h-3 w-3" /> Logs
                 </Link>
               </li>

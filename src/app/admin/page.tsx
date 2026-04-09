@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'next/navigation';
 import { 
   Lock, 
   Trash2, 
@@ -27,13 +28,21 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function AdminWorkspacePage() {
+function AdminContent() {
   const db = useFirestore();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   
   const [activeLocker, setActiveLocker] = useState<'projects' | 'comments'>('projects');
   const [password, setPassword] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'projects' || tab === 'comments') {
+      setActiveLocker(tab);
+    }
+  }, [searchParams]);
   
   // Project Form State for Creation
   const [newProject, setNewProject] = useState({
@@ -312,5 +321,13 @@ export default function AdminWorkspacePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminWorkspacePage() {
+  return (
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>}>
+      <AdminContent />
+    </Suspense>
   );
 }
