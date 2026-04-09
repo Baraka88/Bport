@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Comment": {
@@ -41,10 +42,30 @@
         "status": { "type": "string" },
         "submissionDate": { "type": "string", "format": "date-time" }
       }
+    },
+    "Chat": {
+      "title": "Chat",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "ai"] },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
-    "providers": ["password"]
+    "providers": ["anonymous", "password"]
   },
   "firestore": {
     "/comments/{commentId}": {
@@ -58,6 +79,14 @@
     "/inquiries_collaboration/{id}": {
       "schema": "InquiryCollab",
       "description": "Collaboration proposals."
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "User conversation headers."
+    },
+    "/chat_messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Individual messages within a chat."
     }
   }
 }

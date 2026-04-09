@@ -4,7 +4,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles, Bot } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
+  { name: "AI Chat", href: "/chat", icon: Bot },
   { name: "Community", href: "/comments", icon: MessageSquare },
   { name: "Quotes", href: "/motivation", icon: Sparkles },
   { name: "Collab", href: "/collab", icon: Users },
@@ -37,8 +38,8 @@ export function Navbar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === item.href ? "text-primary font-bold" : "text-muted-foreground"
+                "text-sm font-medium transition-colors hover:text-primary flex items-center gap-1",
+                pathname.startsWith(item.href) && item.href !== "/" ? "text-primary font-bold" : (pathname === item.href ? "text-primary font-bold" : "text-muted-foreground")
               )}
             >
               {item.name}
@@ -83,7 +84,7 @@ export function Navbar() {
                     onClick={() => setIsOpen(false)}
                     className={cn(
                       "flex items-center space-x-2 text-lg font-medium py-2 border-b",
-                      pathname === item.href && "text-primary"
+                      (pathname.startsWith(item.href) && item.href !== "/") || pathname === item.href ? "text-primary" : ""
                     )}
                   >
                     <item.icon className="h-5 w-5 text-primary" />

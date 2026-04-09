@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -17,7 +18,6 @@ export default function ChatConversationPage() {
   const chatId = params?.chatId as string;
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
-  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [input, setInput] = useState('');

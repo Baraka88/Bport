@@ -1,10 +1,10 @@
+
 'use client';
 
 import React, { useEffect } from 'react';
 import { useUser, useAuth } from '@/firebase';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { MessageSquarePlus, Bot, Sparkles } from 'lucide-react';
+import { Bot, Sparkles, MessageSquarePlus } from 'lucide-react';
 
 export default function ChatMainPage() {
   const { user, isUserLoading } = useUser();
@@ -12,7 +12,6 @@ export default function ChatMainPage() {
 
   useEffect(() => {
     if (!isUserLoading && !user && auth) {
-      // Background anonymous sign-in to maintain local history without a form
       initiateAnonymousSignIn(auth);
     }
   }, [user, isUserLoading, auth]);

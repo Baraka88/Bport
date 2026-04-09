@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -32,7 +33,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     }
   }, [user, isUserLoading, auth]);
 
-  // Unified chats query - show user's own chats if logged in, otherwise empty list
+  // Unified chats query - show user's own chats
   const chatsQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
