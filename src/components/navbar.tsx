@@ -1,9 +1,10 @@
+
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Sparkles } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -13,6 +14,7 @@ const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Community", href: "/comments", icon: MessageSquare },
+  { name: "Quotes", href: "/motivation", icon: Sparkles },
   { name: "Collab", href: "/collab", icon: Users },
   { name: "Gallery", href: "/gallery", icon: Layout },
 ]
@@ -36,7 +38,7 @@ export function Navbar() {
               href={item.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-primary",
-                pathname.startsWith(item.href) && item.href !== "/" ? "text-primary font-bold" : (pathname === item.href ? "text-primary font-bold" : "text-muted-foreground")
+                pathname === item.href ? "text-primary font-bold" : "text-muted-foreground"
               )}
             >
               {item.name}

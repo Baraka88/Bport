@@ -30,6 +30,7 @@ export function Footer() {
             <h4 className="font-bold">Navigation</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li><Link href="/comments" className="hover:text-primary transition-colors">Community Wall</Link></li>
+              <li><Link href="/motivation" className="hover:text-primary transition-colors">Daily Quotes</Link></li>
               <li><Link href="/collab" className="hover:text-primary transition-colors">Collaboration</Link></li>
               <li><Link href="/contact" className="hover:text-primary transition-colors">Hire Me</Link></li>
               <li><Link href="/gallery" className="hover:text-primary transition-colors">Visual Gallery</Link></li>
