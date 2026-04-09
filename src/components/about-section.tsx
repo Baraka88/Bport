@@ -1,11 +1,15 @@
 
 import { EXPERIENCE } from "@/app/data/portfolio"
 import { Briefcase, Calendar, GraduationCap, ShieldCheck, Terminal } from "lucide-react"
+import Image from "next/image"
+import { PlaceHolderImages } from "@/app/lib/placeholder-images"
 
 export function AboutSection() {
+  const profileImg = PlaceHolderImages.find(img => img.id === 'profile-portrait');
+
   return (
     <section id="about" className="container mx-auto px-4 py-20">
-      <div className="max-w-5xl mx-auto space-y-20">
+      <div className="max-w-6xl mx-auto space-y-20">
         <div className="grid lg:grid-cols-5 gap-16 items-start">
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-card p-10 rounded-[3rem] shadow-2xl border border-primary/5 relative overflow-hidden group">
@@ -25,6 +29,18 @@ export function AboutSection() {
                     <p className="text-3xl font-black font-headline">4+ Years</p>
                   </div>
               </div>
+            </div>
+
+            <div className="relative aspect-square rounded-[3rem] overflow-hidden shadow-2xl border-4 border-card hidden lg:block">
+              {profileImg && (
+                <Image 
+                  src={profileImg.imageUrl} 
+                  alt={profileImg.description} 
+                  fill 
+                  className="object-cover"
+                  data-ai-hint={profileImg.imageHint}
+                />
+              )}
             </div>
 
             <div className="bg-accent p-10 rounded-[3rem] shadow-2xl border border-white/10 text-accent-foreground">

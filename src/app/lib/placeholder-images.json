@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -11,6 +12,12 @@
       "description": "System architecture and cloud nodes",
       "imageUrl": "https://picsum.photos/seed/arch/1200/600",
       "imageHint": "system architecture"
+    },
+    {
+      "id": "profile-portrait",
+      "description": "Professional portrait representing strength and leadership",
+      "imageUrl": "https://picsum.photos/seed/baraka-portrait/800/1200",
+      "imageHint": "professional man"
     },
     {
       "id": "project-node",
