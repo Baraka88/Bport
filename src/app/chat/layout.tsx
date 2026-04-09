@@ -28,8 +28,12 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (user && db) {
       const checkProfile = async () => {
-        const docSnap = await getDoc(doc(db, 'chat_users', user.uid));
-        setHasProfile(docSnap.exists());
+        try {
+          const docSnap = await getDoc(doc(db, 'chat_users', user.uid));
+          setHasProfile(docSnap.exists());
+        } catch (e) {
+          setHasProfile(false);
+        }
       };
       checkProfile();
     } else if (!isUserLoading && !user) {
@@ -37,6 +41,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     }
   }, [user, db, isUserLoading]);
 
+  // Unified chats query with ownership filter
   const chatsQuery = useMemoFirebase(() => {
     if (!db || !user || !hasProfile) return null;
     return query(

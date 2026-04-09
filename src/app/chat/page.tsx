@@ -31,9 +31,14 @@ export default function ChatMainPage() {
 
     if (user && db) {
       const checkProfile = async () => {
-        const docRef = doc(db, 'chat_users', user.uid);
-        const docSnap = await getDoc(docRef);
-        setHasProfile(docSnap.exists());
+        try {
+          const docRef = doc(db, 'chat_users', user.uid);
+          const docSnap = await getDoc(docRef);
+          setHasProfile(docSnap.exists());
+        } catch (e) {
+          // If we can't read the profile, assume we need to create one
+          setHasProfile(false);
+        }
       };
       checkProfile();
     }
@@ -59,7 +64,7 @@ export default function ChatMainPage() {
       // 1. Save to Firestore
       await setDoc(doc(db, 'chat_users', user.uid), profileData);
 
-      // 2. Notify Baraka via Formspree
+      // 2. Notify Baraka via Formspree with detailed timestamp
       await fetch('https://formspree.io/f/mlgoveej', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,8 +73,8 @@ export default function ChatMainPage() {
           fullName: username,
           email: user.email,
           uid: user.uid,
-          submissionDate: now.toLocaleDateString(),
-          submissionTime: now.toLocaleTimeString(),
+          submissionDay: now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+          submissionTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           fullTimestamp: joinDate
         }),
       });
