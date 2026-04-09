@@ -7,13 +7,13 @@ import {Toaster} from '@/components/ui/toaster';
 import {FirebaseClientProvider} from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://studio-5852085552-383c3.web.app'),
+  metadataBase: new URL('https://brjdev.web.app'),
   title: 'BRJDEV | Baraka Ruzibiza Junior',
   description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
   openGraph: {
     title: 'BRJDEV | Baraka Ruzibiza Junior',
     description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
-    url: 'https://studio-5852085552-383c3.web.app',
+    url: 'https://brjdev.web.app',
     siteName: 'BRJDEV',
     locale: 'en_US',
     type: 'website',
