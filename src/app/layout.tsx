@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
@@ -7,8 +8,22 @@ import {Toaster} from '@/components/ui/toaster';
 import {FirebaseClientProvider} from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://BRJDEV.web.app'),
   title: 'BRJDEV | Baraka Ruzibiza Junior',
   description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
+  openGraph: {
+    title: 'BRJDEV | Baraka Ruzibiza Junior',
+    description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
+    url: 'https://BRJDEV.web.app',
+    siteName: 'BRJDEV',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BRJDEV | Baraka Ruzibiza Junior',
+    description: 'Professional Portfolio of Baraka Ruzibiza Junior - Full Stack Developer',
+  },
 };
 
 export default function RootLayout({
