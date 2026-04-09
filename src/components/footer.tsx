@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Lock, MessageSquare, Briefcase } from "lucide-react"
+import { Github, Linkedin, Instagram, Phone, Mail, Facebook, ShieldCheck, Lock, MessageSquare, Briefcase, Terminal, Database } from "lucide-react"
 import Link from "next/link"
 import React from "react"
 
@@ -38,16 +38,16 @@ export function Footer() {
           </div>
 
           <div className="space-y-6">
-            <h4 className="font-black text-xs uppercase tracking-[0.3em] text-muted-foreground">Master Dashboard</h4>
+            <h4 className="font-black text-xs uppercase tracking-[0.3em] text-muted-foreground">System Operations</h4>
             <ul className="space-y-4 text-sm font-bold">
               <li>
-                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-accent">
-                  <Briefcase className="h-3 w-3" /> Project Locker
+                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
+                  <Terminal className="h-3 w-3" /> Architecture
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-accent">
-                  <MessageSquare className="h-3 w-3" /> Comments Locker
+                <Link href="/admin" className="flex items-center gap-2 hover:text-primary transition-colors text-muted-foreground/40">
+                  <Database className="h-3 w-3" /> Logs
                 </Link>
               </li>
               <li>

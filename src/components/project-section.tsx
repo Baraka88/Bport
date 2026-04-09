@@ -3,6 +3,7 @@
 
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
+import { PROJECTS } from "@/app/data/portfolio"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,7 +19,12 @@ export function ProjectSection() {
     return query(collection(db, "projects"), orderBy("createdAt", "desc"));
   }, [db]);
 
-  const { data: projects, isLoading } = useCollection(projectsQuery);
+  const { data: firestoreProjects, isLoading } = useCollection(projectsQuery);
+
+  // Use Firestore data if available, otherwise fallback to static data
+  const displayProjects = firestoreProjects && firestoreProjects.length > 0 
+    ? firestoreProjects 
+    : PROJECTS;
 
   return (
     <section id="projects" className="container mx-auto px-4 scroll-mt-20">
@@ -38,9 +44,9 @@ export function ProjectSection() {
           <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
           <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse">Syncing Projects...</p>
         </div>
-      ) : projects && projects.length > 0 ? (
+      ) : displayProjects.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project) => (
+          {displayProjects.map((project) => (
             <Card key={project.id} className="group overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-300 bg-card/50 backdrop-blur-sm">
               <div className="relative h-64 overflow-hidden">
                 <Image
