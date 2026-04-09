@@ -3,14 +3,29 @@
 
 import React, { useState } from "react"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore"
-import Image from "next/image"
-import { Loader2, ImageOff, Lock, Unlock, Plus, Send } from "lucide-react"
+import { collection, query, orderBy, doc } from "firebase/firestore"
+import { 
+  addDocumentNonBlocking, 
+  deleteDocumentNonBlocking, 
+  updateDocumentNonBlocking 
+} from "@/firebase/non-blocking-updates"
+import { 
+  Loader2, 
+  ImageOff, 
+  Lock, 
+  Unlock, 
+  Plus, 
+  Send, 
+  Trash2, 
+  Edit3, 
+  X, 
+  Save 
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 export default function GalleryPage() {
   const db = useFirestore()
@@ -25,6 +40,10 @@ export default function GalleryPage() {
   const [newImage, setNewImage] = useState({ url: "", description: "", altText: "" })
   const [isUploading, setIsUploading] = useState(false)
 
+  // Edit State
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ description: "", altText: "" })
+
   const galleryQuery = useMemoFirebase(() => {
     if (!db) return null
     return query(collection(db, "images"), orderBy("uploadDate", "desc"))
@@ -34,7 +53,6 @@ export default function GalleryPage() {
 
   const handleLockerUnlock = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simple demo password - replace with a more secure method if needed
     if (password === "brjadmin2024") {
       setIsAdmin(true)
       setIsLockerOpen(false)
@@ -50,21 +68,39 @@ export default function GalleryPage() {
     if (!db || !newImage.url || !newImage.description) return
     
     setIsUploading(true)
-    try {
-      await addDoc(collection(db, "images"), {
-        url: newImage.url,
-        description: newImage.description,
-        altText: newImage.altText || newImage.description,
-        uploadDate: new Date().toISOString(),
-        createdAt: serverTimestamp()
-      })
+    const imagesRef = collection(db, "images")
+    
+    addDocumentNonBlocking(imagesRef, {
+      url: newImage.url,
+      description: newImage.description,
+      altText: newImage.altText || newImage.description,
+      uploadDate: new Date().toISOString(),
+    }).then(() => {
       setNewImage({ url: "", description: "", altText: "" })
-      toast({ title: "Success", description: "New image added to the gallery." })
-    } catch (error) {
-      toast({ variant: "destructive", title: "Upload Failed", description: "Could not add image." })
-    } finally {
       setIsUploading(false)
-    }
+      toast({ title: "Success", description: "Image added to gallery." })
+    })
+  }
+
+  const handleDelete = (id: string) => {
+    if (!db || !confirm("Are you sure you want to remove this image?")) return
+    deleteDocumentNonBlocking(doc(db, "images", id))
+    toast({ title: "Deleted", description: "Image removed from showcase." })
+  }
+
+  const startEditing = (img: any) => {
+    setEditingId(img.id)
+    setEditForm({ description: img.description, altText: img.altText || "" })
+  }
+
+  const handleUpdate = (id: string) => {
+    if (!db) return
+    updateDocumentNonBlocking(doc(db, "images", id), {
+      description: editForm.description,
+      altText: editForm.altText
+    })
+    setEditingId(null)
+    toast({ title: "Updated", description: "Image details saved." })
   }
 
   return (
@@ -166,14 +202,66 @@ export default function GalleryPage() {
       ) : images && images.length > 0 ? (
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
           {images.map((img) => (
-            <div key={img.id} className="relative group overflow-hidden rounded-2xl shadow-lg break-inside-avoid border">
+            <div key={img.id} className="relative group overflow-hidden rounded-2xl shadow-lg break-inside-avoid border bg-card">
               <img
                 src={img.url}
                 alt={img.altText || img.description}
                 className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                <p className="text-white font-medium">{img.description}</p>
+              
+              {/* Overlay for Info */}
+              <div className={cn(
+                "absolute inset-0 bg-black/70 flex flex-col justify-end p-6 transition-opacity duration-300",
+                editingId === img.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}>
+                {editingId === img.id ? (
+                  <div className="space-y-3">
+                    <Input 
+                      className="h-8 text-xs bg-white/10 text-white border-white/20" 
+                      value={editForm.description}
+                      onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                      placeholder="Description"
+                    />
+                    <Input 
+                      className="h-8 text-xs bg-white/10 text-white border-white/20" 
+                      value={editForm.altText}
+                      onChange={(e) => setEditForm({...editForm, altText: e.target.value})}
+                      placeholder="Alt text"
+                    />
+                    <div className="flex gap-2">
+                      <Button size="sm" className="h-8 flex-1" onClick={() => handleUpdate(img.id)}>
+                        <Save className="h-3 w-3 mr-1" /> Save
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 flex-1" onClick={() => setEditingId(null)}>
+                        <X className="h-3 w-3 mr-1" /> Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-white font-medium mb-4">{img.description}</p>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <Button 
+                          size="icon" 
+                          variant="secondary" 
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => startEditing(img)}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="destructive" 
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => handleDelete(img.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
           ))}
