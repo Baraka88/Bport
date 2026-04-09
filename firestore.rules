@@ -1,59 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper to check authentication
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Helper to check ownership based on a 'userId' field in the document
-    function isOwner(data) {
-      return isAuthenticated() && data.userId == request.auth.uid;
-    }
-
-    // Helper to check if user is an administrator
-    function isAdmin() {
-      return isAuthenticated() && 
-        (get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == 'admin' || 
-         get(/databases/$(database)/documents/chat_users/$(request.auth.uid)).data.role == 'admin ');
-    }
-
-    // User profiles: Publicly readable for chat discovery, owner can create/update
-    match /chat_users/{userId} {
-      allow read: if true;
-      allow write: if true;
-    }
-
-    // Chats: Public access enabled as requested (No security rules)
-    match /chats/{chatId} {
+    // Completely open rules as requested for a clean start
+    match /{document=**} {
       allow read, write: if true;
-    }
-
-    // Chat Messages: Public access enabled as requested (No security rules)
-    match /chat_messages/{messageId} {
-      allow read, write: if true;
-    }
-
-    // Community feedback is public for all to read and participate
-    match /comments/{id} {
-      allow read: if true;
-      allow create: if true;
-      allow update, delete: if isAdmin();
-    }
-
-    // Professional Inquiries: Public create, Admin only read
-    match /inquiries_hire_me/{id} {
-      allow create: if true;
-      allow read: if isAdmin();
-    }
-    match /inquiries_collaboration/{id} {
-      allow create: if true;
-      allow read: if isAdmin();
-    }
-    match /images/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
     }
   }
 }

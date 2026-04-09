@@ -1,10 +1,9 @@
-
 "use client"
 
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare, Bot } from "lucide-react"
+import { Moon, Sun, Menu, Layout, Briefcase, Users, MessageSquare } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
@@ -14,7 +13,6 @@ const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
   { name: "Community", href: "/comments", icon: MessageSquare },
-  { name: "AI Chat", href: "/chat", icon: Bot },
   { name: "Collab", href: "/collab", icon: Users },
   { name: "Gallery", href: "/gallery", icon: Layout },
 ]
