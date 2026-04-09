@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, where, orderBy, addDoc, serverTimestamp, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -11,9 +12,11 @@ import { Send, Loader2, Bot, User, Trash2, Sparkles, AlertCircle } from 'lucide-
 import { useParams, useRouter } from 'next/navigation';
 import { getChatResponse } from '@/ai/flows/chat-flow';
 import { cn } from '@/lib/utils';
+import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function ChatConversationPage() {
-  const { chatId } = useParams();
+  const params = useParams();
+  const chatId = params?.chatId as string;
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
@@ -23,9 +26,11 @@ export default function ChatConversationPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
-  // 1. Mandatory Profile Check
   useEffect(() => {
-    if (!isUserLoading && !user) router.push('/auth');
+    if (!isUserLoading && !user) {
+      router.push('/auth');
+      return;
+    }
     if (user && db) {
       getDoc(doc(db, 'chat_users', user.uid)).then(snap => {
         if (!snap.exists()) router.push('/chat');
@@ -36,7 +41,7 @@ export default function ChatConversationPage() {
 
   const chatRef = useMemoFirebase(() => {
     if (!db || !chatId) return null;
-    return doc(db, 'chats', chatId as string);
+    return doc(db, 'chats', chatId);
   }, [db, chatId]);
 
   const { data: chatData, isLoading: chatLoading } = useDoc(chatRef);
@@ -69,9 +74,9 @@ export default function ChatConversationPage() {
 
     const messagesRef = collection(db, 'chat_messages');
 
-    // Add user message
-    addDoc(messagesRef, {
-      chatId: chatId as string,
+    // Add user message (Non-blocking)
+    addDocumentNonBlocking(messagesRef, {
+      chatId,
       userId: user.uid,
       role: 'user',
       text: userText,
@@ -86,28 +91,42 @@ export default function ChatConversationPage() {
 
       const response = await getChatResponse({ message: userText, history });
 
-      // Add AI response
-      addDoc(messagesRef, {
-        chatId: chatId as string,
+      // Add AI response (Non-blocking)
+      addDocumentNonBlocking(messagesRef, {
+        chatId,
         userId: user.uid,
         role: 'ai',
         text: response.text,
         createdAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error('AI Error:', error);
+      // Errors handled by global listener
     } finally {
       setIsTyping(false);
     }
   };
 
-  const deleteMessage = async (msgId: string) => {
+  const deleteMessage = (msgId: string) => {
     if (!db) return;
-    deleteDoc(doc(db, 'chat_messages', msgId));
+    deleteDocumentNonBlocking(doc(db, 'chat_messages', msgId));
   };
 
-  if (chatLoading || hasProfile === null) return <div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!chatData) return <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground"><AlertCircle className="h-10 w-10" /><p>Conversation access denied.</p></div>;
+  if (chatLoading || hasProfile === null || isUserLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary h-8 w-8" />
+      </div>
+    );
+  }
+
+  if (!chatData) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground">
+        <AlertCircle className="h-10 w-10" />
+        <p>Conversation access denied or not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full">
