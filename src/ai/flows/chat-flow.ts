@@ -1,11 +1,5 @@
-
-'use server';
-/**
- * @fileOverview ChatBRJ AI Agent - Professional Agent for Baraka Ruzibiza Junior.
- */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'ai']),
@@ -27,8 +21,8 @@ export async function getChatResponse(input: z.infer<typeof ChatInputSchema>) {
 
 const prompt = ai.definePrompt({
   name: 'chatPrompt',
-  input: {schema: ChatInputSchema},
-  output: {schema: ChatOutputSchema},
+  input: { schema: ChatInputSchema },
+  output: { schema: ChatOutputSchema },
   prompt: `You are ChatBRJ, the official AI representative for Baraka Ruzibiza Junior.
 Baraka is a highly skilled Full Stack Developer based in Kigali, Rwanda.
 
@@ -59,8 +53,11 @@ const chatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const { output } = await prompt(input);
+    return output || { text: "Sorry, I couldn't generate a response." };
+  }
+);    const {output} = await prompt(input);
     return output!;
   }
 );
