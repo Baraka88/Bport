@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { MOTIVATIONAL_QUOTES, MOTIVATIONAL_VIDEOS, type MotivationQuote, type MotivationVideo } from '@/app/data/motivation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Quote, PlayCircle, Sparkles, RefreshCw } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function MotivationPage() {
   const [dailyQuote, setDailyQuote] = useState<MotivationQuote | null>(null);

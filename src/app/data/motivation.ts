@@ -27,6 +27,11 @@ export const MOTIVATIONAL_VIDEOS: MotivationVideo[] = [
   { id: "1", title: "Dream - Motivational Video", embedId: "mgmVOuLgFB0" },
   { id: "2", title: "Unbroken - Motivational Video", embedId: "26U_seo0a1g" },
   { id: "3", title: "Vision - Motivational Video", embedId: "m_I7vLqXkE8" },
-  { id: "4", title: "Mindset - Motivational Video", embedId: "26U_seo0a1g" },
-  { id: "5", title: "Persistence - Motivational Video", embedId: "mgmVOuLgFB0" }
+  { id: "4", title: "Believe - Motivational Speech", embedId: "vXv2XlO8Qvw" },
+  { id: "5", title: "Rise and Grind", embedId: "Ax38x7V9Yvg" },
+  { id: "6", title: "Never Give Up", embedId: "hLQl3WQQoQ0" },
+  { id: "7", title: "Success Starts Now", embedId: "X0U7tdJ6Qv8" },
+  { id: "8", title: "Push Through", embedId: "tAGnKpE4NCI" },
+  { id: "9", title: "Stay Focused", embedId: "H14bBuluwB8" },
+  { id: "10", title: "Keep Going", embedId: "U2MbpKLJfzo" }
 ];
