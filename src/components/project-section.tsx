@@ -1,29 +1,15 @@
 'use client';
 
-import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
 import { PROJECTS } from "@/app/data/portfolio"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, Github, Loader2, Sparkles } from "lucide-react"
+import { Briefcase, Github, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 export function ProjectSection() {
-  const db = useFirestore();
-
-  const projectsQuery = useMemoFirebase(() => {
-    if (!db) return null;
-    return query(collection(db, "projects"), orderBy("createdAt", "desc"));
-  }, [db]);
-
-  const { data: firestoreProjects, isLoading } = useCollection(projectsQuery);
-
-  // Use Firestore data if available, otherwise fallback to static data
-  const displayProjects = firestoreProjects && firestoreProjects.length > 0 
-    ? firestoreProjects 
-    : PROJECTS;
+  const displayProjects = PROJECTS;
 
   return (
     <section id="projects" className="container mx-auto px-4 scroll-mt-20">
@@ -38,12 +24,7 @@ export function ProjectSection() {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20" />
-          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground animate-pulse">Syncing Projects...</p>
-        </div>
-      ) : displayProjects.length > 0 ? (
+      {displayProjects.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayProjects.map((project) => (
             <Card key={project.id} className="group overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-300 bg-card/50 backdrop-blur-sm flex flex-col h-full">
@@ -71,7 +52,7 @@ export function ProjectSection() {
                 </div>
                 <CardDescription className="line-clamp-2 text-base font-medium">{project.description}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-4">
                 <div className="flex flex-wrap gap-2">
                   {project.tech.map((t: string) => (
                     <Badge key={t} variant="secondary" className="bg-primary/5 text-primary hover:bg-primary/10 border-primary/10 font-bold transition-colors">
@@ -79,6 +60,15 @@ export function ProjectSection() {
                     </Badge>
                   ))}
                 </div>
+                {project.liveUrl && project.liveUrl !== "#" && (
+                  <div>
+                    <Button variant="secondary" size="sm" className="rounded-full" asChild>
+                      <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
+                        Review Details
+                      </a>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

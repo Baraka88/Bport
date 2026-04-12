@@ -27,11 +27,11 @@ export const PROJECTS: Project[] = [
   {
     id: "chatbot-ai-app",
     title: "ChatBRJ AI Assistant",
-    description: "Professional AI representative with real-time system knowledge.",
-    longDescription: "A custom-engineered chatbot platform built using Google Genkit and Gemini. It features a specialized technical persona for Baraka Junior, streaming responses, and persistent conversation history handled by secure cloud infrastructure.",
+    description: "AI assistant demo now available via an external review experience.",
+    longDescription: "A showcase of the hosted AI assistant experience. For the full ChatBRJ review, follow the external link provided on the portfolio card.",
     tech: ["Genkit", "Gemini AI", "Next.js"],
     imageUrl: "https://picsum.photos/seed/chat-ai/800/600",
-    liveUrl: "#",
+    liveUrl: "https://example.com",
     repoUrl: "#"
   },
   {
