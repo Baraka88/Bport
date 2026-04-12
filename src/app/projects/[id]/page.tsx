@@ -1,6 +1,6 @@
-export const runtime = "edge";
-"use client"
 
+"use client"
+export const runtime = "edge";
 import React, { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
