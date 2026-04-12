@@ -31,8 +31,9 @@ export default function MotivationPage() {
       return;
     }
 
+    const origin = window.location.origin;
     setIframeSrc(
-      `https://www.youtube-nocookie.com/embed/${dailyVideo.embedId}?rel=0&modestbranding=1&playsinline=1&controls=1`
+      `https://www.youtube.com/embed/${dailyVideo.embedId}?rel=0&modestbranding=1&playsinline=1&controls=1&origin=${encodeURIComponent(origin)}`
     );
   }, [dailyVideo]);
 
@@ -98,7 +99,7 @@ export default function MotivationPage() {
                   className="w-full h-full"
                   src={iframeSrc}
                   title={dailyVideo.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                   allowFullScreen
                   loading="lazy"
                 />
