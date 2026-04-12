@@ -11,12 +11,10 @@ import {
   Send, 
   Loader2, 
   Reply,
-  Lock,
   Trash2,
   Edit3,
   X,
   Save,
-  ShieldCheck,
   LayoutDashboard,
   AlertCircle
 } from "lucide-react"
@@ -51,11 +49,6 @@ export default function CommentsPage() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  // Admin State
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [password, setPassword] = useState("")
-  const [isLockerOpen, setIsLockerOpen] = useState(false)
-  
   // Form State
   const [name, setName] = useState("")
   const [commentText, setCommentText] = useState("")
@@ -75,18 +68,6 @@ export default function CommentsPage() {
   }, [db])
 
   const { data: allComments, isLoading: commentsLoading } = useCollection<Comment>(commentsQuery)
-
-  const handleLockerUnlock = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (password === "brjadmin2024") {
-      setIsAdmin(true)
-      setIsLockerOpen(false)
-      toast({ title: "Wall Manager Unlocked", description: "Full CRUD access to activity feed." })
-    } else {
-      toast({ variant: "destructive", title: "Access Denied", description: "Incorrect master key." })
-    }
-    setPassword("")
-  }
 
   async function handlePostComment(e: React.FormEvent) {
     e.preventDefault()
@@ -200,26 +181,6 @@ export default function CommentsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    {isAdmin && (
-                      <div className="flex items-center gap-1 mr-2 bg-secondary/50 p-1.5 rounded-xl border border-primary/10">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary" 
-                          onClick={() => startEditing(c)}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive" 
-                          onClick={() => handleDelete(c.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => {
                       setReplyTo(c)
                       document.getElementById('comment-form')?.scrollIntoView({ behavior: 'smooth' })
@@ -249,55 +210,7 @@ export default function CommentsPage() {
             Join the conversation, leave project feedback, or suggest new full-stack collaborations.
           </p>
 
-          <div className="pt-4">
-            {!isAdmin ? (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full px-6 border-primary/20 hover:bg-primary/5 transition-all"
-                onClick={() => setIsLockerOpen(true)}
-              >
-                <Lock className="mr-2 h-4 w-4" /> Admin Locker
-              </Button>
-            ) : (
-              <div className="flex items-center justify-center gap-4">
-                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-600 text-[10px] font-black uppercase tracking-widest border border-green-500/20 shadow-sm">
-                  <ShieldCheck className="h-3 w-3" /> Management Active
-                </div>
-                <Button variant="ghost" size="sm" className="text-xs font-bold" onClick={() => setIsAdmin(false)}>Close Manager</Button>
-              </div>
-            )}
-          </div>
         </div>
-
-        {/* Admin Locker Entry */}
-        {isLockerOpen && !isAdmin && (
-          <Card className="max-w-md mx-auto mb-16 border-primary/20 bg-card/50 backdrop-blur-xl shadow-2xl rounded-[2.5rem] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-            <CardHeader className="bg-primary text-primary-foreground p-8 text-center">
-              <Lock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <CardTitle className="text-2xl font-black font-headline">Wall Manager</CardTitle>
-              <CardDescription className="text-primary-foreground/80 font-medium italic">Enter master key to enable CRUD tools.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleLockerUnlock} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Master Key</label>
-                  <div className="flex gap-2">
-                    <Input 
-                      type="password" 
-                      placeholder="••••••••" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="rounded-xl h-12 bg-background/50 font-mono"
-                    />
-                    <Button type="submit" className="rounded-xl h-12 px-6 font-bold">Unlock</Button>
-                  </div>
-                </div>
-                <Button variant="ghost" className="w-full text-xs font-bold" onClick={() => setIsLockerOpen(false)}>Cancel Entry</Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Post Form */}
         <div id="comment-form" className="scroll-mt-24">

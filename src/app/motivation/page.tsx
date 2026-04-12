@@ -84,16 +84,26 @@ export default function MotivationPage() {
             <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-card bg-black">
               <iframe
                 className="w-full h-full"
-                src={`https://www.youtube.com/embed/${dailyVideo.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`}
+                src={`https://www.youtube-nocookie.com/embed/${dailyVideo.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
                 title={dailyVideo.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
                 loading="lazy"
               />
             </div>
-            <div className="px-6 py-4 flex justify-between items-center bg-card/30 rounded-2xl border">
-              <span className="font-bold text-lg">{dailyVideo.title}</span>
-              <span className="text-xs font-black uppercase text-muted-foreground">Today's Pick</span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 bg-card/30 rounded-2xl border">
+              <div>
+                <span className="font-bold text-lg block">{dailyVideo.title}</span>
+                <span className="text-xs text-muted-foreground">Today's Pick</span>
+              </div>
+              <a
+                href={`https://www.youtube.com/watch?v=${dailyVideo.embedId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all"
+              >
+                Watch on YouTube
+              </a>
             </div>
           </div>
         </div>

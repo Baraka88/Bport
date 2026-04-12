@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { name: "Home", href: "/", icon: Layout },
   { name: "Projects", href: "/#projects", icon: Briefcase },
+  { name: "ChatBRJ", href: "/chat", icon: MessageSquare },
   { name: "Community", href: "/comments", icon: MessageSquare },
   { name: "Quotes", href: "/motivation", icon: Sparkles },
   { name: "Collab", href: "/collab", icon: Users },
