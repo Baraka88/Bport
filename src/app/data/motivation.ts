@@ -24,14 +24,9 @@ export const MOTIVATIONAL_QUOTES: MotivationQuote[] = [
 ];
 
 export const MOTIVATIONAL_VIDEOS: MotivationVideo[] = [
-  { id: "1", title: "Dream - Motivational Video", embedId: "mgmVOuLgFB0" },
-  { id: "2", title: "Unbroken - Motivational Video", embedId: "26U_seo0a1g" },
-  { id: "3", title: "Vision - Motivational Video", embedId: "m_I7vLqXkE8" },
-  { id: "4", title: "Believe - Motivational Speech", embedId: "vXv2XlO8Qvw" },
-  { id: "5", title: "Rise and Grind", embedId: "Ax38x7V9Yvg" },
-  { id: "6", title: "Never Give Up", embedId: "hLQl3WQQoQ0" },
-  { id: "7", title: "Success Starts Now", embedId: "X0U7tdJ6Qv8" },
-  { id: "8", title: "Push Through", embedId: "tAGnKpE4NCI" },
-  { id: "9", title: "Stay Focused", embedId: "H14bBuluwB8" },
-  { id: "10", title: "Keep Going", embedId: "U2MbpKLJfzo" }
+  { id: "1", title: "Build Your Dreams", embedId: "F16ZS6rM29s" },
+  { id: "2", title: "Stay Motivated", embedId: "ey9xv4Kd0kU" },
+  { id: "3", title: "Push Forward", embedId: "D24Oo0B5AN8" },
+  { id: "4", title: "Focus on Growth", embedId: "yA68tXdJClA" },
+  { id: "5", title: "Make It Happen", embedId: "G6a3qQeRbgY" }
 ];
