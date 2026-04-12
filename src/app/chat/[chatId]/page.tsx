@@ -1,6 +1,7 @@
-
 'use client';
+
 export const runtime = "edge";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, where, orderBy, serverTimestamp, doc } from 'firebase/firestore';
@@ -10,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Loader2, Bot, User, Trash2, Sparkles, AlertCircle } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { getChatResponse } from '@/ai/flows/chat-flow';
 import { cn } from '@/lib/utils';
 
 export default function ChatConversationPage() {
@@ -47,6 +47,17 @@ export default function ChatConversationPage() {
     }
   }, [messages]);
 
+  // ✅ FIXED: safe API call instead of importing server AI
+  const getChatResponse = async (payload: any) => {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    return res.json();
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!db || !user || !input.trim() || !chatId) return;
@@ -57,7 +68,6 @@ export default function ChatConversationPage() {
 
     const messagesRef = collection(db, 'chat_messages');
 
-    // Add user message (Non-blocking)
     addDocumentNonBlocking(messagesRef, {
       chatId,
       userId: user.uid,
@@ -67,14 +77,18 @@ export default function ChatConversationPage() {
     });
 
     try {
-      const history = (messages || []).map(m => ({
-        role: m.role as 'user' | 'ai',
-        text: m.text,
-      })).slice(-10);
+      const history = (messages || [])
+        .map(m => ({
+          role: m.role as 'user' | 'ai',
+          text: m.text,
+        }))
+        .slice(-10);
 
-      const response = await getChatResponse({ message: userText, history });
+      const response = await getChatResponse({
+        message: userText,
+        history,
+      });
 
-      // Add AI response (Non-blocking)
       addDocumentNonBlocking(messagesRef, {
         chatId,
         userId: user.uid,
@@ -83,7 +97,7 @@ export default function ChatConversationPage() {
         createdAt: serverTimestamp(),
       });
     } catch (error) {
-      // Errors handled by global listener
+      // handled globally
     } finally {
       setIsTyping(false);
     }
@@ -125,42 +139,68 @@ export default function ChatConversationPage() {
       <ScrollArea className="flex-1 p-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {messages?.map((msg) => (
-            <div key={msg.id} className={cn(
-              "flex group",
-              msg.role === 'user' ? "justify-end" : "justify-start"
-            )}>
-              <div className={cn(
-                "flex max-w-[85%] sm:max-w-[75%] gap-3",
-                msg.role === 'user' ? "flex-row-reverse" : "flex-row"
-              )}>
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                  msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-                )}>
-                  {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+            <div
+              key={msg.id}
+              className={cn(
+                "flex group",
+                msg.role === 'user' ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex max-w-[85%] sm:max-w-[75%] gap-3",
+                  msg.role === 'user' ? "flex-row-reverse" : "flex-row"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                    msg.role === 'user'
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground"
+                  )}
+                >
+                  {msg.role === 'user' ? (
+                    <User className="h-4 w-4" />
+                  ) : (
+                    <Bot className="h-4 w-4" />
+                  )}
                 </div>
+
                 <div className="space-y-1">
-                  <div className={cn(
-                    "px-4 py-3 rounded-2xl text-sm leading-relaxed relative whitespace-pre-wrap",
-                    msg.role === 'user' 
-                      ? "bg-primary text-primary-foreground rounded-tr-none" 
-                      : "bg-secondary/50 rounded-tl-none border border-border"
-                  )}>
+                  <div
+                    className={cn(
+                      "px-4 py-3 rounded-2xl text-sm leading-relaxed relative whitespace-pre-wrap",
+                      msg.role === 'user'
+                        ? "bg-primary text-primary-foreground rounded-tr-none"
+                        : "bg-secondary/50 rounded-tl-none border border-border"
+                    )}
+                  >
                     {msg.text}
-                    <button 
+
+                    <button
                       onClick={() => deleteMessage(msg.id)}
                       className="absolute top-0 -right-8 p-1 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
+
                   <span className="text-[10px] text-muted-foreground px-1">
-                    {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                    {msg.createdAt?.toDate
+                      ? msg.createdAt
+                          .toDate()
+                          .toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                      : '...'}
                   </span>
                 </div>
               </div>
             </div>
           ))}
+
           {isTyping && (
             <div className="flex justify-start">
               <div className="flex items-center gap-3">
@@ -175,24 +215,37 @@ export default function ChatConversationPage() {
               </div>
             </div>
           )}
+
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
       <div className="p-6 border-t bg-card/50">
-        <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-4">
-          <Input 
+        <form
+          onSubmit={handleSendMessage}
+          className="max-w-4xl mx-auto flex gap-4"
+        >
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Talk with Baraka's AI agent..."
             className="rounded-xl h-12 bg-background/50"
             disabled={isTyping}
           />
-          <Button type="submit" size="icon" className="h-12 w-12 rounded-xl shadow-lg" disabled={isTyping || !input.trim()}>
-            {isTyping ? <Loader2 className="animate-spin" /> : <Send className="h-5 w-5" />}
+          <Button
+            type="submit"
+            size="icon"
+            className="h-12 w-12 rounded-xl shadow-lg"
+            disabled={isTyping || !input.trim()}
+          >
+            {isTyping ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
           </Button>
         </form>
       </div>
     </div>
   );
-}
+  }
