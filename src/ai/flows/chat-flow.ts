@@ -57,7 +57,4 @@ const chatFlow = ai.defineFlow(
     const { output } = await prompt(input);
     return output || { text: "Sorry, I couldn't generate a response." };
   }
-);    const {output} = await prompt(input);
-    return output!;
-  }
 );

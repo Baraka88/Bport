@@ -1,5 +1,5 @@
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit'; // keep ONLY if your setup requires it
+import { z } from 'zod';
 
 const GenerateProjectDescriptionInputSchema = z.object({
   technicalDetails: z.string().describe('Detailed technical aspects and implementation specifics of the project.'),
@@ -46,20 +46,5 @@ const generateProjectDescriptionFlow = ai.defineFlow(
     return output || {
       description: "A modern, scalable project built with strong engineering principles."
     };
-  }
-);Project Goals: {{{projectGoals}}}
-
-Ensure the description is suitable for a portfolio showcase, highlighting the project's essence and value in a few sentences.`,
-});
-
-const generateProjectDescriptionFlow = ai.defineFlow(
-  {
-    name: 'generateProjectDescriptionFlow',
-    inputSchema: GenerateProjectDescriptionInputSchema,
-    outputSchema: GenerateProjectDescriptionOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
   }
 );

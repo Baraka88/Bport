@@ -74,6 +74,30 @@ export const SKILLS: Skill[] = [
   }
 ];
 
+export interface Certificate {
+  name: string;
+  issuer: string;
+  date: string;
+}
+
+export const CERTIFICATES: Certificate[] = [
+  {
+    name: "Full Stack Web Development",
+    issuer: "Coursera",
+    date: "2024"
+  },
+  {
+    name: "Firebase for Web Apps",
+    issuer: "Google",
+    date: "2024"
+  },
+  {
+    name: "TypeScript Mastery",
+    issuer: "Udemy",
+    date: "2024"
+  }
+];
+
 export const EXPERIENCE: Experience[] = [
   {
     role: "Senior Full Stack Developer",
