@@ -18,7 +18,7 @@ export default function MotivationPage() {
     const seed = parseInt(dateString);
 
     const quoteIndex = seed % MOTIVATIONAL_QUOTES.length;
-    const videoIndex = quoteIndex % MOTIVATIONAL_VIDEOS.length;
+    const videoIndex = seed % MOTIVATIONAL_VIDEOS.length;
 
     setDailyQuote(MOTIVATIONAL_QUOTES[quoteIndex]);
     setDailyVideo(MOTIVATIONAL_VIDEOS[videoIndex]);

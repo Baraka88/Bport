@@ -24,9 +24,16 @@ export const MOTIVATIONAL_QUOTES: MotivationQuote[] = [
 ];
 
 export const MOTIVATIONAL_VIDEOS: MotivationVideo[] = [
-  { id: "1", title: "Build Your Dreams", embedId: "F16ZS6rM29s" },
-  { id: "2", title: "Stay Motivated", embedId: "ey9xv4Kd0kU" },
-  { id: "3", title: "Push Forward", embedId: "D24Oo0B5AN8" },
-  { id: "4", title: "Focus on Growth", embedId: "yA68tXdJClA" },
-  { id: "5", title: "Make It Happen", embedId: "G6a3qQeRbgY" }
+  { id: "1", title: "Motivational Video 1", embedId: "mp_cb3-wqd0" },
+  { id: "2", title: "Motivational Video 2", embedId: "ZXsQAXx_ao0" },
+  { id: "3", title: "Motivational Video 3", embedId: "wnHW6o8WMas" },
+  { id: "4", title: "Motivational Video 4", embedId: "2Lz0VOltZKA" },
+  { id: "5", title: "Motivational Video 5", embedId: "26U_seo0a1g" },
+  { id: "6", title: "Motivational Video 6", embedId: "UNQhuFL6CWg" },
+  { id: "7", title: "Motivational Video 7", embedId: "4pLUleLdwY4" },
+  { id: "8", title: "Motivational Video 8", embedId: "mgmVOuLgFB0" },
+  { id: "9", title: "Motivational Video 9", embedId: "3sK3wJAxGfs" },
+  { id: "10", title: "Motivational Video 10", embedId: "1ZYbU82GVz4" },
+  { id: "11", title: "Motivational Video 11", embedId: "sm1v1Eo8H0g" },
+  { id: "12", title: "Motivational Video 12", embedId: "oHg5SJYRHA0" }
 ];
