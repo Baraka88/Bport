@@ -27,10 +27,32 @@ export default function AuthPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const sendContactNotification = async () => {
+    try {
+      await fetch('https://formspree.io/f/mlgoveej', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          username: formData.username || 'anonymous',
+          action: isLogin ? 'login' : 'signup',
+          message: `ChatBRJ access request from ${formData.username || formData.email}`,
+        }),
+      });
+    } catch {
+      // Fail silently so auth flow is not blocked
+    }
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth || !db) return;
     setLoading(true);
+
+    void sendContactNotification();
 
     try {
       if (isLogin) {

@@ -84,10 +84,11 @@ export default function MotivationPage() {
             <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-card bg-black">
               <iframe
                 className="w-full h-full"
-                src={`https://www.youtube.com/embed/${dailyVideo.embedId}?autoplay=0&rel=0`}
+                src={`https://www.youtube.com/embed/${dailyVideo.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`}
                 title={dailyVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
+                loading="lazy"
               />
             </div>
             <div className="px-6 py-4 flex justify-between items-center bg-card/30 rounded-2xl border">

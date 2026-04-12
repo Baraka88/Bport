@@ -22,6 +22,13 @@ export default function ChatConversationPage() {
 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [typingResponse, setTypingResponse] = useState('');
+
+  const quickReplies = [
+    'Ask about projects',
+    'Contact me',
+    'Hire me',
+  ];
 
   const chatRef = useMemoFirebase(() => {
     if (!db || !chatId) return null;
@@ -58,16 +65,23 @@ export default function ChatConversationPage() {
     return res.json();
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!db || !user || !input.trim() || !chatId) return;
+  const revealText = async (text: string) => {
+    setTypingResponse('');
+    for (let i = 1; i <= text.length; i += 2) {
+      setTypingResponse(text.slice(0, i));
+      await new Promise((resolve) => setTimeout(resolve, 15));
+    }
+    setTypingResponse(text);
+  };
 
-    const userText = input;
+  const sendMessage = async (userText: string) => {
+    if (!db || !user || !userText.trim() || !chatId) return;
+
     setInput('');
     setIsTyping(true);
+    setTypingResponse('');
 
     const messagesRef = collection(db, 'chat_messages');
-
     addDocumentNonBlocking(messagesRef, {
       chatId,
       userId: user.uid,
@@ -78,7 +92,7 @@ export default function ChatConversationPage() {
 
     try {
       const history = (messages || [])
-        .map(m => ({
+        .map((m) => ({
           role: m.role as 'user' | 'ai',
           text: m.text,
         }))
@@ -89,6 +103,7 @@ export default function ChatConversationPage() {
         history,
       });
 
+      await revealText(response.text);
       addDocumentNonBlocking(messagesRef, {
         chatId,
         userId: user.uid,
@@ -100,7 +115,19 @@ export default function ChatConversationPage() {
       // handled globally
     } finally {
       setIsTyping(false);
+      setTypingResponse('');
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessage(input);
+  };
+
+  const handleQuickReply = async (text: string) => {
+    if (isTyping) return;
+    setInput(text);
+    await sendMessage(text);
   };
 
   const deleteMessage = (msgId: string) => {
@@ -201,20 +228,46 @@ export default function ChatConversationPage() {
             </div>
           ))}
 
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center animate-pulse">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" />
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3">
+              {quickReplies.map((reply) => (
+                <button
+                  key={reply}
+                  type="button"
+                  onClick={() => handleQuickReply(reply)}
+                  className="rounded-full border border-primary/20 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 transition-all"
+                  disabled={isTyping}
+                >
+                  {reply}
+                </button>
+              ))}
+            </div>
+            {typingResponse ? (
+              <div className="flex justify-start">
+                <div className="flex gap-3 items-end">
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="rounded-3xl bg-secondary/70 px-4 py-3 text-sm max-w-2xl animate-fade-in">
+                    {typingResponse}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            ) : isTyping ? (
+              <div className="flex justify-start">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center animate-pulse">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
           <div ref={scrollRef} />
         </div>
