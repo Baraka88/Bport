@@ -1,6 +1,6 @@
 
 'use client';
-
+export const runtime = "edge";
 import React, { useEffect } from 'react';
 import { useUser, useAuth } from '@/firebase';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
