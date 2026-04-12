@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 export default function MotivationPage() {
   const [dailyQuote, setDailyQuote] = useState<MotivationQuote | null>(null);
   const [dailyVideo, setDailyVideo] = useState<MotivationVideo | null>(null);
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
   useEffect(() => {
     // Generate a daily seed based on the current date (YYYYMMDD)
@@ -17,13 +18,23 @@ export default function MotivationPage() {
     const dateString = now.toISOString().slice(0, 10).replace(/-/g, '');
     const seed = parseInt(dateString);
 
-    // Select items based on the seed
     const quoteIndex = seed % MOTIVATIONAL_QUOTES.length;
-    const videoIndex = seed % MOTIVATIONAL_VIDEOS.length;
+    const videoIndex = quoteIndex % MOTIVATIONAL_VIDEOS.length;
 
     setDailyQuote(MOTIVATIONAL_QUOTES[quoteIndex]);
     setDailyVideo(MOTIVATIONAL_VIDEOS[videoIndex]);
   }, []);
+
+  useEffect(() => {
+    if (!dailyVideo) {
+      setIframeSrc(null);
+      return;
+    }
+
+    setIframeSrc(
+      `https://www.youtube-nocookie.com/embed/${dailyVideo.embedId}?rel=0&modestbranding=1&playsinline=1&controls=1`
+    );
+  }, [dailyVideo]);
 
   if (!dailyQuote || !dailyVideo) {
     return (
@@ -82,28 +93,29 @@ export default function MotivationPage() {
               Featured Video
             </h2>
             <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-4 border-card bg-black">
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube-nocookie.com/embed/${dailyVideo.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-                title={dailyVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-                loading="lazy"
-              />
+              {iframeSrc ? (
+                <iframe
+                  className="w-full h-full"
+                  src={iframeSrc}
+                  title={dailyVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-black text-white text-sm font-semibold">
+                  Loading video...
+                </div>
+              )}
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 bg-card/30 rounded-2xl border">
               <div>
                 <span className="font-bold text-lg block">{dailyVideo.title}</span>
                 <span className="text-xs text-muted-foreground">Today's Pick</span>
               </div>
-              <a
-                href={`https://www.youtube.com/watch?v=${dailyVideo.embedId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all"
-              >
-                Watch on YouTube
-              </a>
+              <div className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground">
+                Embedded Playback
+              </div>
             </div>
           </div>
         </div>

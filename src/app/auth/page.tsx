@@ -39,7 +39,7 @@ export default function AuthPage() {
           email: formData.email,
           username: formData.username || 'anonymous',
           action: isLogin ? 'login' : 'signup',
-          message: `ChatBRJ access request from ${formData.username || formData.email}`,
+          message: `Account access request from ${formData.username || formData.email}`,
         }),
       });
     } catch {
@@ -57,7 +57,7 @@ export default function AuthPage() {
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, formData.email, formData.password);
-        toast({ title: 'Welcome Back!', description: 'Redirecting to your dashboard...' });
+        toast({ title: 'Welcome Back!', description: 'Redirecting to the homepage...' });
       } else {
         const userCred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
         await updateProfile(userCred.user, { displayName: formData.username });
@@ -73,7 +73,7 @@ export default function AuthPage() {
         
         toast({ title: 'Account Created', description: 'Welcome to the BRJDEV community!' });
       }
-      router.push('/chat');
+      router.push('/');
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Auth Error', description: error.message });
     } finally {

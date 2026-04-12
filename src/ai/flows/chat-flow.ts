@@ -17,7 +17,7 @@ const ChatOutputSchema = z.object({
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || 'AIzaSyAT_Zgjkd9VzqJtv_E39lNe1EUex_hhYFY';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta2/models/gemini-2.5-flash:generate?key=${GEMINI_API_KEY}`;
 
-const systemInstruction = `You are ChatBRJ, the official AI representative for Baraka Ruzibiza Junior.
+const systemInstruction = `You are an AI assistant representing Baraka Ruzibiza Junior.
 Baraka is a highly skilled Full Stack Developer based in Kigali, Rwanda.
 
 His Core Skills:

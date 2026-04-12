@@ -26,9 +26,9 @@ export interface Experience {
 export const PROJECTS: Project[] = [
   {
     id: "chatbot-ai-app",
-    title: "ChatBRJ AI Assistant",
-    description: "AI assistant demo now available via an external review experience.",
-    longDescription: "A showcase of the hosted AI assistant experience. For the full ChatBRJ review, follow the external link provided on the portfolio card.",
+    title: "AI Assistant Review",
+    description: "A hosted AI review experience available through an external link.",
+    longDescription: "This conversational AI demo is now hosted externally. Use the review details button on this card to visit the external AI assistant preview.",
     tech: ["Genkit", "Gemini AI", "Next.js"],
     imageUrl: "https://picsum.photos/seed/chat-ai/800/600",
     liveUrl: "https://example.com",
