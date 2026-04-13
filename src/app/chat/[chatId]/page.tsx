@@ -1,6 +1,8 @@
 export const runtime = "edge";
 'use client';
 
+export const runtime = 'edge';
+
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ExternalLink } from 'lucide-react';
 
