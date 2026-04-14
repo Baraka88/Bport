@@ -24,16 +24,14 @@ export const MOTIVATIONAL_QUOTES: MotivationQuote[] = [
 ];
 
 export const MOTIVATIONAL_VIDEOS: MotivationVideo[] = [
-  { id: "1", title: "Motivational Video 1", embedId: "mp_cb3-wqd0" },
-  { id: "2", title: "Motivational Video 2", embedId: "ZXsQAXx_ao0" },
-  { id: "3", title: "Motivational Video 3", embedId: "wnHW6o8WMas" },
-  { id: "4", title: "Motivational Video 4", embedId: "2Lz0VOltZKA" },
-  { id: "5", title: "Motivational Video 5", embedId: "26U_seo0a1g" },
-  { id: "6", title: "Motivational Video 6", embedId: "UNQhuFL6CWg" },
-  { id: "7", title: "Motivational Video 7", embedId: "4pLUleLdwY4" },
-  { id: "8", title: "Motivational Video 8", embedId: "mgmVOuLgFB0" },
-  { id: "9", title: "Motivational Video 9", embedId: "3sK3wJAxGfs" },
-  { id: "10", title: "Motivational Video 10", embedId: "1ZYbU82GVz4" },
-  { id: "11", title: "Motivational Video 11", embedId: "sm1v1Eo8H0g" },
-  { id: "12", title: "Motivational Video 12", embedId: "oHg5SJYRHA0" }
+  { id: "1", title: "How Bad Do You Want It?", embedId: "2Lz0VOltZKA" },
+  { id: "2", title: "Dream", embedId: "3sK3wJAxGfs" },
+  { id: "3", title: "You Owe You", embedId: "ggCbJxyblg4" },
+  { id: "4", title: "Rise and Shine", embedId: "4pLUleLdwY4" },
+  { id: "5", title: "The Mindset of a Champion", embedId: "UNQhuFL6CWg" },
+  { id: "6", title: "Motivation for Success", embedId: "26U_seo0a1g" },
+  { id: "7", title: "Believe in Yourself", embedId: "mgmVOuLgFB0" },
+  { id: "8", title: "Why Leaders Eat Last", embedId: "wnHW6o8WMas" },
+  { id: "9", title: "Make Your Bed", embedId: "sm1v1Eo8H0g" },
+  { id: "10", title: "Never Give Up", embedId: "1ZYbU82GVz4" }
 ];

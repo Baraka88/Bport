@@ -32,7 +32,7 @@ export default function MotivationPage() {
 
     const origin = window.location.origin;
     setIframeSrc(
-      `https://www.youtube.com/embed/${dailyVideo.embedId}?rel=0&modestbranding=1&playsinline=1&controls=1&origin=${encodeURIComponent(origin)}`
+      `https://www.youtube-nocookie.com/embed/${dailyVideo.embedId}?rel=0&modestbranding=1&playsinline=1&controls=1&origin=${encodeURIComponent(origin)}`
     );
   }, [dailyVideo]);
 
