@@ -1,7 +1,8 @@
 
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy, doc } from "firebase/firestore"
 import { 
@@ -38,6 +39,13 @@ export default function GalleryPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [password, setPassword] = useState("")
   const [isLockerOpen, setIsLockerOpen] = useState(false)
+  const searchParams = useSearchParams()
+  
+  useEffect(() => {
+    if (searchParams.get("locker") === "1") {
+      setIsLockerOpen(true)
+    }
+  }, [searchParams])
   
   // Upload Form State
   const [newImage, setNewImage] = useState({ url: "", description: "", altText: "" })
@@ -117,17 +125,8 @@ export default function GalleryPage() {
         </p>
         
         <div className="pt-4">
-          {!isAdmin ? (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full px-6 border-primary/20 hover:bg-primary/5 transition-all"
-              onClick={() => setIsLockerOpen(true)}
-            >
-              <Lock className="mr-2 h-4 w-4" /> Admin Locker
-            </Button>
-          ) : (
-            <div className="flex items-center gap-4">
+          {isAdmin && (
+            <div className="flex items-center gap-4 justify-center">
               <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-600 text-xs font-black uppercase tracking-widest border border-green-500/20">
                 <ShieldCheck className="h-3 w-3" /> Dashboard Active
               </div>

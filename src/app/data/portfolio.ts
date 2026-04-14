@@ -31,7 +31,7 @@ export const PROJECTS: Project[] = [
     longDescription: "This conversational AI demo is now hosted externally. Use the review details button on this card to visit the external AI assistant preview.",
     tech: ["Genkit", "Gemini AI", "Next.js"],
     imageUrl: "https://picsum.photos/seed/chat-ai/800/600",
-    liveUrl: "https://example.com",
+    liveUrl: "https://chatbrj.pages.dev",
     repoUrl: "#"
   },
   {
